@@ -1,0 +1,27 @@
+{
+	"Document": [
+		{
+			"key": "number",
+			"value": "99999",
+			"type": "text",
+			"description": "",
+			"enabled": true
+		},
+		{
+			"key": "correspondence_partner_guid",
+			"value": "e602ddcb-e479-4cee-b268-e53bbecf6dc9",
+			"type": "text",
+			"description": "",
+			"enabled": true
+		}
+	],
+	"Client": [
+		{
+			"key": "id",
+			"value": "e602ddcb-e479-4cee-b268-e53bbecf6dc9",
+			"type": "text",
+			"description": "",
+			"enabled": true
+		}
+	]
+}
