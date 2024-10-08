@@ -28,7 +28,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
 
     - name: Install tools
-      run: apt install mupdf-tools xpdf imagemagick-6.q16hdri libtiff-tools -Y
+      run: apt install -y mupdf-tools xpdf imagemagick-6.q16hdri libtiff-tools
 
     - name: Dump Autoload
       run: composer dump-autoload -o
