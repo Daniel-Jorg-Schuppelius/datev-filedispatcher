@@ -11,3 +11,5 @@ The following tools are needed
 - ImageMagick
   - Windows: https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-39-Q16-HDRI-x64-dll.exe
   - Debian/Ubuntu: apt install imagemagick-6.q16hdri
+- muPDF Tools
+  - Debian/Ubuntu: apt install mupdf-tools
