@@ -8,10 +8,10 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace App\Helper\FileTypes;
+namespace App\Helper\FileSystem\FileTypes;
 
 use App\Contracts\Abstracts\HelperAbstract;
-use App\Helper\File;
+use App\Helper\FileSystem\File;
 use Exception;
 use ZipArchive;
 

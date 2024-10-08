@@ -10,7 +10,7 @@
 
 namespace Tests\Helper;
 
-use App\Helper\File;
+use App\Helper\FileSystem\File;
 use PHPUnit\Framework\TestCase;
 
 class FileTest extends TestCase {

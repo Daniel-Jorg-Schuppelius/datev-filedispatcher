@@ -8,7 +8,7 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace App\Helper\FileTypes;
+namespace App\Helper\FileSystem\FileTypes;
 
 use App\Contracts\Abstracts\HelperAbstract;
 use App\Helper\Shell;
@@ -43,7 +43,10 @@ class PdfFile extends HelperAbstract {
     }
 
     public static function isValid(string $filename): bool {
-        $command = sprintf("mutool info %s 2>&1 | grep error", escapeshellarg($filename));
+        $command = Shell::getPlatformSpecificCommand(
+            sprintf("mutool info %s 2>&1 | grep error", escapeshellarg($filename)),
+            sprintf('pdfinfo %s 2>&1 | findstr /R "Syntax.Error"', escapeshellarg($filename))
+        );
         $output = [];
         $resultCode = 0;
 

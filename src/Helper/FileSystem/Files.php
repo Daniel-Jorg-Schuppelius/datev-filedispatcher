@@ -1,18 +1,12 @@
 <?php
-/*
- * Created on   : Sun Oct 06 2024
- * Author       : Daniel Jörg Schuppelius
- * Author Uri   : https://schuppelius.org
- * Filename     : Files.php
- * License      : MIT License
- * License Uri  : https://opensource.org/license/mit
- */
 
-namespace App\Helper;
+namespace App\Helper\FileSystem;
 
 use App\Contracts\Abstracts\HelperAbstract;
+use Exception;
 
 class Files extends HelperAbstract {
+
     public static function exists(array $files): bool {
         foreach ($files as $file) {
             if (!File::exists($file)) {
@@ -46,5 +40,30 @@ class Files extends HelperAbstract {
         foreach ($fileData as $file => $data) {
             File::write($file, $data);
         }
+    }
+
+    public static function get(string $directory, bool $recursive = false, array $fileTypes = []): array {
+        self::setLogger();
+        $result = [];
+        $files = array_diff(scandir($directory), ['.', '..']);
+
+        foreach ($files as $file) {
+            $path = $directory . DIRECTORY_SEPARATOR . $file;
+            if ($recursive && is_dir($path)) {
+                $result = array_merge($result, self::get($path, true, $fileTypes));
+            } elseif (is_file($path)) {
+                if (empty($fileTypes) || in_array(pathinfo($path, PATHINFO_EXTENSION), $fileTypes)) {
+                    $result[] = $path;
+                }
+            }
+        }
+
+        if (empty($result)) {
+            self::$logger->warning("Keine Dateien gefunden im Verzeichnis: $directory");
+        } else {
+            self::$logger->info("Dateien erfolgreich gelesen aus Verzeichnis: $directory");
+        }
+
+        return $result;
     }
 }

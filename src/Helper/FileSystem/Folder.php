@@ -8,7 +8,7 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace App\Helper;
+namespace App\Helper\FileSystem;
 
 use App\Contracts\Abstracts\HelperAbstract;
 use App\Contracts\Interfaces\FileSystemInterface;
@@ -50,11 +50,24 @@ class Folder extends HelperAbstract implements FileSystemInterface {
         self::$logger->info("Verzeichnis umbenannt von $oldName zu $newName");
     }
 
-    public static function delete(string $directory): void {
+    public static function delete(string $directory, bool $recursive = false): void {
         self::setLogger();
         if (!self::exists($directory)) {
             self::$logger->error("Das Verzeichnis $directory existiert nicht");
             throw new Exception("Das Verzeichnis $directory existiert nicht");
+        }
+
+        if ($recursive) {
+            $files = array_diff(scandir($directory), ['.', '..']);
+            foreach ($files as $file) {
+                $path = $directory . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($path)) {
+                    self::delete($path, $recursive);
+                } else {
+                    unlink($path);
+                    self::$logger->info("Datei gelöscht: $path");
+                }
+            }
         }
 
         if (!rmdir($directory)) {
@@ -78,5 +91,22 @@ class Folder extends HelperAbstract implements FileSystemInterface {
         }
 
         self::$logger->info("Verzeichnis verschoben von $sourceDirectory nach $destinationDirectory");
+    }
+
+    public static function get(string $directory, bool $recursive = false): array {
+        $result = [];
+        $files = array_diff(scandir($directory), ['.', '..']);
+
+        foreach ($files as $file) {
+            $path = $directory . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                if ($recursive) {
+                    $result = array_merge($result, self::get($path));
+                }
+                $result[] = $path;
+            }
+        }
+
+        return $result;
     }
 }
