@@ -40,8 +40,12 @@ class File extends HelperAbstract implements FileSystemInterface {
     private static function mimeTypeByShell(string $filename): string {
         self::setLogger();
 
-        $command = sprintf('file -b --mime-type -m /usr/share/misc/magic %s', escapeshellarg($filename));
+        if (!self::exists($filename)) {
+            self::$logger->error("Datei existiert nicht: $filename");
+            return '';
+        }
 
+        $command = sprintf('file -b --mime-type -m /usr/share/misc/magic %s', escapeshellarg($filename));
         $output = [];
         $success = Shell::executeShellCommand($command, $output);
 
