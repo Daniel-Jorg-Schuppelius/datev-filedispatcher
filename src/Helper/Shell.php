@@ -21,15 +21,15 @@ class Shell extends HelperAbstract {
 
         if ($resultCode !== 0) {
             if ($throwException) {
-                self::$logger->error("Error executing shell command: $command");
+                self::$logger->error("Fehler bei der Ausführung des Kommandos: $command");
                 throw new Exception("Fehler bei der Ausführung des Kommandos: " . implode("\n", $output));
             } else {
-                self::$logger->warning("Shell command failed (but not throwing): $command");
+                self::$logger->warning("Fehler bei der Ausführung des Kommandos (keine Exception geworfen): $command");
                 return false;
             }
         }
 
-        self::$logger->info("Shell command executed successfully: $command");
+        self::$logger->info("Kommando erfolgreich ausgeführt: $command");
         return true;
     }
 

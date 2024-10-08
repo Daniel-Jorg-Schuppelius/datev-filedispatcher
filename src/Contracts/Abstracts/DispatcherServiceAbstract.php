@@ -37,6 +37,5 @@ abstract class DispatcherServiceAbstract implements DispatcherInterface {
      *
      * @return void
      */
-
     abstract protected function extractDatafromFilename(): void;
 }

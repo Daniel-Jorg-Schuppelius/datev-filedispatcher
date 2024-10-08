@@ -3,17 +3,17 @@
  * Created on   : Sun Oct 06 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : TifFile.php
+ * Filename     : TifFileHelper.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace App\Helper\FileTypes;
+namespace App\Helper\FileSystem\FileTypes;
 
 use APIToolkit\Exceptions\NotFoundException;
 use App\Contracts\Abstracts\HelperAbstract;
-use App\Helper\File;
-use App\Helper\Files;
+use App\Helper\FileSystem\File;
+use App\Helper\FileSystem\Files;
 use App\Helper\Shell;
 use Exception;
 
