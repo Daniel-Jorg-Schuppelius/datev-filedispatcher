@@ -1,6 +1,5 @@
 {
-	"name": "DATEV Desktop API",
-	"values": [
+	"DatevAPI": [
 		{
 			"key": "resourceurl",
 			"value": "https://127.0.0.1:58452",
@@ -17,6 +16,15 @@
 		{
 			"key": "password",
 			"value": "password",
+			"description": "",
+			"enabled": true
+		}
+	],
+	"Path": [
+		{
+			"key": "internalStore",
+			"value": "/tmp",
+			"type": "text",
 			"description": "",
 			"enabled": true
 		}
