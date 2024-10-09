@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 namespace App\Services\Payroll;
 
-use App\Contracts\Interfaces\FileServiceInterface;
+use App\Contracts\Abstracts\FileServiceAbstract;
 
-class PayrollFileService implements FileServiceInterface {
-    private $filename;
+class PayrollFileService extends FileServiceAbstract {
+    private string $month;
+    private string $year;
 
     public function __construct(string $filename) {
+        parent::__construct($filename);
         $this->filename = $filename;
     }
 
@@ -25,12 +27,17 @@ class PayrollFileService implements FileServiceInterface {
         return '/^(\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(\d{2})_(\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/';
     }
 
-    public static function matchesPattern(string $filename): bool {
-        return preg_match(self::getPattern(), basename($filename)) === 1;
-    }
-
     public function process(): void {
         // TODO: Implementiere die Logik für die Verarbeitung der Datei
         echo "Verabreite Payroll Datei: $this->filename";
+        $this->extractDatafromFilename();
+    }
+
+    protected function extractDatafromFilename(): void {
+        $matches = [];
+        self::matchesPattern($this->filename, $matches);
+        $this->documentNumber = $matches[1];
+        $this->month = $matches[4];
+        $this->year = $matches[5];
     }
 }

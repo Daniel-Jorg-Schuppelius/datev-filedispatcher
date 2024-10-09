@@ -25,20 +25,27 @@ class FileDispatcher extends HelperAbstract {
     protected static string $servicesNamespace = 'App\\Services';
     protected static ?array $services = null;
 
+    protected static array $fileTypesWithoutPreProcessing = ['xlsm', 'csv'];
+
     protected static function setServices(): void {
         self::setLogger();
 
         if (is_null(self::$services)) {
             self::$services = [];
-            $files = Files::get(self::$servicesDirectory, true, ['php']);
+            $servicesDir = realpath(self::$servicesDirectory);
 
+            if ($servicesDir === false) {
+                self::$logger->error("Das Verzeichnis für Services konnte nicht aufgelöst werden: " . self::$servicesDirectory);
+                return;
+            }
+
+            $files = Files::get($servicesDir, true, ['php']);
             foreach ($files as $file) {
-                $relativePath = str_replace(self::$servicesDirectory . DIRECTORY_SEPARATOR, '', $file);
+                $relativePath = str_replace($servicesDir . DIRECTORY_SEPARATOR, '', $file);
                 $className = self::$servicesNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
 
                 if (class_exists($className)) {
                     $reflectionClass = new ReflectionClass($className);
-
                     if ($reflectionClass->implementsInterface(FileServiceInterface::class) && !$reflectionClass->isAbstract()) {
                         self::$services[] = $className;
                         self::$logger->info("Serviceklasse gefunden und hinzugefügt: $className");
@@ -59,7 +66,7 @@ class FileDispatcher extends HelperAbstract {
         self::setServices();
 
         try {
-            if (self::preProcessFile($filename)) {
+            if (in_array(pathinfo($filename, PATHINFO_EXTENSION), self::$fileTypesWithoutPreProcessing) || self::preProcessFile($filename)) {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($filename)) {
                         $service = new $serviceClass($filename);

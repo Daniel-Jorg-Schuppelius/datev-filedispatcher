@@ -30,7 +30,7 @@ class ShellTest extends TestCase {
     }
 
     public function testExecuteShellCommandFailure() {
-        $command = "invalidcommand";
+        $command = "invalidcommand 2>&1";
 
         $output = [];
         $this->expectException(Exception::class);
