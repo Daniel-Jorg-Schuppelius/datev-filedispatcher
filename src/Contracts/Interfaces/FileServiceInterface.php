@@ -12,7 +12,7 @@ namespace App\Contracts\Interfaces;
 
 interface FileServiceInterface {
     public static function getPattern(): string;
-    public static function matchesPattern(string $filename): bool;
+    public static function matchesPattern(string $filename, array &$matches = null): bool;
 
     public function process(): void;
 }

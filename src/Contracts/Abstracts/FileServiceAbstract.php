@@ -1,17 +1,25 @@
 <?php
+/*
+ * Created on   : Tue Oct 08 2024
+ * Author       : Daniel Jörg Schuppelius
+ * Author Uri   : https://schuppelius.org
+ * Filename     : FileServiceAbstract.php
+ * License      : MIT License
+ * License Uri  : https://opensource.org/license/mit
+ */
 
 namespace App\Contracts\Abstracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use APIToolkit\Logger\ConsoleLoggerFactory;
-use App\Contracts\Interfaces\DispatcherInterface;
+use App\Contracts\Interfaces\FileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\StorageFactory;
-use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
+use Datev\API\Desktop\Endpoints\Accounting\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Psr\Log\LoggerInterface;
 
-abstract class DispatcherServiceAbstract implements DispatcherInterface {
+abstract class FileServiceAbstract implements FileServiceInterface {
     protected ClientsEndpoint $clientsEndpoint;
     protected DocumentsEndpoint $documentEndpoint;
 
@@ -32,10 +40,14 @@ abstract class DispatcherServiceAbstract implements DispatcherInterface {
         $this->extractDatafromFilename();
     }
 
-    /**
-     * Extrahiert Klassendaten basierend auf dem Dateinamen.
-     *
-     * @return void
-     */
+    public static function matchesPattern(string $filename, array &$matches = null): bool {
+        return preg_match(static::getPattern(), basename($filename), $matches) === 1;
+    }
+
+    public function getDocumentNumber(): string {
+        return $this->documentNumber;
+    }
+
     abstract protected function extractDatafromFilename(): void;
+    abstract public static function getPattern(): string;
 }
