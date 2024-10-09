@@ -45,5 +45,11 @@ jobs:
     - name: Copy phpunit.xml
       run: php -r "file_exists('phpunit.xml') || copy('phpunit.xml.dist', 'phpunit.xml');"
 
+    - name: Copy config.json
+      run: php -r "file_exists('config.json') || copy('config.json.sample', 'config.json');"
+
+    - name: Copy .samples/config.json
+      run: php -r "file_exists('.samples/config.json') || copy('.samples/config.json.sample', '.samples/config.json');"
+
     - name: Run test suite
       run: composer run-script test
