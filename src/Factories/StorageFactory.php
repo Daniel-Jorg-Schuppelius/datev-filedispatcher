@@ -17,7 +17,7 @@ class StorageFactory {
 
     public static function getInternalStorePath(): string {
         if (self::$internalStorePath === null) {
-            $config = new Config();
+            $config = Config::getInstance();
             self::$internalStorePath = $config->internalStorePath;
         }
         return self::$internalStorePath;

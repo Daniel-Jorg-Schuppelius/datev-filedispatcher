@@ -19,7 +19,7 @@ class APIClientFactory {
 
     public static function getClient(): ApiClientInterface {
         if (self::$client === null) {
-            $config = new Config();
+            $config = Config::getInstance();
             self::$client = new ClientBasicAuth($config->user, $config->password, $config->resourceUrl ?? "https://127.0.0.1:58452");
         }
         return self::$client;

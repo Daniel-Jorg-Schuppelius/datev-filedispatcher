@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServiceAbstract;
+use Psr\Log\LoggerInterface;
 
 class PayrollFileService extends FileServiceAbstract {
     private string $month;
@@ -28,8 +29,7 @@ class PayrollFileService extends FileServiceAbstract {
     }
 
     public function process(): void {
-        // TODO: Implementiere die Logik für die Verarbeitung der Datei
-        echo "Verabreite Payroll Datei: $this->filename";
+        $this->logger->info("Verabreite Payroll Datei: $this->filename");
         $this->extractDatafromFilename();
     }
 

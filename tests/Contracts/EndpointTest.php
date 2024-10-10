@@ -13,8 +13,9 @@ declare(strict_types=1);
 namespace Tests\Contracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
-use APIToolkit\Logger\ConsoleLoggerFactory;
+use App\Config\Config;
 use App\Factories\APIClientFactory;
+use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\Diagnostics\EchoEndpoint;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,7 +29,9 @@ abstract class EndpointTest extends TestCase {
 
     public function __construct($name) {
         parent::__construct($name);
-        $this->logger = ConsoleLoggerFactory::getLogger();
+        $config = Config::getInstance();
+        $config->debug = true;
+        $this->logger = LoggerFactory::getLogger();
         $this->client = APIClientFactory::getClient();
     }
 

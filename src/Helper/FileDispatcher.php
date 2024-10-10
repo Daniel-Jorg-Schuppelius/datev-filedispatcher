@@ -66,7 +66,7 @@ class FileDispatcher extends HelperAbstract {
         self::setServices();
 
         try {
-            if (in_array(pathinfo($filename, PATHINFO_EXTENSION), self::$fileTypesWithoutPreProcessing) || self::preProcessFile($filename)) {
+            if (self::preProcessFile($filename)) {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($filename)) {
                         $service = new $serviceClass($filename);
@@ -85,29 +85,36 @@ class FileDispatcher extends HelperAbstract {
     private static function preProcessFile(string $filename): bool {
         self::setLogger();
 
-        $fileType = pathinfo($filename, PATHINFO_EXTENSION);
-        $result = false;
+        $fileType = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        switch (strtolower($fileType)) {
-            case 'zip':
-                self::preProcessZipFile($filename);
-                break;
-
-            case 'tif':
-                self::preProcessTiffFile($filename);
-                break;
-
-            case 'pdf':
-                self::preProcessPdfFile($filename);
-                $result = true;
-                break;
-
-            default:
-                self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $filename");
-                break;
+        if (in_array($fileType, self::$fileTypesWithoutPreProcessing)) {
+            return true; // Datei benötigt keine Vorverarbeitung
         }
 
-        return $result;
+        try {
+            switch ($fileType) {
+                case 'zip':
+                    self::preProcessZipFile($filename);
+                    break;
+
+                case 'tif':
+                    self::preProcessTiffFile($filename);
+                    break;
+
+                case 'pdf':
+                    self::preProcessPdfFile($filename);
+                    break;
+
+                default:
+                    self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $filename");
+                    return false; // Unbekannter Dateityp
+            }
+        } catch (Exception $e) {
+            self::$logger->error("Fehler bei der Vorverarbeitung der Datei $filename: " . $e->getMessage());
+            return false; // Fehler bei der Vorverarbeitung
+        }
+
+        return true; // Erfolgreiche Vorverarbeitung
     }
 
     private static function checkAndRepairFile(string $filename, string $expectedMimeType, callable $repairFunction): void {
