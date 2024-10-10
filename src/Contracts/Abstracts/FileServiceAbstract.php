@@ -11,9 +11,9 @@
 namespace App\Contracts\Abstracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
-use APIToolkit\Logger\ConsoleLoggerFactory;
 use App\Contracts\Interfaces\FileServiceInterface;
 use App\Factories\APIClientFactory;
+use App\Factories\LoggerFactory;
 use App\Factories\StorageFactory;
 use Datev\API\Desktop\Endpoints\Accounting\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
@@ -34,7 +34,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     public function __construct(string $filename, ?string $destinationFolder = null, ApiClientInterface $client = null, LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
-        $this->logger = $logger ?? ConsoleLoggerFactory::getLogger();
+        $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->destinationFolder = $destinationFolder ?? StorageFactory::getInternalStorePath();
         $this->filename = $filename;
         $this->extractDatafromFilename();

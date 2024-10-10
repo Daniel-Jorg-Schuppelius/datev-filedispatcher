@@ -14,12 +14,12 @@ use App\Contracts\Abstracts\HelperAbstract;
 use Exception;
 
 class Shell extends HelperAbstract {
-    public static function executeShellCommand(string $command, array &$output = [], bool $throwException = false): bool {
+    public static function executeShellCommand(string $command, array &$output = [], bool $throwException = false, int $expectedResultCode = 0): bool {
         self::setLogger();
 
         exec($command, $output, $resultCode);
 
-        if ($resultCode !== 0) {
+        if ($resultCode !== $expectedResultCode) {
             if ($throwException) {
                 self::$logger->error("Fehler bei der Ausführung des Kommandos: $command");
                 throw new Exception("Fehler bei der Ausführung des Kommandos: " . implode("\n", $output));

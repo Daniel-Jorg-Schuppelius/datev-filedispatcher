@@ -10,9 +10,6 @@
 
 namespace Tests;
 
-use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
-use APIToolkit\Entities\ID;
-use Datev\API\Desktop\ClientBasicAuth;
 use Datev\Entities\ClientMasterData\Clients\ID\ClientID;
 use Datev\Entities\DocumentManagement\CorrespondencePartners\CorrespondencePartnerGUID;
 use Tests\Config\Config;

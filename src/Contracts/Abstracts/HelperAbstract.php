@@ -10,8 +10,8 @@
 
 namespace App\Contracts\Abstracts;
 
-use APIToolkit\Logger\ConsoleLoggerFactory;
 use App\Contracts\Interfaces\HelperInterface;
+use App\Factories\LoggerFactory;
 use Psr\Log\LoggerInterface;
 
 abstract class HelperAbstract implements HelperInterface {
@@ -21,7 +21,7 @@ abstract class HelperAbstract implements HelperInterface {
         if (!is_null($logger)) {
             self::$logger = $logger;
         } elseif (is_null(self::$logger)) {
-            self::$logger = ConsoleLoggerFactory::getLogger();
+            self::$logger = LoggerFactory::getLogger();
         }
     }
 

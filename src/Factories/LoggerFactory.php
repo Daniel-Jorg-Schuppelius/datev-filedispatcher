@@ -10,15 +10,23 @@
 
 namespace App\Factories;
 
+use APIToolkit\Contracts\Interfaces\LoggerFactoryInterface;
 use APIToolkit\Logger\ConsoleLogger;
-use APIToolkit\Factories\ConsoleLoggerFactory as BaseConsoleLoggerFactory;
+use App\Config\Config;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
-class LoggerFactory extends BaseConsoleLoggerFactory {
+class LoggerFactory implements LoggerFactoryInterface {
+    public static ?LoggerInterface $logger = null;
 
     public static function getLogger(): LoggerInterface {
         if (self::$logger === null) {
-            self::$logger = new ConsoleLogger();
+            $config = Config::getInstance();
+            if ($config->debug === true) {
+                self::$logger = new ConsoleLogger();
+            } else {
+                self::$logger = new NullLogger();
+            }
         }
         return static::$logger;
     }
