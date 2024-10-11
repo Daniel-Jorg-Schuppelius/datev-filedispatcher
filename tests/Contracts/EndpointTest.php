@@ -30,7 +30,7 @@ abstract class EndpointTest extends TestCase {
     public function __construct($name) {
         parent::__construct($name);
         $config = Config::getInstance();
-        $config->debug = true;
+        $config->setDebug(true);
         $this->logger = LoggerFactory::getLogger();
         $this->client = APIClientFactory::getClient();
     }

@@ -13,13 +13,17 @@ namespace App\Config;
 class Config {
     private static ?Config $instance = null;
 
-    public bool $debug = false;
+    private bool $debug = false;
 
-    public ?string $resourceUrl = null;
-    public ?string $user = null;
-    public ?string $password = null;
+    private ?string $resourceUrl = null;
+    private ?string $user = null;
+    private ?string $password = null;
 
-    public ?string $internalStorePath = null;
+    private ?string $internalStorePath = null;
+
+    private array $datevDMSMapping = [];
+    private array $perYear = [];
+    private array $perPeriod = [];
 
     private function __construct() {
         $this->setConfig();
@@ -71,8 +75,56 @@ class Config {
                     }
                 }
             }
+
+            if (isset($config['DatevDMSMapping'])) {
+                $this->datevDMSMapping = $config['DatevDMSMapping'];
+            }
+
+            if (isset($config['PerYear'])) {
+                $this->perYear = $config['PerYear'];
+            }
+
+            if (isset($config['PerPeriod'])) {
+                $this->perPeriod = $config['PerPeriod'];
+            }
         } else {
             error_log('Config file not found, please create one at ../../config.json');
         }
+    }
+
+    public function getInternalStorePath(): ?string {
+        return $this->internalStorePath;
+    }
+
+    public function getResourceUrl(): ?string {
+        return $this->resourceUrl;
+    }
+
+    public function getUser(): ?string {
+        return $this->user;
+    }
+
+    public function getPassword(): ?string {
+        return $this->password;
+    }
+
+    public function getDatevDMSMapping(): array {
+        return $this->datevDMSMapping;
+    }
+
+    public function getPerYear(): array {
+        return $this->perYear;
+    }
+
+    public function getPerPeriod(): array {
+        return $this->perPeriod;
+    }
+
+    public function isDebugEnabled(): bool {
+        return $this->debug;
+    }
+
+    public function setDebug(bool $debug): void {
+        $this->debug = $debug;
     }
 }

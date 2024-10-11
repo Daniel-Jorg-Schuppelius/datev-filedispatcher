@@ -30,8 +30,7 @@ class PayrollFileService extends FileServiceAbstract {
     }
 
     public static function getDestinationFolder(): string {
-        $config = Config::getInstance();
-        return $config->internalStorePath . 'payroll';
+        return '/payroll';
     }
 
     public function process(): void {

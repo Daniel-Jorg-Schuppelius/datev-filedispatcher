@@ -22,7 +22,7 @@ class LoggerFactory implements LoggerFactoryInterface {
     public static function getLogger(): LoggerInterface {
         if (self::$logger === null) {
             $config = Config::getInstance();
-            if ($config->debug === true) {
+            if ($config->isDebugEnabled()) {
                 self::$logger = new ConsoleLogger();
             } else {
                 self::$logger = new NullLogger();
