@@ -19,7 +19,7 @@ use Exception;
 use finfo;
 
 class File extends HelperAbstract implements FileSystemInterface {
-    public static function mimeType(string $filename): string {
+    public static function mimeType(string $filename): string|false {
         self::setLogger();
 
         $result = false;
@@ -39,12 +39,14 @@ class File extends HelperAbstract implements FileSystemInterface {
         return $result;
     }
 
-    private static function mimeTypeByShell(string $filename): string {
+    private static function mimeTypeByShell(string $filename): string|false {
         self::setLogger();
+
+        $result = false;
 
         if (!self::exists($filename)) {
             self::$logger->error("Datei existiert nicht: $filename");
-            return '';
+            return $result;
         }
 
         $command = sprintf('file -b --mime-type -m /usr/share/misc/magic %s', escapeshellarg($filename));
@@ -56,7 +58,11 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Problem bei der Bestimmung des MIME-Typs für $filename");
         }
 
-        return trim(implode("\n", $output));
+        if (!empty($output)) {
+            $result = trim(implode("\n", $output));
+            self::$logger->info("MIME-Typ für $filename: " . $result);
+        }
+        return $result;
     }
 
     public static function exists(string $file): bool {

@@ -23,9 +23,9 @@ class ShellTest extends TestCase {
         $command = Shell::getPlatformSpecificCommand($unixCommand, $windowsCommand);
 
         $output = [];
-        $result = Shell::executeShellCommand($command, $output);
+        $success = Shell::executeShellCommand($command, $output);
 
-        $this->assertTrue($result, "The shell command should be successful.");
+        $this->assertTrue($success, "The shell command should be successful.");
         $this->assertNotEmpty($output, "The output should not be empty.");
     }
 
@@ -33,7 +33,9 @@ class ShellTest extends TestCase {
         $command = "invalidcommand 2>&1";
 
         $output = [];
+        $resultCode = 0;
+
         $this->expectException(Exception::class);
-        Shell::executeShellCommand($command, $output, true);
+        Shell::executeShellCommand($command, $output, $resultCode, true);
     }
 }

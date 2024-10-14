@@ -16,7 +16,7 @@ use App\Contracts\Abstracts\HelperAbstract;
 use Exception;
 
 class Shell extends HelperAbstract {
-    public static function executeShellCommand(string $command, array &$output = [], bool $throwException = false, int $expectedResultCode = 0): bool {
+    public static function executeShellCommand(string $command, array &$output = [], int &$resultCode = 0, bool $throwException = false, int $expectedResultCode = 0): bool {
         self::setLogger();
 
         exec($command, $output, $resultCode);
