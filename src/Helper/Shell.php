@@ -31,7 +31,7 @@ class Shell extends HelperAbstract {
             }
         }
 
-        self::$logger->info("Kommando erfolgreich ausgeführt: $command");
+        self::$logger->debug("Kommando erfolgreich ausgeführt: $command");
         return true;
     }
 

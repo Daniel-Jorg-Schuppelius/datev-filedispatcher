@@ -50,7 +50,7 @@ class FileDispatcher extends HelperAbstract {
                     $reflectionClass = new ReflectionClass($className);
                     if ($reflectionClass->implementsInterface(FileServiceInterface::class) && !$reflectionClass->isAbstract()) {
                         self::$services[] = $className;
-                        self::$logger->info("Serviceklasse gefunden und hinzugefügt: $className");
+                        self::$logger->debug("Serviceklasse gefunden und hinzugefügt: $className");
                     }
                 } else {
                     self::$logger->warning("Klasse existiert nicht oder konnte nicht geladen werden: $className");
