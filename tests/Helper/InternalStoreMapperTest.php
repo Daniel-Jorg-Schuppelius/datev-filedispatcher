@@ -28,13 +28,7 @@ class InternalStoreMapperTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $tempDir = sys_get_temp_dir();
-
-        if (DIRECTORY_SEPARATOR === '/' && substr($tempDir, 0, 1) !== '/') {
-            $tempDir = '/' . $tempDir;
-        }
-
-        $this->internalStorePath = $tempDir . '/internal_store_test/{tenant}';
+        $this->internalStorePath = sys_get_temp_dir() . '/internal_store_test/{tenant}';
         $this->tempDir = str_replace("{tenant}", "12345", $this->internalStorePath);
 
         if (!is_dir(dirname($this->tempDir))) {
