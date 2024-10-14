@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 use App\Helper\InternalStoreMapper;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use App\Factories\StorageFactory;
+use Datev\Entities\DocumentManagement\Documents\Document;
+use Datev\Entities\DocumentManagement\Documents\Folders\DocumentFolder;
+use Datev\Entities\DocumentManagement\Registers\Register;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -60,11 +63,20 @@ class InternalStoreMapperTest extends TestCase {
 
     public function testGetInternalStorePathWithoutParameter() {
         $client = $this->createMock(Client::class);
+        $document = $this->createMock(Document::class);
+        $register = $this->createMock(Register::class);
+        $folder = $this->createMock(DocumentFolder::class);
+
         $client->method('getNumber')->willReturn(12345);
-        $dmsCategory = "01 Stammakte Einkommensbesch.";
+        $document->method('getRegister')->willReturn($register);
+        $document->method('getFolder')->willReturn($folder);
+
+        $register->method('getName')->willReturn("Einkommensbesch.");
+        $folder->method('getName')->willReturn("01 Stammakte");
+
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "04 Sonstiges/Einkommensbescheinigungen");
 
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $dmsCategory);
+        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
@@ -72,12 +84,21 @@ class InternalStoreMapperTest extends TestCase {
 
     public function testGetInternalStorePathWithParameter() {
         $client = $this->createMock(Client::class);
+        $document = $this->createMock(Document::class);
+        $register = $this->createMock(Register::class);
+        $folder = $this->createMock(DocumentFolder::class);
+
         $client->method('getNumber')->willReturn(12345);
-        $dmsCategory = "04 FIBU Finanzamt lfd.";
+        $document->method('getRegister')->willReturn($register);
+        $document->method('getFolder')->willReturn($folder);
+
+        $register->method('getName')->willReturn("Finanzamt lfd.");
+        $folder->method('getName')->willReturn("04 FIBU");
+
         $parameter = "2024";
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc");
 
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $dmsCategory, $parameter);
+        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document, $parameter);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
@@ -85,11 +106,20 @@ class InternalStoreMapperTest extends TestCase {
 
     public function testGetInternalStorePathInvalidCategory() {
         $client = $this->createMock(Client::class);
-        $client->method('getNumber')->willReturn(12345);
-        $dmsCategory = "Invalid Category";
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $dmsCategory);
+        $document = $this->createMock(Document::class);
+        $register = $this->createMock(Register::class);
+        $folder = $this->createMock(DocumentFolder::class);
 
-        $this->assertNull($actualPath, "Der Pfad sollte null sein, da die Kategorie ungültig ist.");
+        $client->method('getNumber')->willReturn(12345);
+        $document->method('getRegister')->willReturn($register);
+        $document->method('getFolder')->willReturn($folder);
+
+        $register->method('getName')->willReturn("Register");
+        $folder->method('getName')->willReturn("Folder");
+
+        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document);
+
+        $this->assertNull($actualPath, "Der Pfad sollte null sein, da das Register und Folder Objekt im Dokument ungültig ist.");
     }
 
     public function testRequiresYearTrue() {
