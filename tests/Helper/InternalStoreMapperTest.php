@@ -2,10 +2,10 @@
 /*
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
- * Author Uri   : https:\/\/schuppelius.org
+ * Author Uri   : https://schuppelius.org
  * Filename     : InternalStoreMapperTest.php
  * License      : MIT License
- * License Uri  : https:\/\/opensource.org\/license\/mit
+ * License Uri  : https://opensource.org/license/mit
  */
 
 namespace Tests\Helper;
@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 use App\Helper\InternalStoreMapper;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use App\Factories\StorageFactory;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class InternalStoreMapperTest extends TestCase {
 
@@ -30,7 +33,6 @@ class InternalStoreMapperTest extends TestCase {
         }
         mkdir($this->tempDir);
 
-        // Setze den internen Pfad in der StorageFactory auf das temporäre Verzeichnis
         StorageFactory::setInternalStorePath($this->internalStorePath);
 
         $categories = [
@@ -48,7 +50,7 @@ class InternalStoreMapperTest extends TestCase {
 
     protected function tearDown(): void {
         if (is_dir($this->tempDir)) {
-            foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->tempDir, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $file) {
+            foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->tempDir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST) as $file) {
                 $file->isDir() ? rmdir($file) : unlink($file);
             }
             rmdir($this->tempDir);
@@ -62,7 +64,6 @@ class InternalStoreMapperTest extends TestCase {
         $dmsCategory = "01 Stammakte Einkommensbesch.";
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "04 Sonstiges/Einkommensbescheinigungen");
 
-        // Injecting the mock path manually instead of using setInstance
         $actualPath = InternalStoreMapper::getInternalStorePath($client, $dmsCategory);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
@@ -76,7 +77,6 @@ class InternalStoreMapperTest extends TestCase {
         $parameter = "2024";
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc");
 
-        // Injecting the mock path manually instead of using setInstance
         $actualPath = InternalStoreMapper::getInternalStorePath($client, $dmsCategory, $parameter);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");

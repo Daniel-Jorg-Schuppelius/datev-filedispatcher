@@ -2,11 +2,13 @@
 /*
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
- * Author Uri   : https:\/\/schuppelius.org
+ * Author Uri   : https://schuppelius.org
  * Filename     : DmsMapper.php
  * License      : MIT License
- * License Uri  : https:\/\/opensource.org\/license\/mit
+ * License Uri  : https://opensource.org/license/mit
  */
+
+declare(strict_types=1);
 
 namespace App\Helper;
 

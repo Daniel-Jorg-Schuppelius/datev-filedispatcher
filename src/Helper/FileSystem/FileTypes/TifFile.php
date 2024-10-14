@@ -8,6 +8,8 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\Helper\FileSystem\FileTypes;
 
 use APIToolkit\Exceptions\NotFoundException;

@@ -12,10 +12,6 @@ namespace Tests\Endpoints\DocumentManagement;
 
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
-use Datev\Entities\ClientMasterData\Clients\Client;
-use Datev\Entities\ClientMasterData\Clients\ClientID;
-use Datev\Entities\DocumentManagement\Documents\Document;
-use Datev\Entities\DocumentManagement\Documents\DocumentID;
 use Datev\Entities\DocumentManagement\Documents\Documents;
 use Tests\Contracts\EndpointTest;
 use Tests\TestDispatcherFactory;
