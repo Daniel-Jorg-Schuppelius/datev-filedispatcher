@@ -16,7 +16,7 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Contracts\Interfaces\FileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
-use Datev\API\Desktop\Endpoints\Accounting\ClientsEndpoint;
+use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Psr\Log\LoggerInterface;
@@ -24,39 +24,49 @@ use Psr\Log\LoggerInterface;
 abstract class FileServiceAbstract implements FileServiceInterface {
     protected ClientsEndpoint $clientsEndpoint;
     protected DocumentsEndpoint $documentEndpoint;
-
     protected LoggerInterface $logger;
 
     protected string $filename;
-
     protected ?Client $client = null;
     protected ?string $documentNumber = null;
 
-    public function __construct(string $filename, ApiClientInterface $client = null, LoggerInterface $logger = null) {
+    public function __construct(string $filename, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
         $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->filename = $filename;
-        $this->extractDatafromFilename();
+
+        try {
+            $this->extractDataFromFilename();
+        } catch (\Exception $e) {
+            $this->logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
+            throw $e;
+        }
     }
 
-    public function getFilename(): string {
+    public final function getFilename(): string {
         return $this->filename;
     }
 
-    public function getClient(): ?Client {
+    public final function getClient(): ?Client {
         return $this->client;
     }
 
-    public function getDocumentNumber(): ?string {
+    public final function getDocumentNumber(): ?string {
         return $this->documentNumber;
     }
 
     public static function matchesPattern(string $filename, array &$matches = null): bool {
-        return preg_match(static::getPattern(), basename($filename), $matches) === 1;
+        $result = preg_match(static::getPattern(), basename($filename), $matches);
+        if ($result === false) {
+            throw new \RuntimeException("Fehler beim Anwenden des Musters auf den Dateinamen: $filename");
+        }
+        return $result === 1;
     }
 
-    abstract protected function extractDatafromFilename(): void;
+    abstract protected function extractDataFromFilename(): void;
+
+    abstract public function getDestinationFolder(): ?string;
+
     abstract public static function getPattern(): string;
-    abstract public static function getDestinationFolder(): ?string;
 }

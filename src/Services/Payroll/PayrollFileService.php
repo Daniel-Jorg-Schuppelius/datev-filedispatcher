@@ -12,37 +12,40 @@ declare(strict_types=1);
 
 namespace App\Services\Payroll;
 
-use App\Config\Config;
-use App\Contracts\Abstracts\FileServiceAbstract;
+use App\Contracts\Abstracts\PeriodicFileServiceAbstract;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
-class PayrollFileService extends FileServiceAbstract {
-    private string $month;
-    private string $year;
-
-    public function __construct(string $filename) {
-        parent::__construct($filename);
-        $this->filename = $filename;
+class PayrollFileService extends PeriodicFileServiceAbstract {
+    public function __construct(string $filename, LoggerInterface $logger = null) {
+        parent::__construct($filename, null, $logger);
     }
 
     public static function getPattern(): string {
         return '/^(\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(\d{2})_(\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/';
     }
 
-    public static function getDestinationFolder(): ?string {
-        return '/payroll';
+    public static function getSubFolder(): string {
+        return "02 Entgeltabrechnung";
     }
 
     public function process(): void {
-        $this->logger->info("Verarbeite Payroll Datei: $this->filename");
-        $this->extractDatafromFilename();
+        $this->logger->info("Verarbeite Payroll Datei: {$this->filename}");
     }
 
-    protected function extractDatafromFilename(): void {
+    protected function extractDataFromFilename(): void {
         $matches = [];
-        self::matchesPattern($this->filename, $matches);
-        $this->documentNumber = $matches[1];
-        $this->month = $matches[4];
-        $this->year = $matches[5];
+        if (!self::matchesPattern($this->filename, $matches)) {
+            $this->logger->error("Ungültiger Dateiname: {$this->filename}");
+            throw new InvalidArgumentException("Der Dateiname entspricht nicht dem erwarteten Muster: {$this->filename}");
+        }
+
+        $this->client = $this->clientsEndpoint->search(["filter" => "number eq $matches[1]"])->getFirstValue();
+        if (is_null($this->client)) {
+            $this->logger->error("Client konnte nicht gefunden werden: $matches[1]");
+            throw new RuntimeException("Client konnte nicht gefunden werden: $matches[1]");
+        }
+        $this->validateDate((int) $matches[5], (int) $matches[4]);
     }
 }

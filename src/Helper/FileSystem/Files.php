@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace App\Helper\FileSystem;
 
 use App\Contracts\Abstracts\HelperAbstract;
-use Exception;
 
 class Files extends HelperAbstract {
 
@@ -69,9 +68,9 @@ class Files extends HelperAbstract {
         }
 
         if (empty($result)) {
-            self::$logger->warning("Keine Dateien gefunden im Verzeichnis: $directory");
+            self::$logger->info("Keine Dateien gefunden im Verzeichnis: $directory");
         } else {
-            self::$logger->info("Dateien erfolgreich gelesen aus Verzeichnis: $directory");
+            self::$logger->debug("Dateien erfolgreich gelesen aus Verzeichnis: $directory");
         }
 
         return $result;

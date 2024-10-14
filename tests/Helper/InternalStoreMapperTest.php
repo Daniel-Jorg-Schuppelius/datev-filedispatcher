@@ -76,7 +76,7 @@ class InternalStoreMapperTest extends TestCase {
 
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "04 Sonstiges/Einkommensbescheinigungen");
 
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document);
+        $actualPath = InternalStoreMapper::getInternalStorePath4Document($client, $document);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
@@ -98,7 +98,7 @@ class InternalStoreMapperTest extends TestCase {
         $parameter = "2024";
         $expectedPath = str_replace("/", DIRECTORY_SEPARATOR, "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc");
 
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document, $parameter);
+        $actualPath = InternalStoreMapper::getInternalStorePath4Document($client, $document, $parameter);
 
         $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
@@ -117,7 +117,7 @@ class InternalStoreMapperTest extends TestCase {
         $register->method('getName')->willReturn("Register");
         $folder->method('getName')->willReturn("Folder");
 
-        $actualPath = InternalStoreMapper::getInternalStorePath($client, $document);
+        $actualPath = InternalStoreMapper::getInternalStorePath4Document($client, $document);
 
         $this->assertNull($actualPath, "Der Pfad sollte null sein, da das Register und Folder Objekt im Dokument ungültig ist.");
     }
