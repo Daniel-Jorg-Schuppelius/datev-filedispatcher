@@ -8,6 +8,8 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\Helper;
 
 use App\Contracts\Abstracts\HelperAbstract;

@@ -29,7 +29,7 @@ class PayrollFileService extends FileServiceAbstract {
         return '/^(\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(\d{2})_(\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/';
     }
 
-    public static function getDestinationFolder(): string {
+    public static function getDestinationFolder(): ?string {
         return '/payroll';
     }
 
