@@ -12,12 +12,13 @@ namespace Tests\Services;
 
 use App\Helper\FileDispatcher;
 use App\Services\Payroll\PayrollFileService;
-use PHPUnit\Framework\TestCase;
+use Tests\Endpoints\DocumentManagement\DocumentTest;
 
-class PayrollFileServiceTest extends TestCase {
+class PayrollFileServiceTest extends DocumentTest {
     protected string $testFile;
 
-    protected function setUp(): void {
+    public function __construct($name) {
+        parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../.samples/20542_00001_Wegner_Regina_09_2023_Brutto_Netto_O04.pdf');
     }
@@ -37,6 +38,10 @@ class PayrollFileServiceTest extends TestCase {
     }
 
     public function testPayrollFileServiceProcessing() {
+        if ($this->apiDisabled) {
+            $this->markTestSkipped('API is disabled');
+        }
+
         $service = new PayrollFileService($this->testFile);
         $service->process();
 
@@ -45,6 +50,10 @@ class PayrollFileServiceTest extends TestCase {
     }
 
     public function testFileDispatcherPayrollFileServiceProcessing(): void {
+        if ($this->apiDisabled) {
+            $this->markTestSkipped('API is disabled');
+        }
+
         $this->assertFileExists($this->testFile);
 
         FileDispatcher::processFile($this->testFile);
