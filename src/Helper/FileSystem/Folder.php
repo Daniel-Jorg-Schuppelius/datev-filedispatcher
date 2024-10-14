@@ -20,7 +20,7 @@ class Folder extends HelperAbstract implements FileSystemInterface {
     public static function exists(string $directory): bool {
         self::setLogger();
         $exists = is_dir($directory);
-        self::$logger->info("Überprüfung ob Verzeichnis existiert: $directory - " . ($exists ? 'Ja' : 'Nein'));
+        self::$logger->debug("Überprüfung ob Verzeichnis existiert: $directory - " . ($exists ? 'Ja' : 'Nein'));
         return $exists;
     }
 
@@ -31,7 +31,7 @@ class Folder extends HelperAbstract implements FileSystemInterface {
                 self::$logger->error("Fehler beim Erstellen des Verzeichnisses: $directory");
                 throw new Exception("Fehler beim Erstellen des Verzeichnisses $directory");
             }
-            self::$logger->info("Verzeichnis erstellt: $directory mit Berechtigungen $permissions");
+            self::$logger->debug("Verzeichnis erstellt: $directory mit Berechtigungen $permissions");
         } else {
             self::$logger->info("Verzeichnis existiert bereits: $directory");
         }

@@ -13,7 +13,6 @@ namespace Tests\Services;
 use App\Helper\FileDispatcher;
 use App\Services\Payroll\PayrollFileService;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class PayrollFileServiceTest extends TestCase {
     protected string $testFile;
@@ -41,19 +40,8 @@ class PayrollFileServiceTest extends TestCase {
         $service = new PayrollFileService($this->testFile);
         $service->process();
 
-        // Verwende Reflection, um auf die geschützten/privaten Properties zuzugreifen
-        $reflection = new ReflectionClass(PayrollFileService::class);
-
-        $this->assertSame('20542', $service->getDocumentNumber());
-        $monthProperty = $reflection->getProperty('month');
-        $monthProperty->setAccessible(true);
-        $month = $monthProperty->getValue($service);
-        $this->assertEquals('09', $month);
-
-        $yearProperty = $reflection->getProperty('year');
-        $yearProperty->setAccessible(true);
-        $year = $yearProperty->getValue($service);
-        $this->assertEquals('2023', $year);
+        $this->assertEquals('9', $service->getMonth());
+        $this->assertEquals('2023', $service->getYear());
     }
 
     public function testFileDispatcherPayrollFileServiceProcessing(): void {

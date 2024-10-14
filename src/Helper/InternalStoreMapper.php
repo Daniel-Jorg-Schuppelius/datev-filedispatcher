@@ -19,33 +19,37 @@ use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 
 class InternalStoreMapper extends HelperAbstract {
-    public static function getInternalStorePath(Client $client, Document $document, ?string $parameter = null): ?string {
+
+    public static function getInternalStorePath(Client $client, string $subPath, ?string $parameter = null): ?string {
         self::setLogger();
-
-        $config = Config::getInstance();
-        $datevDMSMapping = $config->getDatevDMSMapping();
-        $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
-
-        self::$logger->debug("Mapping für: '$datevDMSCategory' beginnt.");
-        if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
-            return null;
-        }
-
 
         $internalStorePath = StorageFactory::getInternalStorePathForClient($client);
         if ($internalStorePath === null) {
+            self::$logger->error("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
             return null;
         }
 
         return self::validatePath(
-            self::buildInternalStorePath($internalStorePath, $datevDMSMapping[$datevDMSCategory], $parameter)
+            self::buildInternalStorePath($internalStorePath, $subPath, $parameter)
         );
+    }
+
+    public static function getInternalStorePath4Document(Client $client, Document $document, ?string $parameter = null): ?string {
+        self::setLogger();
+
+        $subPath = self::getMapping4InternalStorePath($document);
+        if ($subPath === null) {
+            self::$logger->error("Kein Mapping für Dokument: '{$document->getFolder()->getName()} {$document->getRegister()->getName()}' gefunden.");
+            return null;
+        }
+
+        return self::getInternalStorePath($client, $subPath, $parameter);
     }
 
     public static function requiresPattern(string $internalPath, array $patterns): bool {
         self::setLogger();
 
-        self::$logger->debug("Wird Pattern für: $internalPath (Pattern: " . print_r(implode(", ", $patterns), true) . ") benötigt.");
+        self::$logger->debug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
 
         foreach ($patterns as $pattern) {
             if (strpos($internalPath, $pattern) !== false) {
@@ -73,17 +77,39 @@ class InternalStoreMapper extends HelperAbstract {
         if ($parameter !== null && strpos($path, '%s') !== false) {
             $path = sprintf($path, $parameter);
         }
-        self::$logger->debug("Pfad für Internen Bereich (ermittelt): '$path'.");
+
+        self::$logger->debug("Interner Speicherpfad (ermittelt): '$path'.");
 
         return $path;
+    }
+
+    private static function getMapping4InternalStorePath(Document $document): ?string {
+        self::setLogger();
+
+        $config = Config::getInstance();
+        $datevDMSMapping = $config->getDatevDMSMapping();
+
+        $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
+
+        self::$logger->debug("Suche Mapping für: '$datevDMSCategory'.");
+        if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
+            self::$logger->error("Kein Mapping für Kategorie '$datevDMSCategory' gefunden.");
+            return null;
+        }
+
+        return $datevDMSMapping[$datevDMSCategory];
     }
 
     private static function validatePath(string $path): ?string {
         self::setLogger();
 
         $realPath = realpath($path);
-        self::$logger->debug("Pfad für Internen Bereich (validiert): '$realPath'.");
+        if ($realPath === false) {
+            self::$logger->error("Der Pfad '$path' konnte nicht validiert werden.");
+            return null;
+        }
 
-        return $realPath !== false ? $realPath : null;
+        self::$logger->debug("Pfad für Internen Bereich (validiert): '$realPath'.");
+        return $realPath;
     }
 }
