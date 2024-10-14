@@ -38,7 +38,7 @@ class StorageFactory {
         if ($path === false) {
             throw new RuntimeException('The InternalStorePath for the client could not be resolved');
         }
-        return ltrim($path, DIRECTORY_SEPARATOR);
+        return rtrim($path, DIRECTORY_SEPARATOR);
     }
 
     public static function setInternalStorePath(string $path): void {
