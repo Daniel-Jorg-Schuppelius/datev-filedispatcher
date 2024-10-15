@@ -10,6 +10,7 @@
 
 namespace Tests\Helper;
 
+use App\Config\Config;
 use PHPUnit\Framework\TestCase;
 use App\Helper\InternalStoreMapper;
 use Datev\Entities\ClientMasterData\Clients\Client;
@@ -28,6 +29,14 @@ class InternalStoreMapperTest extends TestCase {
 
     protected function setUp(): void {
         parent::setUp();
+        if (is_null(Config::getInstance()->getDatevDMSMapping())) {
+            $this->markTestSkipped("Datev DMS Mapping ist nicht konfiguriert.");
+        } elseif (is_null(Config::getInstance()->getPerYear())) {
+            $this->markTestSkipped("Per Year ist nicht konfiguriert.");
+        } elseif (is_null(Config::getInstance()->getPerPeriod())) {
+            $this->markTestSkipped("Per Period ist nicht konfiguriert.");
+        }
+
         $this->internalStorePath = sys_get_temp_dir() . '/internal_store_test/{tenant}';
         $this->tempDir = str_replace("{tenant}", "12345", $this->internalStorePath);
 

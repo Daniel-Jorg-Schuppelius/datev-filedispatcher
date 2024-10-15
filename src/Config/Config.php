@@ -21,9 +21,9 @@ class Config {
 
     private ?string $internalStorePath = null;
 
-    private array $datevDMSMapping = [];
-    private array $perYear = [];
-    private array $perPeriod = [];
+    private ?array $datevDMSMapping = null;
+    private ?array $perYear = null;
+    private ?array $perPeriod = null;
 
     private function __construct() {
         $this->setConfig();
@@ -76,15 +76,14 @@ class Config {
                 }
             }
 
-            if (isset($config['DatevDMSMapping'])) {
+            if (isset($config['DatevDMSMapping']) && is_array($config['DatevDMSMapping'])) {
                 $this->datevDMSMapping = $config['DatevDMSMapping'];
             }
 
-            if (isset($config['PerYear'])) {
+            if (isset($config['PerYear']) && is_array($config['PerYear'])) {
                 $this->perYear = $config['PerYear'];
             }
-
-            if (isset($config['PerPeriod'])) {
+            if (isset($config['PerPeriod']) && is_array($config['PerPeriod'])) {
                 $this->perPeriod = $config['PerPeriod'];
             }
         } else {
@@ -108,15 +107,15 @@ class Config {
         return $this->password;
     }
 
-    public function getDatevDMSMapping(): array {
+    public function getDatevDMSMapping(): ?array {
         return $this->datevDMSMapping;
     }
 
-    public function getPerYear(): array {
+    public function getPerYear(): ?array {
         return $this->perYear;
     }
 
-    public function getPerPeriod(): array {
+    public function getPerPeriod(): ?array {
         return $this->perPeriod;
     }
 
