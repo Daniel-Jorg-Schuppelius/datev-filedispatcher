@@ -52,8 +52,6 @@ class PdfFile extends HelperAbstract {
         $output = [];
         $resultCode = 0;
 
-        Shell::executeShellCommand($command, $output, $resultCode);
-
-        return $resultCode === 1 && empty($output);
+        return Shell::executeShellCommand($command, $output, $resultCode, false, 1) && empty($output);
     }
 }
