@@ -21,6 +21,9 @@ class Config {
 
     private ?string $internalStorePath = null;
 
+    private ?int $previousYears4Internal = null;
+    private ?string $previousYearsFolderName4Internal = null;
+
     private ?array $datevDMSMapping = null;
     private ?array $perYear = null;
     private ?array $perPeriod = null;
@@ -68,6 +71,17 @@ class Config {
                 }
             }
 
+            if (isset($config['maxYears']) && is_array($config['maxYears'])) {
+                foreach ($config['maxYears'] as $value) {
+                    if ($value['key'] === 'previousYears4Internal') {
+                        $this->previousYears4Internal = $value['value'];
+                    }
+                    if ($value['key'] === 'previousYearsFolderName4Internal') {
+                        $this->previousYearsFolderName4Internal = $value['value'];
+                    }
+                }
+            }
+
             if (isset($config['Debugging']) && is_array($config['Debugging'])) {
                 foreach ($config['Debugging'] as $value) {
                     if (isset($value['key']) && $value['key'] === 'debug') {
@@ -105,6 +119,14 @@ class Config {
 
     public function getPassword(): ?string {
         return $this->password;
+    }
+
+    public function getPreviousYears4Internal(): ?int {
+        return $this->previousYears4Internal;
+    }
+
+    public function getPreviousYearsFolderName4Internal(): ?string {
+        return $this->previousYearsFolderName4Internal;
     }
 
     public function getDatevDMSMapping(): ?array {

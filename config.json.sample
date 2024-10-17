@@ -37,6 +37,22 @@
 			"description": "",
 			"enabled": true
 		}
+	],	
+	"maxYears": [
+		{
+			"key": "previousYears4Internal",
+			"value": 3,
+			"type": "int",
+			"description": "maximal years before put in previous years",
+			"enabled": true
+		},
+		{
+			"key": "previousYearsFolderName4Internal",
+			"value": "Vorjahre",
+			"type": "string",
+			"description": "foldername for maximal years before put in previous years",
+			"enabled": true
+		}
 	],
 	"DatevDMSMapping": {
         "01 Stammakte Einkommensbesch.": "04 Sonstiges/Einkommensbescheinigungen",
@@ -65,6 +81,7 @@
         "Belege gebucht": "04 Sonstiges/Belege"
     },
     "PerYear": [
+		"01 Finanzbuchhaltung/%s/FA Mahnungen, Umbuchung etc",
         "03 Erklärungen, Abschlüsse, Bescheide"
     ],
     "PerPeriod": [

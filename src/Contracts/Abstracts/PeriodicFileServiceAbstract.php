@@ -14,6 +14,7 @@ namespace App\Contracts\Abstracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use APIToolkit\Enums\Month;
+use App\Config\Config;
 use App\Helper\InternalStoreMapper;
 use DateTime;
 use Exception;
@@ -36,18 +37,41 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
     }
 
     public function getDestinationFolder(bool $leadingZero = true): ?string {
+        $subFolder = static::getSubFolder();
+        $requiresPeriod = InternalStoreMapper::requiresPeriod($subFolder);
+        $requiresYear = InternalStoreMapper::requiresYear($subFolder);
+
+        $config = Config::getInstance();
+
+        if (is_null($config->getPreviousYears4Internal())) {
+            throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
+        } elseif (is_null($config->getPreviousYearsFolderName4Internal())) {
+            throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
+        }
+
+        $minYearValue = (clone $this->date)->modify("-" . $config->getPreviousYears4Internal() . " years");
+
+        $yearFormatted = $this->date->format('Y');
         $monthValue = $this->getMonth();
         $monthFormatted = ($leadingZero ? $this->date->format('m') : $monthValue) . " " . Month::toArray(false, 'de')[$monthValue];
 
-        if (InternalStoreMapper::requiresPeriod(static::getSubFolder())) {
-            $this->logger->info("Nutze Monatsablage für den Ordner '" . static::getSubFolder() . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, static::getSubFolder() . "/%s", $this->date->format('Y') . DIRECTORY_SEPARATOR . $monthFormatted);
-        } elseif (InternalStoreMapper::requiresYear(static::getSubFolder())) {
-            $this->logger->info("Nutze Jahresablage für den Ordner '" . static::getSubFolder() . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, static::getSubFolder() . "/%s", $this->date->format('Y'));
+        if (($requiresPeriod || $requiresYear) && strpos($subFolder, '%s') === false) {
+            $subFolder .= DIRECTORY_SEPARATOR . "%s";
         }
 
-        $this->logger->warning("Keine Konfiguration für eine periodische Ablage in den Ordner '" . static::getSubFolder() . "' gefunden.");
+        if ($this->date < $minYearValue) {
+            $yearFormatted = $config->getPreviousYearsFolderName4Internal() . DIRECTORY_SEPARATOR . $yearFormatted;
+        }
+
+        if ($requiresPeriod) {
+            $this->logger->info("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
+            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
+        } elseif ($requiresYear) {
+            $this->logger->info("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
+        }
+
+        $this->logger->warning("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
         return null;
     }
 
