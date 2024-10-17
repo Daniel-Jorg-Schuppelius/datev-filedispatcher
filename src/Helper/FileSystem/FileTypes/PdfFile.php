@@ -47,13 +47,13 @@ class PdfFile extends HelperAbstract {
     public static function isValid(string $filename): bool {
         $command = Shell::getPlatformSpecificCommand(
             sprintf("mutool info %s 2>&1 | grep error", escapeshellarg($filename)),
-            sprintf('pdfinfo %s 2>&1 | findstr /R "Syntax.Error" || exit /b 0', escapeshellarg($filename))
+            sprintf('pdfinfo %s 2>&1 | findstr /R "Syntax.Error"', escapeshellarg($filename))
         );
         $output = [];
         $resultCode = 0;
 
         Shell::executeShellCommand($command, $output, $resultCode);
 
-        return $resultCode === 0 && empty($output);
+        return $resultCode === 1 && empty($output);
     }
 }
