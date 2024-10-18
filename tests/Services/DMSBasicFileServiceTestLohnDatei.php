@@ -19,7 +19,7 @@ class DMSBasicFileServiceTestLohnDatei extends DMSBasicFileServiceTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../.samples/219624 - Lohn - 2022_1.pdf');
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testPatternMatching() {
