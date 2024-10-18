@@ -1,7 +1,7 @@
+#!/usr/bin/php
 <?php
 /*
  * Created on   : Fri Oct 18 2024
- * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
  * Filename     : DatevFileDispatcher.php
  * License      : MIT License
