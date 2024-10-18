@@ -17,6 +17,7 @@ use App\Config\Config;
 use App\Contracts\Interfaces\FileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
+use App\Helper\FileSystem\File;
 use App\Helper\InternalStoreMapper;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
@@ -79,6 +80,11 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         }
 
         return null;
+    }
+
+    public function process(): void {
+        $this->logger->info("Verarbeite Datei: {$this->filename} mit {static::class}.");
+        File::move($this->filename, $this->getDestinationFolder());
     }
 
     protected function getMatches(): array {

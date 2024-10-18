@@ -29,12 +29,29 @@
 			"enabled": true
 		}
 	],
+	"Logging": [
+		{
+			"key": "log",
+			"value": "Console",
+			"type": "string",
+			"description": "log to (Console, File, Null)",
+			"enabled": true
+		},		
+		{
+			"key": "path",
+			"value": "/opt/internal_dispatcher/log.txt",
+			"type": "string",
+			"description": "",
+			"enabled": true
+		}
+
+	],	
 	"Debugging": [
 		{
 			"key": "debug",
 			"value": false,
 			"type": "bool",
-			"description": "",
+			"description": "If enabled log get to Console",
 			"enabled": true
 		}
 	],	
