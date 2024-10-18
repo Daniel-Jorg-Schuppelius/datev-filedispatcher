@@ -15,7 +15,7 @@ namespace App\Contracts\Abstracts;
 use App\Helper\InternalStoreMapper;
 use App\Traits\PeriodicFileServiceTrait;
 
-abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
+abstract class DMSFileServiceAbstract extends FileServiceAbstract {
     use PeriodicFileServiceTrait;
 
     public function getDestinationFolder(bool $leadingZero = true): ?string {
@@ -33,9 +33,17 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
         } elseif ($requiresYear) {
             $this->logger->info("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
             return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
+        } else {
+            return parent::getDestinationFolder($leadingZero);
         }
+    }
 
-        $this->logger->error("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
-        return null;
+    protected function getSubFolder(): string {
+        return InternalStoreMapper::getMapping4InternalStorePath($this->document);
+    }
+
+    protected function setPropertiesFromDMS(string $documentNumber) {
+        parent::setPropertiesFromDMS($documentNumber);
+        $this->setDate($this->document->getYear(), $this->document->getMonth());
     }
 }

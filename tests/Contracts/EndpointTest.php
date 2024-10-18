@@ -46,27 +46,32 @@ abstract class EndpointTest extends TestCase {
 
     final protected function setUp(): void {
         $this->internalStorePath = sys_get_temp_dir() . '/internal_store_test/{tenant}';
-        $this->tempDir = str_replace("{tenant}", "20542", $this->internalStorePath);
+        $tenantIds = ['20542', '50004'];  // Füge hier die Mandanten hinzu, für die du Verzeichnisse erstellen willst
 
-        if (!is_dir(dirname($this->tempDir))) {
-            mkdir(dirname($this->tempDir));
-        }
-        if (!is_dir($this->tempDir)) {
-            mkdir($this->tempDir);
-        }
+        foreach ($tenantIds as $tenantId) {
+            $this->tempDir = str_replace("{tenant}", $tenantId, $this->internalStorePath);
 
-        StorageFactory::setInternalStorePath($this->internalStorePath);
+            if (!is_dir(dirname($this->tempDir))) {
+                mkdir(dirname($this->tempDir));
+            }
+            if (!is_dir($this->tempDir)) {
+                mkdir($this->tempDir);
+            }
 
-        $categories = [
-            "04 Sonstiges/Einkommensbescheinigungen",
-            "02 Entgeltabrechnung/2023/09 September",
-            "01 Finanzbuchhaltung/2023/FA Mahnungen, Umbuchung etc"
-        ];
+            StorageFactory::setInternalStorePath($this->internalStorePath);
 
-        foreach ($categories as $category) {
-            $fullPath = $this->tempDir . '/' . $category;
-            if (!is_dir($fullPath)) {
-                mkdir($fullPath, 0777, true);
+            $categories = [
+                "04 Sonstiges/Einkommensbescheinigungen",
+                "02 Entgeltabrechnung/2022/01 Januar",
+                "02 Entgeltabrechnung/2023/09 September",
+                "01 Finanzbuchhaltung/2023/FA Mahnungen, Umbuchung etc"
+            ];
+
+            foreach ($categories as $category) {
+                $fullPath = $this->tempDir . '/' . $category;
+                if (!is_dir($fullPath)) {
+                    mkdir($fullPath, 0777, true);
+                }
             }
         }
 

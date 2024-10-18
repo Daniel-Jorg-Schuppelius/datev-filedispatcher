@@ -46,6 +46,23 @@ class InternalStoreMapper extends HelperAbstract {
         return self::getInternalStorePath($client, $subPath, $parameter);
     }
 
+    public static function getMapping4InternalStorePath(Document $document): ?string {
+        self::setLogger();
+
+        $config = Config::getInstance();
+        $datevDMSMapping = $config->getDatevDMSMapping();
+
+        $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
+
+        self::$logger->debug("Suche Mapping für: '$datevDMSCategory'.");
+        if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
+            self::$logger->error("Kein Mapping für Kategorie '$datevDMSCategory' gefunden.");
+            return null;
+        }
+
+        return $datevDMSMapping[$datevDMSCategory];
+    }
+
     public static function requiresPattern(string $internalPath, array $patterns): bool {
         self::setLogger();
 
@@ -81,23 +98,6 @@ class InternalStoreMapper extends HelperAbstract {
         self::$logger->debug("Interner Speicherpfad (ermittelt): '$path'.");
 
         return $path;
-    }
-
-    private static function getMapping4InternalStorePath(Document $document): ?string {
-        self::setLogger();
-
-        $config = Config::getInstance();
-        $datevDMSMapping = $config->getDatevDMSMapping();
-
-        $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
-
-        self::$logger->debug("Suche Mapping für: '$datevDMSCategory'.");
-        if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
-            self::$logger->error("Kein Mapping für Kategorie '$datevDMSCategory' gefunden.");
-            return null;
-        }
-
-        return $datevDMSMapping[$datevDMSCategory];
     }
 
     private static function validatePath(string $path): ?string {
