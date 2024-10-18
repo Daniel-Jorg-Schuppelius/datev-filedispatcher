@@ -10,10 +10,15 @@
 
 namespace App\Config;
 
+use App\Enums\LogType;
+
 class Config {
     private static ?Config $instance = null;
 
     private bool $debug = false;
+
+    private ?LogType $logType = LogType::NULL;
+    private ?string $logPath = null;
 
     private ?string $resourceUrl = null;
     private ?string $user = null;
@@ -82,6 +87,17 @@ class Config {
                 }
             }
 
+            if (isset($config['Logging']) && is_array($config['Logging'])) {
+                foreach ($config['Logging'] as $value) {
+                    if ($value['key'] === 'log') {
+                        $this->logType = LogType::fromString($value['value']);
+                    }
+                    if ($value['key'] === 'path') {
+                        $this->logPath = $value['value'];
+                    }
+                }
+            }
+
             if (isset($config['Debugging']) && is_array($config['Debugging'])) {
                 foreach ($config['Debugging'] as $value) {
                     if (isset($value['key']) && $value['key'] === 'debug') {
@@ -119,6 +135,14 @@ class Config {
 
     public function getPassword(): ?string {
         return $this->password;
+    }
+
+    public function getLogType(): ?LogType {
+        return $this->logType;
+    }
+
+    public function getLogPath(): ?string {
+        return $this->logPath;
     }
 
     public function getPreviousYears4Internal(): ?int {
