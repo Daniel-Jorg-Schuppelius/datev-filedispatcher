@@ -68,10 +68,8 @@ class InternalStoreMapper extends HelperAbstract {
 
         self::$logger->debug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
 
-        foreach ($patterns as $pattern) {
-            if (strpos($internalPath, $pattern) !== false) {
-                return true;
-            }
+        if (in_array($internalPath, $patterns)) {
+            return true;
         }
         return false;
     }

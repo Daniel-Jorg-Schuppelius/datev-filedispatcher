@@ -10,9 +10,7 @@
 
 namespace Tests\Services;
 
-use App\Helper\FileDispatcher;
 use App\Services\DMSBasicFileService;
-use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class DMSBasicFileServiceTestLohnDatei extends DMSBasicFileServiceTest {
     public function __construct($name) {
