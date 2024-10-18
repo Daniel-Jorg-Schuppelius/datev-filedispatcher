@@ -44,7 +44,11 @@ trait PeriodicFileServiceTrait {
         return $yearFormatted;
     }
 
-    protected function setDate(int $year, int $month = 1, int $day = 1): void {
+    protected function setDate(?int $year, ?int $month = null, ?int $day = null): void {
+        $year = $year ?? (int) (new DateTime())->format('Y');
+        $month = $month ?? 1;
+        $day = $day ?? 1;
+
         try {
             $this->date = new DateTime("$year-$month-$day");
         } catch (Exception) {
