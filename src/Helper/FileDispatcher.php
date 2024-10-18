@@ -44,8 +44,11 @@ class FileDispatcher extends HelperAbstract {
             $files = Files::get($servicesDir, true, ['php']);
             foreach ($files as $file) {
                 $relativePath = str_replace($servicesDir . DIRECTORY_SEPARATOR, '', $file);
-                $className = self::$servicesNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
-
+                if ($relativePath != pathinfo($file, PATHINFO_BASENAME)) {
+                    $className = self::$servicesNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
+                } else {
+                    $className = self::$servicesNamespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+                }
                 if (class_exists($className)) {
                     $reflectionClass = new ReflectionClass($className);
                     if ($reflectionClass->implementsInterface(FileServiceInterface::class) && !$reflectionClass->isAbstract()) {

@@ -117,6 +117,15 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         }
     }
 
+    protected function setPropertiesFromDMS(string $documentNumber) {
+        $this->setDocument($documentNumber);
+        $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
+        if (is_null($this->client)) {
+            $this->logger->error("Client konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+            throw new RuntimeException("Client konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+        }
+    }
+
     protected function validateConfig(): void {
         if (is_null($this->config->getInternalStorePath())) {
             throw new OutOfRangeException("Ungültige Konfiguration für den internen Speicherpfad.");
