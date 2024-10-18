@@ -77,10 +77,11 @@ class FileDispatcher extends HelperAbstract {
                     }
                 }
 
-                self::$logger->warning("Kein passender Service gefunden für Datei: $filename");
+                self::$logger->warning("Kein passender Service für Datei: $filename gefunden.");
             }
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Verarbeitung der Datei $filename: " . $e->getMessage());
+            throw $e;
         }
     }
 
