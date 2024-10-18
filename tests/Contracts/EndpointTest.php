@@ -18,7 +18,6 @@ use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
 use App\Factories\StorageFactory;
 use App\Helper\FileSystem\File;
-use App\Helper\FileSystem\Folder;
 use Datev\API\Desktop\Endpoints\Diagnostics\EchoEndpoint;
 use FilesystemIterator;
 use PHPUnit\Framework\TestCase;
