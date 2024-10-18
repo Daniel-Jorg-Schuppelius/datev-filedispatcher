@@ -83,7 +83,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     }
 
     public function process(): void {
-        $this->logger->info("Verarbeite Datei: {$this->filename} mit {static::class}.");
+        $this->logger->info("Verarbeite Datei: {$this->filename} mit FileService: " . static::class . ".");
         File::move($this->filename, $this->getDestinationFolder());
     }
 
