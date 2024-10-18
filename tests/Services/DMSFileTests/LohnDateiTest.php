@@ -8,15 +8,17 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace Tests\Services;
+namespace Tests\Services\DMSFileTests;
 
 use App\Services\DMSBasicFileService;
+use Tests\Endpoints\DocumentManagement\DocumentTest;
+use Tests\Services\DMSBasicFileServiceTest;
 
-class DMSBasicFileServiceTestLohnDatei extends DMSBasicFileServiceTest {
+class LohnDateiTest extends DMSBasicFileServiceTest {
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
-        $this->testFile = realpath(__DIR__ . '/../../.samples/219624 - Lohn - 2022_1.pdf');
+        $this->testFile = realpath(__DIR__ . '/../../../.samples/219624 - Lohn - 2022_1.pdf');
         $this->apiDisabled = true; // API is disabled
     }
 

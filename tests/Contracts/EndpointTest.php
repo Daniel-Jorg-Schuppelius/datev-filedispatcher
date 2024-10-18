@@ -61,6 +61,7 @@ abstract class EndpointTest extends TestCase {
             StorageFactory::setInternalStorePath($this->internalStorePath);
 
             $categories = [
+                "04 Sonstiges/Belege",
                 "04 Sonstiges/Einkommensbescheinigungen",
                 "02 Entgeltabrechnung/2022/01 Januar",
                 "02 Entgeltabrechnung/2023/09 September",
