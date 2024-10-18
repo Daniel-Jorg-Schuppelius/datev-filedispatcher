@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\PeriodicFileServiceAbstract;
+use App\Helper\FileSystem\File;
 
 class PayrollFileService extends PeriodicFileServiceAbstract {
     // 00000_00000_Client_Client_00_0000_Brutto_Netto_AA0.pdf
@@ -22,6 +23,7 @@ class PayrollFileService extends PeriodicFileServiceAbstract {
 
     public function process(): void {
         $this->logger->info("Verarbeite Payroll Datei: {$this->filename}");
+        File::move($this->filename, $this->getDestinationFolder());
     }
 
     protected function extractDataFromFilename(): void {
