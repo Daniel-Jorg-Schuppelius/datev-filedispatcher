@@ -25,6 +25,12 @@ class Files extends HelperAbstract {
         return true;
     }
 
+    public static function copy(array $filePairs): void {
+        foreach ($filePairs as $sourceFile => $destinationFile) {
+            File::copy($sourceFile, $destinationFile);
+        }
+    }
+
     public static function rename(array $filePairs): void {
         foreach ($filePairs as $oldName => $newName) {
             File::rename($oldName, $newName);

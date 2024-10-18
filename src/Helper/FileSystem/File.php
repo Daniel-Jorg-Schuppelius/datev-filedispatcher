@@ -69,6 +69,22 @@ class File extends HelperAbstract implements FileSystemInterface {
         return file_exists($file);
     }
 
+    public static function copy(string $sourceFile, string $destinationFile): void {
+        self::setLogger();
+
+        if (!self::exists($sourceFile)) {
+            self::$logger->error("Die Datei $sourceFile existiert nicht");
+            throw new Exception("Die Datei $sourceFile existiert nicht");
+        }
+
+        if (!copy($sourceFile, $destinationFile)) {
+            self::$logger->error("Fehler beim Kopieren der Datei von $sourceFile nach $destinationFile");
+            throw new Exception("Fehler beim Kopieren der Datei von $sourceFile nach $destinationFile");
+        }
+
+        self::$logger->info("Datei von $sourceFile nach $destinationFile kopiert");
+    }
+
     public static function create(string $file, int $permissions = 0644, string $content = ''): void {
         self::setLogger();
 
@@ -105,19 +121,19 @@ class File extends HelperAbstract implements FileSystemInterface {
         self::$logger->info("Datei umbenannt von $oldName zu $newName");
     }
 
-    public static function move(string $sourceFile, string $destinationFile): void {
+    public static function move(string $sourceFile, string $destinationFolder): void {
         self::setLogger();
         if (!self::exists($sourceFile)) {
             self::$logger->error("Die Datei $sourceFile existiert nicht");
             throw new Exception("Die Datei $sourceFile existiert nicht");
         }
 
-        if (!rename($sourceFile, $destinationFile)) {
-            self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
-            throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
+        if (!rename($sourceFile, $destinationFolder . DIRECTORY_SEPARATOR . basename($sourceFile))) {
+            self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
+            throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
         }
 
-        self::$logger->info("Datei von $sourceFile zu $destinationFile verschoben");
+        self::$logger->info("Datei von $sourceFile zu $destinationFolder verschoben");
     }
 
     public static function delete(string $file): void {

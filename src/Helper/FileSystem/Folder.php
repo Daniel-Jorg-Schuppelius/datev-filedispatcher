@@ -24,6 +24,38 @@ class Folder extends HelperAbstract implements FileSystemInterface {
         return $exists;
     }
 
+    public static function copy(string $sourceDirectory, string $destinationDirectory, bool $recursive = false): void {
+        self::setLogger();
+
+        if (!self::exists($sourceDirectory)) {
+            self::$logger->error("Das Verzeichnis $sourceDirectory existiert nicht");
+            throw new Exception("Das Verzeichnis $sourceDirectory existiert nicht");
+        }
+
+        if (!self::exists($destinationDirectory)) {
+            self::create($destinationDirectory);
+        }
+
+        $files = array_diff(scandir($sourceDirectory), ['.', '..']);
+
+        foreach ($files as $file) {
+            $sourcePath = $sourceDirectory . DIRECTORY_SEPARATOR . $file;
+            $destinationPath = $destinationDirectory . DIRECTORY_SEPARATOR . $file;
+
+            if (is_dir($sourcePath)) {
+                if ($recursive) {
+                    self::copy($sourcePath, $destinationPath, true);
+                } else {
+                    self::create($destinationPath);
+                }
+            } else {
+                File::copy($sourcePath, $destinationPath);
+            }
+        }
+
+        self::$logger->info("Verzeichnis kopiert von $sourceDirectory nach $destinationDirectory");
+    }
+
     public static function create(string $directory, int $permissions = 0755): void {
         self::setLogger();
         if (!self::exists($directory)) {

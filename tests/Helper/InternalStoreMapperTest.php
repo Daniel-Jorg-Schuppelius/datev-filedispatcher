@@ -49,6 +49,7 @@ class InternalStoreMapperTest extends TestCase {
 
         $categories = [
             "04 Sonstiges/Einkommensbescheinigungen",
+            "02 Entgeltabrechnung/2023",
             "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc"
         ];
 

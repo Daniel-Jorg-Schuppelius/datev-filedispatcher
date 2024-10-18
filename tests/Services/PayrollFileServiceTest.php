@@ -15,8 +15,6 @@ use App\Services\Payroll\PayrollFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class PayrollFileServiceTest extends DocumentTest {
-    protected string $testFile;
-
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
