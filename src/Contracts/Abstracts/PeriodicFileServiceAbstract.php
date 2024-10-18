@@ -14,7 +14,6 @@ namespace App\Contracts\Abstracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use APIToolkit\Enums\Month;
-use App\Config\Config;
 use App\Helper\InternalStoreMapper;
 use DateTime;
 use Exception;
@@ -37,19 +36,11 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
     }
 
     public function getDestinationFolder(bool $leadingZero = true): ?string {
-        $subFolder = static::getSubFolder();
+        $subFolder = $this->getSubFolder();
         $requiresPeriod = InternalStoreMapper::requiresPeriod($subFolder);
         $requiresYear = InternalStoreMapper::requiresYear($subFolder);
 
-        $config = Config::getInstance();
-
-        if (is_null($config->getPreviousYears4Internal())) {
-            throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
-        } elseif (is_null($config->getPreviousYearsFolderName4Internal())) {
-            throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
-        }
-
-        $minYearValue = (clone $this->date)->modify("-" . $config->getPreviousYears4Internal() . " years");
+        $minYearValue = (clone $this->date)->modify("-" . $this->config->getPreviousYears4Internal() . " years");
 
         $yearFormatted = $this->date->format('Y');
         $monthValue = $this->getMonth();
@@ -60,7 +51,7 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
         }
 
         if ($this->date < $minYearValue) {
-            $yearFormatted = $config->getPreviousYearsFolderName4Internal() . DIRECTORY_SEPARATOR . $yearFormatted;
+            $yearFormatted = $this->config->getPreviousYearsFolderName4Internal() . DIRECTORY_SEPARATOR . $yearFormatted;
         }
 
         if ($requiresPeriod) {
@@ -71,11 +62,11 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
             return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
         }
 
-        $this->logger->warning("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
+        $this->logger->error("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
         return null;
     }
 
-    protected function validateDate(int $year, int $month = 1, int $day = 1): void {
+    protected function setDate(int $year, int $month = 1, int $day = 1): void {
         try {
             $this->date = new DateTime("$year-$month-$day");
         } catch (Exception $e) {
@@ -84,5 +75,13 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
         }
     }
 
-    abstract protected static function getSubFolder(): string;
+    protected function validateConfig(): void {
+        parent::validateConfig();
+
+        if (is_null($this->config->getPreviousYears4Internal())) {
+            throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
+        } elseif (is_null($this->config->getPreviousYearsFolderName4Internal())) {
+            throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
+        }
+    }
 }
