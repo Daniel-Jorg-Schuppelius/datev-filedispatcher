@@ -16,8 +16,8 @@ use App\Contracts\Abstracts\FileServices\PeriodicFileServiceAbstract;
 
 class PaymentOverviewsFileService extends PeriodicFileServiceAbstract {
     // 00000_10_2024_Übersicht_Zahlungen_AA0.pdf
-    //                               1       2       3        4          5             6
-    protected const PATTERN = '/^(\d{5})_(\d{2})_(\d{4})_([A-Za-zÜäöß]+)_([A-Za-zÜäöß]+)_([A-Z0-9]{2,3})\.pdf$/i';
+    //                               1       2       3                                 4
+    protected const PATTERN = '/^(\d{5})_(\d{2})_(\d{4})_Übersicht_Zahlungen_([A-Z0-9]{2,3})\.pdf$/i';
     protected const SUBFOLDER = "02 Entgeltabrechnung";
 
     protected function extractDataFromFilename(): void {
