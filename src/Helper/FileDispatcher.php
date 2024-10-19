@@ -32,30 +32,30 @@ class FileDispatcher extends HelperAbstract {
     protected static ?array $preProcessServices = null;
     protected static array $fileTypesWithoutPreProcessing = ['xlsm', 'csv'];
 
-    protected static function setServices(): void {
+    // Allgemeine Methode für das Setzen von Services oder PreProcessServices
+    protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
         self::setLogger();
 
-        if (is_null(self::$services)) {
-            self::$services = [];
-            $servicesDir = realpath(self::$servicesDirectory);
+        if (is_null($serviceStorage)) {
+            $serviceStorage = [];
+            $serviceDir = realpath($directory);
 
-            if ($servicesDir === false) {
-                self::$logger->error("Das Verzeichnis für Services konnte nicht aufgelöst werden: " . self::$servicesDirectory);
+            if ($serviceDir === false) {
+                self::$logger->error("Das Verzeichnis für Services konnte nicht aufgelöst werden: " . $directory);
                 return;
             }
 
-            $files = Files::get($servicesDir, true, ['php']);
+            $files = Files::get($serviceDir, true, ['php']);
             foreach ($files as $file) {
-                $relativePath = str_replace($servicesDir . DIRECTORY_SEPARATOR, '', $file);
-                if ($relativePath != pathinfo($file, PATHINFO_BASENAME)) {
-                    $className = self::$servicesNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                } else {
-                    $className = self::$servicesNamespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                }
+                $relativePath = str_replace($serviceDir . DIRECTORY_SEPARATOR, '', $file);
+                $className = ($relativePath != pathinfo($file, PATHINFO_BASENAME))
+                    ? $namespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME)
+                    : $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+
                 if (class_exists($className)) {
                     $reflectionClass = new ReflectionClass($className);
-                    if ($reflectionClass->implementsInterface(FileServiceInterface::class) && !$reflectionClass->isAbstract()) {
-                        self::$services[] = $className;
+                    if ($reflectionClass->implementsInterface($interface) && !$reflectionClass->isAbstract()) {
+                        $serviceStorage[] = $className;
                         self::$logger->debug("Serviceklasse gefunden und hinzugefügt: $className");
                     }
                 } else {
@@ -63,47 +63,18 @@ class FileDispatcher extends HelperAbstract {
                 }
             }
 
-            if (empty(self::$services)) {
-                self::$logger->warning("Keine passenden Serviceklassen gefunden.");
+            if (empty($serviceStorage)) {
+                self::$logger->warning("Keine passenden Services gefunden.");
             }
         }
     }
 
+    protected static function setServices(): void {
+        self::setServiceClasses(self::$servicesDirectory, self::$servicesNamespace, FileServiceInterface::class, self::$services);
+    }
+
     protected static function setPreProcessServices(): void {
-        self::setLogger();
-
-        if (is_null(self::$preProcessServices)) {
-            self::$preProcessServices = [];
-            $preProcessServicesDir = realpath(self::$preProcessServicesDirectory);
-
-            if ($preProcessServicesDir === false) {
-                self::$logger->error("Das Verzeichnis für PreProcessServices konnte nicht aufgelöst werden: " . self::$preProcessServicesDirectory);
-                return;
-            }
-
-            $files = Files::get($preProcessServicesDir, true, ['php']);
-            foreach ($files as $file) {
-                $relativePath = str_replace($preProcessServicesDir . DIRECTORY_SEPARATOR, '', $file);
-                if ($relativePath != pathinfo($file, PATHINFO_BASENAME)) {
-                    $className = self::$preProcessNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                } else {
-                    $className = self::$preProcessNamespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
-                }
-                if (class_exists($className)) {
-                    $reflectionClass = new ReflectionClass($className);
-                    if ($reflectionClass->implementsInterface(PreProcessFileServiceInterface::class) && !$reflectionClass->isAbstract()) {
-                        self::$preProcessServices[] = $className;
-                        self::$logger->debug("PreProcessService gefunden und hinzugefügt: $className");
-                    }
-                } else {
-                    self::$logger->warning("PreProcessService existiert nicht oder konnte nicht geladen werden: $className");
-                }
-            }
-
-            if (empty(self::$preProcessServices)) {
-                self::$logger->warning("Keine passenden PreProcessServices gefunden.");
-            }
-        }
+        self::setServiceClasses(self::$preProcessServicesDirectory, self::$preProcessNamespace, PreProcessFileServiceInterface::class, self::$preProcessServices);
     }
 
     public static function processFile($filename): void {
@@ -120,7 +91,6 @@ class FileDispatcher extends HelperAbstract {
                         return;
                     }
                 }
-
                 self::$logger->warning("Kein passender Service für Datei: $filename gefunden.");
             }
         } catch (Exception $e) {
@@ -149,35 +119,33 @@ class FileDispatcher extends HelperAbstract {
             }
 
             self::$logger->warning("Kein passender preProcessService für Datei: $filename gefunden. Versuche automatische Vorverarbeitung.");
-
-            switch ($fileType) {
-                case 'zip':
-                    self::preProcessZipFile($filename);
-                    break;
-
-                case 'tif':
-                    self::preProcessTiffFile($filename);
-                    break;
-
-                case 'pdf':
-                    self::preProcessPdfFile($filename);
-                    break;
-
-                default:
-                    self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $filename");
-                    return false;
-            }
+            return self::autoPreProcessFile($filename, $fileType);
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der Datei $filename: " . $e->getMessage());
             return false;
         }
+    }
 
+    private static function autoPreProcessFile(string $filename, string $fileType): bool {
+        switch ($fileType) {
+            case 'zip':
+                self::preProcessZipFile($filename);
+                break;
+            case 'tif':
+                self::preProcessTiffFile($filename);
+                break;
+            case 'pdf':
+                self::preProcessPdfFile($filename);
+                break;
+            default:
+                self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $filename");
+                return false;
+        }
         return true;
     }
 
     private static function checkAndRepairFile(string $filename, string $expectedMimeType, callable $repairFunction): void {
         self::setLogger();
-
         $mimeType = File::mimeType($filename);
 
         if ($mimeType !== $expectedMimeType) {
@@ -188,10 +156,8 @@ class FileDispatcher extends HelperAbstract {
 
     private static function preProcessTiffFile(string $filename): void {
         self::setLogger();
-
         try {
             self::checkAndRepairFile($filename, 'image/tiff', [TifFile::class, 'repair']);
-
             TifFile::convertToPdf($filename);
             self::$logger->info("TIFF-Datei $filename wurde erfolgreich in PDF umgewandelt.");
         } catch (Exception $e) {
@@ -201,13 +167,10 @@ class FileDispatcher extends HelperAbstract {
 
     private static function preProcessPdfFile(string $filename): void {
         self::setLogger();
-
         try {
-            $isValid = PdfFile::isValid($filename);
-            if (!$isValid) {
+            if (!PdfFile::isValid($filename)) {
                 throw new Exception("Fehlerhafte PDF-Datei: $filename");
             }
-
             self::$logger->info("PDF-Datei $filename erfolgreich validiert.");
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der PDF-Datei $filename: " . $e->getMessage());
@@ -216,13 +179,10 @@ class FileDispatcher extends HelperAbstract {
 
     private static function preProcessZipFile(string $filename): void {
         self::setLogger();
-
         try {
-            $isValid = ZipFile::isValid($filename);
-            if (!$isValid) {
+            if (!ZipFile::isValid($filename)) {
                 throw new Exception("Fehlerhaftes ZIP-Archiv: $filename");
             }
-
             self::$logger->info("ZIP-Archiv $filename erfolgreich validiert.");
             ZipFile::extract($filename, pathinfo($filename, PATHINFO_DIRNAME));
         } catch (Exception $e) {
