@@ -27,9 +27,9 @@ class LoggerFactory implements LoggerFactoryInterface {
         if (self::$logger === null) {
             $config = Config::getInstance();
             if ($config->isDebugEnabled() || $config->getLogType() === LogType::CONSOLE) {
-                self::$logger = new ConsoleLogger();
+                self::$logger = new ConsoleLogger($config->getLogLevel());
             } elseif ($config->getLogType() === LogType::FILE) {
-                self::$logger = new FileLogger($config->getLogPath());
+                self::$logger = new FileLogger($config->getLogPath(), $config->getLogLevel());
             } else {
                 self::$logger = new NullLogger();
             }
