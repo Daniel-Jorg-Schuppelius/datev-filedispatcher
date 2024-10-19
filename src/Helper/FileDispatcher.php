@@ -120,7 +120,7 @@ class FileDispatcher extends HelperAbstract {
                 }
             }
 
-            self::$logger->warning("Kein passender preProcessService für Datei: $filename gefunden. Versuche automatische Vorverarbeitung.");
+            self::$logger->notice("Kein passender preProcessService für Datei: $filename gefunden. Versuche automatische Vorverarbeitung.");
             return self::autoPreProcessFile($filename, $fileType);
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der Datei $filename: " . $e->getMessage());
