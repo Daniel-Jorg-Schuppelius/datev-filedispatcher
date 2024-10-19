@@ -65,7 +65,8 @@ trait FileServiceTrait {
     protected function setPropertiesFromDMS(string $documentNumber) {
         $this->setDocument($documentNumber);
         if (is_null($this->document)) {
-            $this->logger->error("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}. Gelöscht? Bitte prüfen!");
+            $this->logger->error("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}");
+            $this->logger->warning("Datei im DMS gelöscht? DATEV Offline bzw. in Sicherung? Bitte prüfen und ggf. aus dem Ordner entfernen!");
             throw new RuntimeException("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}");
         }
 
