@@ -86,8 +86,8 @@ class FileDispatcher extends HelperAbstract {
             if (self::preProcessFile($filename) && File::exists($filename)) {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($filename)) {
-                        $service = new $serviceClass($filename);
                         self::$logger->debug("Service: " . $serviceClass . " für Datei: $filename gefunden.");
+                        $service = new $serviceClass($filename);
                         $service->process();
                         return;
                     }
@@ -112,8 +112,8 @@ class FileDispatcher extends HelperAbstract {
         try {
             foreach (self::$preProcessServices as $preProcessServiceClass) {
                 if ($preProcessServiceClass::matchesPattern($filename)) {
-                    $preProcessService = new $preProcessServiceClass($filename);
                     self::$logger->debug("PreProcessService: " . $preProcessServiceClass . " für Datei: $filename gefunden.");
+                    $preProcessService = new $preProcessServiceClass($filename);
                     if ($preProcessService->preProcess()) {
                         return true;
                     }
