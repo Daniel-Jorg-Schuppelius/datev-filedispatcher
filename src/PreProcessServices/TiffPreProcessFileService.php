@@ -47,8 +47,10 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
 
             $tiffFiles = Files::get(dirname($this->filename), false, [], self::SAME_FILE_PATTERN);
 
-            if (count($tiffFiles) != (int)$matches[1]) {
-                $this->logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->filename}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.");
+            $istFileCount = count($tiffFiles);
+            $sollFileCount = (int)$matches[1];
+            if ($istFileCount != $sollFileCount) {
+                $this->logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->filename}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
                 return true;
             }
 
