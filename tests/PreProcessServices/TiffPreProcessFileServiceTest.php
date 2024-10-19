@@ -20,6 +20,7 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif');
+        // $this->testFile = realpath(__DIR__ . '/../../.samples/235309 - BvFA ESt-Bescheid 2023 - S25C-924070208150_1.tif');
         $this->apiDisabled = true; // API is disabled
     }
 
@@ -43,11 +44,11 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         }
 
         $tiffFiles = [
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif'),
+            $this->testFile,
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif')
         ];
         $bakTiffFiles = [
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif.bak'),
+            $this->testFile . '.bak',
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak')
         ];
 
@@ -84,11 +85,11 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         }
 
         $tiffFiles = [
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif'),
+            $this->testFile,
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif')
         ];
         $bakTiffFiles = [
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif.bak'),
+            $this->testFile . '.bak',
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak')
         ];
 

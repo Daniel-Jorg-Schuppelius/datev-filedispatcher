@@ -25,7 +25,7 @@ class InternalStoreMapper extends HelperAbstract {
 
         $internalStorePath = StorageFactory::getInternalStorePathForClient($client);
         if ($internalStorePath === null) {
-            self::$logger->error("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
+            self::$logger->critical("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
             return null;
         }
 
@@ -107,7 +107,7 @@ class InternalStoreMapper extends HelperAbstract {
             return null;
         }
 
-        self::$logger->debug("Pfad für Internen Bereich (validiert): '$realPath'.");
+        self::$logger->info("Pfad für Internen Bereich (validiert): '$realPath'.");
         return $realPath;
     }
 }
