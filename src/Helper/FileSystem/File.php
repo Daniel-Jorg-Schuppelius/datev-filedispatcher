@@ -75,6 +75,8 @@ class File extends HelperAbstract implements FileSystemInterface {
         if (!self::exists($sourceFile)) {
             self::$logger->error("Die Datei $sourceFile existiert nicht");
             throw new Exception("Die Datei $sourceFile existiert nicht");
+        } elseif (self::exists($destinationFile)) {
+            self::$logger->warning("Die Datei $destinationFile existiert bereits, wird überschrieben.");
         }
 
         if (!copy($sourceFile, $destinationFile)) {
@@ -111,6 +113,9 @@ class File extends HelperAbstract implements FileSystemInterface {
         if (!self::exists($oldName)) {
             self::$logger->error("Die Datei $oldName existiert nicht");
             throw new Exception("Die Datei $oldName existiert nicht");
+        } elseif (self::exists($newName)) {
+            self::$logger->error("Die Datei $newName existiert bereits");
+            throw new Exception("Die Datei $newName existiert bereits");
         }
 
         if (!rename($oldName, $newName)) {
@@ -123,12 +128,19 @@ class File extends HelperAbstract implements FileSystemInterface {
 
     public static function move(string $sourceFile, string $destinationFolder): void {
         self::setLogger();
+
+        $destinationFile = $destinationFolder . DIRECTORY_SEPARATOR . basename($sourceFile);
         if (!self::exists($sourceFile)) {
             self::$logger->error("Die Datei $sourceFile existiert nicht");
             throw new Exception("Die Datei $sourceFile existiert nicht");
+        } elseif (!self::exists($destinationFolder)) {
+            self::$logger->error("Das Zielverzeichnis $destinationFolder existiert nicht");
+            throw new Exception("Das Zielverzeichnis $destinationFolder existiert nicht");
+        } elseif (self::exists($destinationFile)) {
+            self::$logger->warning("Die Datei $destinationFile existiert bereits, wird überschrieben.");
         }
 
-        if (!rename($sourceFile, $destinationFolder . DIRECTORY_SEPARATOR . basename($sourceFile))) {
+        if (!rename($sourceFile, $destinationFile)) {
             self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
             throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
         }
