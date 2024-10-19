@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Abstracts;
+namespace App\Contracts\Abstracts\FileServices;
 
 use App\Helper\InternalStoreMapper;
 use App\Traits\PeriodicFileServiceTrait;

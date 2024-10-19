@@ -1,8 +1,17 @@
 <?php
+/*
+ * Created on   : Sat Oct 19 2024
+ * Author       : Daniel Jörg Schuppelius
+ * Author Uri   : https://schuppelius.org
+ * Filename     : FileServiceTrait.php
+ * License      : MIT License
+ * License Uri  : https://opensource.org/license/mit
+ */
 
 namespace App\Traits;
 
 use App\Config\Config;
+use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\Entities\ClientMasterData\Clients\Client;
@@ -58,17 +67,13 @@ trait FileServiceTrait {
         $this->document = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"])->getFirstValue();
         if (is_null($this->document)) {
             $this->logger->error("Dokument konnte nicht gefunden werden: $documentNumber");
+            $this->logger->warning("Datei im DMS gelöscht? DATEV Offline bzw. in Sicherung? Bitte prüfen und ggf. aus dem Ordner entfernen!");
             throw new RuntimeException("Dokument konnte nicht gefunden werden: $documentNumber");
         }
     }
 
     protected function setPropertiesFromDMS(string $documentNumber) {
         $this->setDocument($documentNumber);
-        if (is_null($this->document)) {
-            $this->logger->error("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}");
-            $this->logger->warning("Datei im DMS gelöscht? DATEV Offline bzw. in Sicherung? Bitte prüfen und ggf. aus dem Ordner entfernen!");
-            throw new RuntimeException("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}");
-        }
 
         $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
         if (is_null($this->client)) {
@@ -78,7 +83,10 @@ trait FileServiceTrait {
     }
 
     public static function getPattern(): string {
+        $logger = LoggerFactory::getLogger();
+
         if (empty(static::PATTERN)) {
+            $logger->error("Kein Pattern in " . static::class . " definiert.");
             throw new RuntimeException("Kein Pattern in " . static::class . " definiert.");
         }
 

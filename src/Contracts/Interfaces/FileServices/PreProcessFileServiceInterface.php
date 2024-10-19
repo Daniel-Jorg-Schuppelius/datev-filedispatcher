@@ -10,16 +10,18 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Interfaces;
+namespace App\Contracts\Interfaces\FileServices;
 
 use Datev\Entities\ClientMasterData\Clients\Client;
+use Datev\Entities\DocumentManagement\Documents\Document;
 
-interface FileServiceInterface {
+interface PreProcessFileServiceInterface {
     public static function getPattern(): string;
     public static function matchesPattern(string $filename, array &$matches = null): bool;
 
-    public function process(): void;
+    public function preProcess(): bool;
 
     public function getFilename(): string;
     public function getClient(): ?Client;
+    public function getDocument(): ?Document;
 }

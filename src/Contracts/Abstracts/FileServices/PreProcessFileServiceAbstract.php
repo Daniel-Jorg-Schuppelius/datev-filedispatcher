@@ -10,18 +10,17 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Abstracts;
+namespace App\Contracts\Abstracts\FileServices;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
-use App\Contracts\Interfaces\PreProcessFileServiceInterface;
+use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
 abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
     use FileServiceTrait;
