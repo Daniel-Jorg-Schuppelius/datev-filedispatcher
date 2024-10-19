@@ -109,7 +109,7 @@ class TifFile extends HelperAbstract {
         if (PdfFile::isValid($pdfFile)) {
             self::$logger->info("TIFF-Datei erfolgreich in PDF umgewandelt: $tiffFile");
         } elseif ($compressed) {
-            self::$logger->warning("Fehler bei der Umwandlung von TIFF in PDF: $tiffFile. Versuche erneute Konvertierung ohne Kompression.");
+            self::$logger->warning("Probleme bei der Umwandlung von TIFF in PDF: $tiffFile. Versuche erneute Konvertierung ohne Kompression.");
             File::delete($pdfFile);
             TifFile::repair($tiffFile, true);
             self::convertToPdf($tiffFile, $pdfFile, false, false);

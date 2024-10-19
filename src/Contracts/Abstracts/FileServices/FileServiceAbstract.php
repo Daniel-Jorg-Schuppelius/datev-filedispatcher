@@ -42,7 +42,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         try {
             $this->extractDataFromFilename();
         } catch (Exception $e) {
-            $this->logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
+            $this->logger->error("Fehler bei der Verarbeitung der Datei: $filename (" . $e->getMessage() . ")");
             throw $e;
         }
     }
@@ -60,7 +60,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     }
 
     public function process(): void {
-        $this->logger->info("Verarbeite Datei: {$this->filename} mit FileService: " . static::class . ".");
+        $this->logger->notice("Verarbeite Datei: {$this->filename} mit FileService: " . static::class . ".");
         File::move($this->filename, $this->getDestinationFolder());
     }
 
@@ -70,6 +70,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
     protected function validateConfig(): void {
         if (is_null($this->config->getInternalStorePath())) {
+            $this->logger->critical("Ungültige Konfiguration für den internen Speicherpfad.");
             throw new OutOfRangeException("Ungültige Konfiguration für den internen Speicherpfad.");
         }
     }

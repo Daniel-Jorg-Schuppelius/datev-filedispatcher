@@ -26,7 +26,7 @@ class Shell extends HelperAbstract {
                 self::$logger->error("Fehler bei der Ausführung des Kommandos: $command");
                 throw new Exception("Fehler bei der Ausführung des Kommandos: " . implode("\n", $output));
             } else {
-                self::$logger->warning("Fehler bei der Ausführung des Kommandos (keine Exception geworfen): $command");
+                self::$logger->warning("Kommando gab unerwartete Ausgabe zurück (keine Exception geworfen): $command");
                 return false;
             }
         }
