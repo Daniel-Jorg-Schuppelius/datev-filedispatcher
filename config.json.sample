@@ -36,7 +36,14 @@
 			"type": "string",
 			"description": "log to (Console, File, Null)",
 			"enabled": true
-		},		
+		},	
+		{
+			"key": "level",
+			"value": "debug",
+			"type": "string",
+			"description": "(emergency, alert, critical, error, warning, notice, info, debug)",
+			"enabled": true
+		},	
 		{
 			"key": "path",
 			"value": "/opt/internal_dispatcher/log.txt",

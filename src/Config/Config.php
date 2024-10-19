@@ -11,6 +11,7 @@
 namespace App\Config;
 
 use App\Enums\LogType;
+use Psr\Log\LogLevel;
 
 class Config {
     private static ?Config $instance = null;
@@ -18,6 +19,7 @@ class Config {
     private bool $debug = false;
 
     private ?LogType $logType = LogType::NULL;
+    private ?string $logLevel = LogLevel::DEBUG;
     private ?string $logPath = null;
 
     private ?string $resourceUrl = null;
@@ -92,6 +94,9 @@ class Config {
                     if ($value['key'] === 'log') {
                         $this->logType = LogType::fromString($value['value']);
                     }
+                    if ($value['key'] === 'level') {
+                        $this->logLevel = $value['value'];
+                    }
                     if ($value['key'] === 'path') {
                         $this->logPath = $value['value'];
                     }
@@ -137,8 +142,12 @@ class Config {
         return $this->password;
     }
 
-    public function getLogType(): ?LogType {
-        return $this->logType;
+    public function getLogType(): LogType {
+        return $this->logType ?? LogType::NULL;
+    }
+
+    public function getLogLevel(): string {
+        return $this->logLevel ?? LogLevel::DEBUG;
     }
 
     public function getLogPath(): ?string {
