@@ -69,6 +69,7 @@ trait FileServiceTrait {
         $documents = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"]);
         if (is_null($documents)) {
             $this->logger->error("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
+            $this->logger->notice("Document im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
         }
         $this->document = $documents->getFirstValue();
