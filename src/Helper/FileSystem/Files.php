@@ -82,7 +82,7 @@ class Files extends HelperAbstract {
         if (empty($result)) {
             self::$logger->info("Keine passenden Dateien gefunden im Verzeichnis: $directory");
         } else {
-            self::$logger->debug("Dateien erfolgreich gefunden im Verzeichnis: $directory");
+            self::$logger->debug("Es wurden Dateien im Verzeichnis: $directory gefunden");
         }
 
         return $result;

@@ -22,6 +22,7 @@ use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
+use Exception;
 use OutOfRangeException;
 use Psr\Log\LoggerInterface;
 
@@ -40,7 +41,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
         try {
             $this->extractDataFromFilename();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
             throw $e;
         }

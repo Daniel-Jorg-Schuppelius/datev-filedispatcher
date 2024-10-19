@@ -15,6 +15,7 @@ namespace App\PreProcessServices;
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use App\Helper\FileSystem\Files;
 use App\Helper\FileSystem\FileTypes\TifFile;
+use OutOfRangeException;
 
 class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.tif(f)
@@ -30,6 +31,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     protected const DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN = "/tif{1,2}\((\d+)\)$/i";
 
     protected function extractDataFromFilename(): void {
+        $this->logger->info("Extrahiere Daten aus dem Dateinamen: {$this->filename}");
         $matches = $this->getMatches();
 
         $this->setPropertiesFromDMS($matches[1]);

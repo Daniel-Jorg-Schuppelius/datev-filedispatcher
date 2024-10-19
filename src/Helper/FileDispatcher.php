@@ -56,7 +56,7 @@ class FileDispatcher extends HelperAbstract {
                     $reflectionClass = new ReflectionClass($className);
                     if ($reflectionClass->implementsInterface($interface) && !$reflectionClass->isAbstract()) {
                         $serviceStorage[] = $className;
-                        self::$logger->debug("Serviceklasse gefunden und hinzugefügt: $className");
+                        self::$logger->debug("Serviceklasse gefunden und erfolgreich hinzugefügt: $className");
                     }
                 } else {
                     self::$logger->warning("Klasse existiert nicht oder konnte nicht geladen werden: $className");
@@ -87,6 +87,7 @@ class FileDispatcher extends HelperAbstract {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($filename)) {
                         $service = new $serviceClass($filename);
+                        self::$logger->debug("Service: " . $serviceClass . " für Datei: $filename gefunden.");
                         $service->process();
                         return;
                     }
@@ -112,6 +113,7 @@ class FileDispatcher extends HelperAbstract {
             foreach (self::$preProcessServices as $preProcessServiceClass) {
                 if ($preProcessServiceClass::matchesPattern($filename)) {
                     $preProcessService = new $preProcessServiceClass($filename);
+                    self::$logger->debug("PreProcessService: " . $preProcessServiceClass . " für Datei: $filename gefunden.");
                     if ($preProcessService->preProcess()) {
                         return true;
                     }

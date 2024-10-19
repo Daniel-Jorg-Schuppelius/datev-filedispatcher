@@ -51,6 +51,7 @@ trait FileServiceTrait {
             $this->logger->error("Ungültiger Dateiname: {$this->filename}");
             throw new InvalidArgumentException("Der Dateiname entspricht nicht dem erwarteten Muster: {$this->filename}");
         }
+        $this->logger->debug("Matches für ServiceKlasse (" . static::class . "):" . implode(", ", $matches));
 
         return $matches;
     }
