@@ -13,8 +13,8 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Contracts\Abstracts\HelperAbstract;
-use App\Contracts\Interfaces\FileServiceInterface;
-use App\Contracts\Interfaces\PreProcessFileServiceInterface;
+use App\Contracts\Interfaces\FileServices\FileServiceInterface;
+use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
 use App\Helper\FileSystem\File;
 use App\Helper\FileSystem\Files;
 use App\Helper\FileSystem\FileTypes\PdfFile;

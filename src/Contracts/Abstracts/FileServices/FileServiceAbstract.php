@@ -10,11 +10,11 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Abstracts;
+namespace App\Contracts\Abstracts\FileServices;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
-use App\Contracts\Interfaces\FileServiceInterface;
+use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
 use App\Helper\FileSystem\File;
@@ -24,7 +24,6 @@ use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use OutOfRangeException;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 
 abstract class FileServiceAbstract implements FileServiceInterface {
     use FileServiceTrait;

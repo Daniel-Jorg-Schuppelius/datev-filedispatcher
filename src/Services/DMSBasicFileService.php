@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\Abstracts\DMSFileServiceAbstract;
+use App\Contracts\Abstracts\FileServices\DMSFileServiceAbstract;
 
 class DMSBasicFileService extends DMSFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.pdf

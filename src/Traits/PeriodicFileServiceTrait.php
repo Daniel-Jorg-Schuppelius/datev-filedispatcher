@@ -1,4 +1,12 @@
 <?php
+/*
+ * Created on   : Sat Oct 19 2024
+ * Author       : Daniel Jörg Schuppelius
+ * Author Uri   : https://schuppelius.org
+ * Filename     : PeriodicFileServiceTrait.php
+ * License      : MIT License
+ * License Uri  : https://opensource.org/license/mit
+ */
 
 namespace App\Traits;
 
@@ -38,6 +46,7 @@ trait PeriodicFileServiceTrait {
         $minYearValue->modify("-" . $this->config->getPreviousYears4Internal() . " years");
 
         if ($this->date < $minYearValue) {
+            $this->logger->debug("Datum liegt vor dem Mindestjahr: " . $minYearValue->format('Y') . " für die Datei: {$this->filename}, wird auf Vorjahresordner gesetzt.");
             $yearFormatted = $this->config->getPreviousYearsFolderName4Internal() . DIRECTORY_SEPARATOR . $yearFormatted;
         }
 
@@ -61,8 +70,10 @@ trait PeriodicFileServiceTrait {
         parent::validateConfig();
 
         if (is_null($this->config->getPreviousYears4Internal())) {
+            $this->logger->error("Ungültige Konfiguration für die Anzahl der Vorjahre.");
             throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
         } elseif (is_null($this->config->getPreviousYearsFolderName4Internal())) {
+            $this->logger->error("Ungültige Konfiguration für den Namen des Vorjahresordners.");
             throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
         }
     }

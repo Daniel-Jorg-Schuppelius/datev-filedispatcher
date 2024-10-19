@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace App\PreProcessServices;
 
-use App\Contracts\Abstracts\PreProcessFileServiceAbstract;
+use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use App\Helper\FileSystem\Files;
 use App\Helper\FileSystem\FileTypes\TifFile;
 
@@ -36,6 +36,8 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     }
 
     public function preProcess(): bool {
+        $this->logger->info("Preprocessing der TIFF-Datei: {$this->filename}");
+
         $matches = [];
         if (preg_match(self::FILE_EXTENSION_PATTERN, $this->document->getExtension())) {
             $this->logger->info("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->filename}");
@@ -47,7 +49,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             $fileNameMatches = [];
             preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->filename), $fileNameMatches);
 
-            $tiffFiles = Files::get(dirname($this->filename), false, [], null, $fileNameMatches[1]);
+            $tiffFiles = Files::get(dirname($this->filename), false, ["tif", "tiff"], null, $fileNameMatches[1]);
 
             $istFileCount = count($tiffFiles);
             $sollFileCount = (int)$matches[1];
