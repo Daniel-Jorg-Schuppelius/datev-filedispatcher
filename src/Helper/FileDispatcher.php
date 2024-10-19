@@ -14,6 +14,7 @@ namespace App\Helper;
 
 use App\Contracts\Abstracts\HelperAbstract;
 use App\Contracts\Interfaces\FileServiceInterface;
+use App\Contracts\Interfaces\PreProcessFileServiceInterface;
 use App\Helper\FileSystem\File;
 use App\Helper\FileSystem\Files;
 use App\Helper\FileSystem\FileTypes\PdfFile;
@@ -24,9 +25,11 @@ use ReflectionClass;
 
 class FileDispatcher extends HelperAbstract {
     protected static string $servicesDirectory = __DIR__ . '/../Services';
+    protected static string $preProcessServicesDirectory = __DIR__ . '/../PreProcessServices';
     protected static string $servicesNamespace = 'App\\Services';
+    protected static string $preProcessNamespace = 'App\\PreProcessServices';
     protected static ?array $services = null;
-
+    protected static ?array $preProcessServices = null;
     protected static array $fileTypesWithoutPreProcessing = ['xlsm', 'csv'];
 
     protected static function setServices(): void {
@@ -66,12 +69,50 @@ class FileDispatcher extends HelperAbstract {
         }
     }
 
+    protected static function setPreProcessServices(): void {
+        self::setLogger();
+
+        if (is_null(self::$preProcessServices)) {
+            self::$preProcessServices = [];
+            $preProcessServicesDir = realpath(self::$preProcessServicesDirectory);
+
+            if ($preProcessServicesDir === false) {
+                self::$logger->error("Das Verzeichnis für PreProcessServices konnte nicht aufgelöst werden: " . self::$preProcessServicesDirectory);
+                return;
+            }
+
+            $files = Files::get($preProcessServicesDir, true, ['php']);
+            foreach ($files as $file) {
+                $relativePath = str_replace($preProcessServicesDir . DIRECTORY_SEPARATOR, '', $file);
+                if ($relativePath != pathinfo($file, PATHINFO_BASENAME)) {
+                    $className = self::$preProcessNamespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME);
+                } else {
+                    $className = self::$preProcessNamespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
+                }
+                if (class_exists($className)) {
+                    $reflectionClass = new ReflectionClass($className);
+                    if ($reflectionClass->implementsInterface(PreProcessFileServiceInterface::class) && !$reflectionClass->isAbstract()) {
+                        self::$preProcessServices[] = $className;
+                        self::$logger->debug("PreProcessService gefunden und hinzugefügt: $className");
+                    }
+                } else {
+                    self::$logger->warning("PreProcessService existiert nicht oder konnte nicht geladen werden: $className");
+                }
+            }
+
+            if (empty(self::$preProcessServices)) {
+                self::$logger->warning("Keine passenden PreProcessServices gefunden.");
+            }
+        }
+    }
+
     public static function processFile($filename): void {
         self::setLogger();
         self::setServices();
+        self::setPreProcessServices();
 
         try {
-            if (self::preProcessFile($filename)) {
+            if (self::preProcessFile($filename) && File::exists($filename)) {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($filename)) {
                         $service = new $serviceClass($filename);
@@ -98,6 +139,17 @@ class FileDispatcher extends HelperAbstract {
         }
 
         try {
+            foreach (self::$preProcessServices as $preProcessServiceClass) {
+                if ($preProcessServiceClass::matchesPattern($filename)) {
+                    $preProcessService = new $preProcessServiceClass($filename);
+                    if ($preProcessService->preProcess()) {
+                        return true;
+                    }
+                }
+            }
+
+            self::$logger->warning("Kein passender preProcessService für Datei: $filename gefunden. Versuche automatische Vorverarbeitung.");
+
             switch ($fileType) {
                 case 'zip':
                     self::preProcessZipFile($filename);
@@ -113,14 +165,14 @@ class FileDispatcher extends HelperAbstract {
 
                 default:
                     self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $filename");
-                    return false; // Unbekannter Dateityp
+                    return false;
             }
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der Datei $filename: " . $e->getMessage());
-            return false; // Fehler bei der Vorverarbeitung
+            return false;
         }
 
-        return true; // Erfolgreiche Vorverarbeitung
+        return true;
     }
 
     private static function checkAndRepairFile(string $filename, string $expectedMimeType, callable $repairFunction): void {

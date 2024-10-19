@@ -14,22 +14,17 @@ namespace App\Contracts\Abstracts;
 
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
-use App\Contracts\Interfaces\FileServiceInterface;
+use App\Contracts\Interfaces\PreProcessFileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
-use App\Helper\FileSystem\File;
-use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
-use OutOfRangeException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
-abstract class FileServiceAbstract implements FileServiceInterface {
+abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
     use FileServiceTrait;
-
-    protected const SUBFOLDER = '';
 
     public function __construct(string $filename, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
@@ -47,32 +42,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         }
     }
 
-    public function getDestinationFolder(): ?string {
-        $this->validateConfig();
-
-        if (!is_null($this->client) && !is_null($this->document)) {
-            return InternalStoreMapper::getInternalStorePath4Document($this->client, $this->document);
-        } elseif (!is_null($this->client) && !empty($this->getSubFolder())) {
-            return InternalStoreMapper::getInternalStorePath($this->client, $this->getSubFolder());
-        }
-
-        return null;
-    }
-
-    public function process(): void {
-        $this->logger->info("Verarbeite Datei: {$this->filename} mit FileService: " . static::class . ".");
-        File::move($this->filename, $this->getDestinationFolder());
-    }
-
-    protected function getSubFolder(): string {
-        return static::SUBFOLDER;
-    }
-
-    protected function validateConfig(): void {
-        if (is_null($this->config->getInternalStorePath())) {
-            throw new OutOfRangeException("Ungültige Konfiguration für den internen Speicherpfad.");
-        }
-    }
-
     abstract protected function extractDataFromFilename(): void;
+
+    abstract public function preProcess(): bool;
 }

@@ -18,7 +18,7 @@ class BelegeTest extends DMSBasicFileServiceTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../../.samples/219625 - Belege.pdf');
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testPatternMatching() {

@@ -57,26 +57,29 @@ class Files extends HelperAbstract {
         }
     }
 
-    public static function get(string $directory, bool $recursive = false, array $fileTypes = []): array {
+    public static function get(string $directory, bool $recursive = false, array $fileTypes = [], ?string $regexPattern = null): array {
         self::setLogger();
         $result = [];
         $files = array_diff(scandir($directory), ['.', '..']);
 
         foreach ($files as $file) {
             $path = $directory . DIRECTORY_SEPARATOR . $file;
+
             if ($recursive && is_dir($path)) {
-                $result = array_merge($result, self::get($path, true, $fileTypes));
+                $result = array_merge($result, self::get($path, true, $fileTypes, $regexPattern));
             } elseif (is_file($path)) {
                 if (empty($fileTypes) || in_array(pathinfo($path, PATHINFO_EXTENSION), $fileTypes)) {
-                    $result[] = $path;
+                    if (is_null($regexPattern) || preg_match($regexPattern, $file)) {
+                        $result[] = $path;
+                    }
                 }
             }
         }
 
         if (empty($result)) {
-            self::$logger->info("Keine Dateien gefunden im Verzeichnis: $directory");
+            self::$logger->info("Keine passenden Dateien gefunden im Verzeichnis: $directory");
         } else {
-            self::$logger->debug("Dateien erfolgreich gelesen aus Verzeichnis: $directory");
+            self::$logger->debug("Dateien erfolgreich gefunden im Verzeichnis: $directory");
         }
 
         return $result;
