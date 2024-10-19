@@ -64,6 +64,11 @@ trait FileServiceTrait {
 
     protected function setPropertiesFromDMS(string $documentNumber) {
         $this->setDocument($documentNumber);
+        if (is_null($this->document)) {
+            $this->logger->error("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}. Gelöscht? Bitte prüfen!");
+            throw new RuntimeException("Dokument ({$documentNumber}) konnte nicht gefunden werden: {$this->filename}");
+        }
+
         $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
         if (is_null($this->client)) {
             $this->logger->error("Client konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
