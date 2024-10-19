@@ -44,8 +44,10 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
 
         if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $this->document->getExtension(), $matches)) {
             $this->logger->info("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->filename}");
+            $fileNameMatches = [];
+            preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->filename), $fileNameMatches);
 
-            $tiffFiles = Files::get(dirname($this->filename), false, [], self::SAME_FILE_PATTERN);
+            $tiffFiles = Files::get(dirname($this->filename), false, [], null, $fileNameMatches[1]);
 
             $istFileCount = count($tiffFiles);
             $sollFileCount = (int)$matches[1];
@@ -56,8 +58,6 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
 
             if (!empty($tiffFiles)) {
                 $this->logger->info("Mehrseitige TIFF-Dateien gefunden: {$this->filename}");
-                $fileNameMatches = [];
-                preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->filename), $fileNameMatches);
                 $outputFilePath = dirname($this->filename) . DIRECTORY_SEPARATOR . $fileNameMatches[1] . '.tif';
 
                 TifFile::merge($tiffFiles, $outputFilePath);

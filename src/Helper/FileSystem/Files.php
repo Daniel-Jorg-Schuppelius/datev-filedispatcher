@@ -57,7 +57,7 @@ class Files extends HelperAbstract {
         }
     }
 
-    public static function get(string $directory, bool $recursive = false, array $fileTypes = [], ?string $regexPattern = null): array {
+    public static function get(string $directory, bool $recursive = false, array $fileTypes = [], ?string $regexPattern = null, ?string $contains = null): array {
         self::setLogger();
         $result = [];
         $files = array_diff(scandir($directory), ['.', '..']);
@@ -66,10 +66,13 @@ class Files extends HelperAbstract {
             $path = $directory . DIRECTORY_SEPARATOR . $file;
 
             if ($recursive && is_dir($path)) {
-                $result = array_merge($result, self::get($path, true, $fileTypes, $regexPattern));
+                $result = array_merge($result, self::get($path, true, $fileTypes, $regexPattern, $contains));
             } elseif (is_file($path)) {
                 if (empty($fileTypes) || in_array(pathinfo($path, PATHINFO_EXTENSION), $fileTypes)) {
-                    if (is_null($regexPattern) || preg_match($regexPattern, $file)) {
+                    // Prüfe auf regulären Ausdruck und ob der Dateiname den String enthält
+                    if ((is_null($regexPattern) || preg_match($regexPattern, $file)) &&
+                        (is_null($contains) || stripos($file, $contains) !== false)
+                    ) {
                         $result[] = $path;
                     }
                 }
