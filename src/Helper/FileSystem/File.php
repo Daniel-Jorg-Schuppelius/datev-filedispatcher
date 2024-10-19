@@ -24,10 +24,10 @@ class File extends HelperAbstract implements FileSystemInterface {
 
         $result = false;
         if (function_exists('mime_content_type')) {
-            self::$logger->info("Nutze mime_content_type für Erkennung des mime-types: $filename");
+            self::$logger->debug("Nutze mime_content_type für Erkennung des mime-types: $filename");
             $result = @mime_content_type($filename);
         } elseif (function_exists('finfo_open')) {
-            self::$logger->info("Nutze finfo für Erkennung des mime-types: $filename");
+            self::$logger->debug("Nutze finfo für Erkennung des mime-types: $filename");
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             $result = $finfo->buffer(file_get_contents($filename));
         }
@@ -118,7 +118,7 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Fehler beim Umbenennen der Datei von $oldName nach $newName");
         }
 
-        self::$logger->info("Datei umbenannt von $oldName zu $newName");
+        self::$logger->debug("Datei umbenannt von $oldName zu $newName");
     }
 
     public static function move(string $sourceFile, string $destinationFolder): void {
@@ -133,14 +133,14 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
         }
 
-        self::$logger->info("Datei von $sourceFile zu $destinationFolder verschoben");
+        self::$logger->debug("Datei von $sourceFile zu $destinationFolder verschoben");
     }
 
     public static function delete(string $file): void {
         self::setLogger();
 
         if (!self::exists($file)) {
-            self::$logger->warning("Die zu löschende Datei: $file existiert nicht");
+            self::$logger->notice("Die zu löschende Datei: $file existiert nicht");
             return;
         }
 
@@ -149,7 +149,7 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Fehler beim Löschen der Datei: $file");
         }
 
-        self::$logger->info("Datei gelöscht: $file");
+        self::$logger->debug("Datei gelöscht: $file");
     }
 
     public static function size(string $file): int {
@@ -172,7 +172,7 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Fehler beim Lesen der Datei $file");
         }
 
-        self::$logger->info("Datei erfolgreich gelesen: $file");
+        self::$logger->debug("Datei erfolgreich gelesen: $file");
         return $content;
     }
 

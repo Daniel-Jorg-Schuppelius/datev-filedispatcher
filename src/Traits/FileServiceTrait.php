@@ -57,20 +57,21 @@ trait FileServiceTrait {
     }
 
     protected function setClient(string $clientNumber): void {
-        $this->client = $this->clientsEndpoint->search(["filter" => "number eq $clientNumber"])->getFirstValue();
-        if (is_null($this->client)) {
+        $clients = $this->clientsEndpoint->search(["filter" => "number eq $clientNumber"]);
+        if (is_null($clients)) {
             $this->logger->error("Client konnte nicht gefunden werden: $clientNumber");
             throw new RuntimeException("Client konnte nicht gefunden werden: $clientNumber");
         }
+        $this->client = $clients->getFirstValue();
     }
 
     protected function setDocument(string $documentNumber): void {
-        $this->document = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"])->getFirstValue();
-        if (is_null($this->document)) {
-            $this->logger->error("Dokument konnte nicht gefunden werden: $documentNumber");
-            $this->logger->warning("Datei im DMS gelöscht? DATEV Offline bzw. in Sicherung? Bitte prüfen und ggf. aus dem Ordner entfernen!");
-            throw new RuntimeException("Dokument konnte nicht gefunden werden: $documentNumber");
+        $documents = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"]);
+        if (is_null($documents)) {
+            $this->logger->error("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
+            throw new RuntimeException("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
         }
+        $this->document = $documents->getFirstValue();
     }
 
     protected function setPropertiesFromDMS(string $documentNumber) {
