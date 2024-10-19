@@ -138,9 +138,15 @@ class File extends HelperAbstract implements FileSystemInterface {
 
     public static function delete(string $file): void {
         self::setLogger();
+
+        if (!self::exists($file)) {
+            self::$logger->warning("Die zu löschende Datei: $file existiert nicht");
+            return;
+        }
+
         if (!unlink($file)) {
-            self::$logger->error("Fehler beim Löschen der Datei $file");
-            throw new Exception("Fehler beim Löschen der Datei $file");
+            self::$logger->error("Fehler beim Löschen der Datei: $file");
+            throw new Exception("Fehler beim Löschen der Datei: $file");
         }
 
         self::$logger->info("Datei gelöscht: $file");

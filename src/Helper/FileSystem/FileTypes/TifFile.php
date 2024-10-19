@@ -20,12 +20,15 @@ use App\Helper\Shell;
 use Exception;
 
 class TifFile extends HelperAbstract {
-    public static function repair(string $filename): string {
+    private const FILE_EXTENSION_PATTERN = "/\.tif{1,2}$/i";
+
+    public static function repair(string $filename, bool $forceRepair = false): string {
+
         self::setLogger();
         $mimeType = File::mimeType($filename);
 
-        if ($mimeType !== 'image/tiff' && preg_match("/\.tif$/i", $filename)) {
-            $newFilename = preg_replace("/\.tif$/i", ".jpg", $filename);
+        if ($mimeType !== 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
+            $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".jpg", $filename);
             File::rename($filename, $newFilename);
 
             $command = sprintf("convert %s %s", escapeshellarg($newFilename), escapeshellarg($filename));
@@ -36,13 +39,31 @@ class TifFile extends HelperAbstract {
                 throw new Exception("Fehler bei der Reparatur von TIFF nach JPEG: $newFilename");
             }
 
-            File::delete($newFilename); // Entferne die temporäre JPEG-Datei
+            File::delete($newFilename);
 
             return $filename;
-        } elseif ($mimeType === 'image/tiff' && !preg_match("/\.tif$/i", $filename)) {
-            $newFilename = str_replace("." . pathinfo($filename, PATHINFO_EXTENSION), ".tif", $filename);
+        } elseif ($mimeType === 'image/tiff' && !preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
+            $newFilename = preg_replace("/\.[^.]+$/", ".tif", $filename);
             File::rename($filename, $newFilename);
-            return self::repair($newFilename);  // Rufe die Reparatur erneut auf mit dem neuen Dateinamen
+            return self::repair($newFilename);
+        } elseif ($mimeType === 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
+            self::$logger->info("Die Datei ist bereits im TIFF-Format: $filename");
+            if ($forceRepair) {
+                $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".original.tif", $filename);
+                File::rename($filename, $newFilename);
+
+                $command = sprintf("convert %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($filename));
+                if (Shell::executeShellCommand($command)) {
+                    self::$logger->info("TIFF-Datei erfolgreich repariert: $newFilename");
+                } else {
+                    self::$logger->error("Fehler bei der Reparatur von TIFF: $newFilename");
+                    throw new Exception("Fehler bei der Reparatur von TIFF: $newFilename");
+                }
+
+                File::delete($newFilename);
+
+                return $filename;
+            }
         } else {
             self::$logger->error("Die Datei ist nicht im TIFF-Format: $filename");
             throw new Exception("Die Datei ist nicht im TIFF-Format: $filename");
@@ -56,7 +77,7 @@ class TifFile extends HelperAbstract {
         if (!File::exists($tiffFile)) {
             self::$logger->error("Die Datei existiert nicht: $tiffFile");
             throw new NotFoundException("Die Datei existiert nicht: $tiffFile");
-        } elseif (File::exists($pdfFile)) {
+        } elseif (!is_null($pdfFile) && File::exists($pdfFile)) {
             self::$logger->error("Die Datei existiert bereits: $pdfFile");
             throw new Exception("Die Datei existiert bereits: $pdfFile");
         } elseif (!self::isValid($tiffFile)) {
@@ -69,7 +90,7 @@ class TifFile extends HelperAbstract {
         }
 
         if (is_null($pdfFile)) {
-            $pdfFile = preg_replace("/\.tif$/i", ".pdf", $tiffFile);
+            $pdfFile = preg_replace(self::FILE_EXTENSION_PATTERN, ".pdf", $tiffFile);
         }
 
         if (File::exists($pdfFile)) {
@@ -78,12 +99,31 @@ class TifFile extends HelperAbstract {
         }
 
         $command = $compressed
-            ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile'"
-            : "tiff2pdf -n -F -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile'";
+            ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile' 2>&1"
+            : "tiff2pdf -F -n -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile' 2>&1";
 
         Shell::executeShellCommand($command);
 
-        self::$logger->info("TIFF-Datei erfolgreich in PDF umgewandelt: $tiffFile");
+        if (PdfFile::isValid($pdfFile)) {
+            self::$logger->info("TIFF-Datei erfolgreich in PDF umgewandelt: $tiffFile");
+        } elseif ($compressed) {
+            self::$logger->warning("Fehler bei der Umwandlung von TIFF in PDF: $tiffFile. Versuche erneute Konvertierung ohne Kompression.");
+            File::delete($pdfFile);
+            TifFile::repair($tiffFile, true);
+            self::convertToPdf($tiffFile, $pdfFile, false, false);
+
+            if (PdfFile::isValid($pdfFile)) {
+                self::$logger->info("TIFF-Datei erfolgreich ohne Kompression in PDF umgewandelt: $tiffFile");
+            } else {
+                self::$logger->error("Erneuter Fehler bei der Umwandlung von TIFF in PDF: $tiffFile");
+                File::delete($pdfFile);
+                throw new Exception("Erneuter Fehler bei der Umwandlung von TIFF in PDF: $tiffFile");
+            }
+        } else {
+            self::$logger->error("Fehler bei der Umwandlung von TIFF in PDF: $tiffFile");
+            File::delete($pdfFile);
+            throw new Exception("Fehler bei der Umwandlung von TIFF in PDF: $tiffFile");
+        }
 
         if ($deleteSourceFile) {
             File::delete($tiffFile);
@@ -104,7 +144,7 @@ class TifFile extends HelperAbstract {
 
     public static function isValid(string $filename): bool {
         self::setLogger();
-        if (preg_match("/\.tif$/i", $filename)) {
+        if (preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
             $command = sprintf("tiffinfo %s 2>&1", escapeshellarg($filename));
             $output = [];
 
@@ -116,6 +156,7 @@ class TifFile extends HelperAbstract {
                 return false;
             }
         }
+        self::$logger->warning("Datei ist keine TIFF-Datei: $filename");
         return false;
     }
 }

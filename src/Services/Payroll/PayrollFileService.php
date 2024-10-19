@@ -17,7 +17,7 @@ use App\Contracts\Abstracts\PeriodicFileServiceAbstract;
 class PayrollFileService extends PeriodicFileServiceAbstract {
     // 00000_00000_Client_Client_00_0000_Brutto_Netto_AA0.pdf
     //                               1       2            3                4       5                          6
-    protected const PATTERN = '/^(\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(\d{2})_(\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/';
+    protected const PATTERN = '/^(\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(\d{2})_(\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/i';
     protected const SUBFOLDER = "02 Entgeltabrechnung";
 
     protected function extractDataFromFilename(): void {

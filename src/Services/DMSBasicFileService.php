@@ -17,8 +17,7 @@ use App\Contracts\Abstracts\DMSFileServiceAbstract;
 class DMSBasicFileService extends DMSFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.pdf
     //                              1        2            (3)
-    protected const PATTERN = '/^([0-9]+) - (.+?)(?: - (\d{4}_\d+))?\.pdf$/';
-    // protected const PATTERN = '/\/([0-9]{1,}) - (.+)\.pdf$/i';
+    protected const PATTERN = '/^([0-9]+) - (.+?)(?: - (\d{4}_\d+))?\.pdf$/i';
 
     protected function extractDataFromFilename(): void {
         $matches = $this->getMatches();
