@@ -27,7 +27,6 @@ class Config {
     private ?string $password = null;
 
     private ?string $internalStorePath = null;
-
     private ?int $previousYears4Internal = null;
     private ?string $previousYearsFolderName4Internal = null;
 
@@ -36,7 +35,7 @@ class Config {
     private ?array $perPeriod = null;
 
     private function __construct() {
-        $this->setConfig();
+        $this->loadConfig();
     }
 
     public static function getInstance(): Config {
@@ -50,82 +49,81 @@ class Config {
         return !is_null($this->resourceUrl) && !is_null($this->user) && !is_null($this->password);
     }
 
-    private function setConfig(): void {
+    private function loadConfig(): void {
         $filePath = realpath(__DIR__ . '/../../config.json');
-        if ($filePath && file_exists($filePath)) {
-            $jsonContent = file_get_contents($filePath);
-            $config = json_decode($jsonContent, true);
 
-            if (isset($config['DatevAPI']) && is_array($config['DatevAPI'])) {
-                foreach ($config['DatevAPI'] as $value) {
-                    if ($value['key'] === 'resourceurl') {
-                        $this->resourceUrl = $value['value'];
-                    }
-                    if ($value['key'] === 'user') {
-                        $this->user = $value['value'];
-                    }
-                    if ($value['key'] === 'password') {
-                        $this->password = $value['value'];
-                    }
-                }
-            }
-
-            if (isset($config['Path']) && is_array($config['Path'])) {
-                foreach ($config['Path'] as $value) {
-                    if ($value['key'] === 'internalStore') {
-                        $this->internalStorePath = $value['value'];
-                    }
-                }
-            }
-
-            if (isset($config['maxYears']) && is_array($config['maxYears'])) {
-                foreach ($config['maxYears'] as $value) {
-                    if ($value['key'] === 'previousYears4Internal') {
-                        $this->previousYears4Internal = $value['value'];
-                    }
-                    if ($value['key'] === 'previousYearsFolderName4Internal') {
-                        $this->previousYearsFolderName4Internal = $value['value'];
-                    }
-                }
-            }
-
-            if (isset($config['Logging']) && is_array($config['Logging'])) {
-                foreach ($config['Logging'] as $value) {
-                    if ($value['key'] === 'log') {
-                        $this->logType = LogType::fromString($value['value']);
-                    }
-                    if ($value['key'] === 'level') {
-                        $this->logLevel = $value['value'];
-                    }
-                    if ($value['key'] === 'path') {
-                        $this->logPath = $value['value'];
-                    }
-                }
-            }
-
-            if (isset($config['Debugging']) && is_array($config['Debugging'])) {
-                foreach ($config['Debugging'] as $value) {
-                    if (isset($value['key']) && $value['key'] === 'debug') {
-                        $this->debug = (bool) $value['value'];
-                    }
-                }
-            }
-
-            if (isset($config['DatevDMSMapping']) && is_array($config['DatevDMSMapping'])) {
-                $this->datevDMSMapping = $config['DatevDMSMapping'];
-            }
-
-            if (isset($config['PerYear']) && is_array($config['PerYear'])) {
-                $this->perYear = $config['PerYear'];
-            }
-            if (isset($config['PerPeriod']) && is_array($config['PerPeriod'])) {
-                $this->perPeriod = $config['PerPeriod'];
-            }
-        } else {
+        if (!$filePath || !file_exists($filePath)) {
             error_log('Config file not found, please create one at ../../config.json');
+            return;
+        }
+
+        $config = json_decode(file_get_contents($filePath), true);
+
+        $this->setApiConfig($config['DatevAPI'] ?? []);
+        $this->setPathConfig($config['Path'] ?? []);
+        $this->setMaxYearsConfig($config['maxYears'] ?? []);
+        $this->setLoggingConfig($config['Logging'] ?? []);
+        $this->setDebugConfig($config['Debugging'] ?? []);
+        $this->datevDMSMapping = $config['DatevDMSMapping'] ?? null;
+        $this->perYear = $config['PerYear'] ?? null;
+        $this->perPeriod = $config['PerPeriod'] ?? null;
+    }
+
+    private function setApiConfig(array $apiConfig): void {
+        foreach ($apiConfig as $value) {
+            if ($value['enabled']) {
+                match ($value['key']) {
+                    'resourceurl' => $this->resourceUrl = $value['value'],
+                    'user' => $this->user = $value['value'],
+                    'password' => $this->password = $value['value'],
+                    default => null,
+                };
+            }
         }
     }
 
+    private function setPathConfig(array $pathConfig): void {
+        foreach ($pathConfig as $value) {
+            if ($value['enabled'] && $value['key'] === 'internalStore') {
+                $this->internalStorePath = $value['value'];
+            }
+        }
+    }
+
+    private function setMaxYearsConfig(array $maxYearsConfig): void {
+        foreach ($maxYearsConfig as $value) {
+            if ($value['enabled']) {
+                match ($value['key']) {
+                    'previousYears4Internal' => $this->previousYears4Internal = (int)$value['value'],
+                    'previousYearsFolderName4Internal' => $this->previousYearsFolderName4Internal = $value['value'],
+                    default => null,
+                };
+            }
+        }
+    }
+
+    private function setLoggingConfig(array $loggingConfig): void {
+        foreach ($loggingConfig as $value) {
+            if ($value['enabled']) {
+                match ($value['key']) {
+                    'log' => $this->logType = LogType::fromString($value['value']),
+                    'level' => $this->logLevel = $value['value'],
+                    'path' => $this->logPath = $value['value'],
+                    default => null,
+                };
+            }
+        }
+    }
+
+    private function setDebugConfig(array $debuggingConfig): void {
+        foreach ($debuggingConfig as $value) {
+            if (isset($value['key']) && $value['key'] === 'debug' && $value['enabled']) {
+                $this->debug = (bool)$value['value'];
+            }
+        }
+    }
+
+    // Getter methods for config values
     public function getInternalStorePath(): ?string {
         return $this->internalStorePath;
     }

@@ -23,6 +23,9 @@ class LohnDateiTest extends DMSBasicFileServiceTest {
     }
 
     public function testPatternMatching() {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
         $matches = [];
         $this->assertTrue(DMSBasicFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
@@ -32,6 +35,8 @@ class LohnDateiTest extends DMSBasicFileServiceTest {
     public function testDMSBasicFileServiceProcessing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
+        } elseif (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
         }
 
         $service = new DMSBasicFileService($this->testFile);

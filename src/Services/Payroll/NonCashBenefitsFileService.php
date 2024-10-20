@@ -16,13 +16,6 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class NonCashBenefitsFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_BerechSchema_Firmenwagen_00001_AA0.pdf
-    //                               1       2       3            4                5             6
-    protected const PATTERN = '/^(\d{5})_(\d{2})_(\d{4})_(BerechSchema_[A-Za-z]+)_(\d{5})_([A-Z0-9]{2,3})\.pdf$/i';
-
-    protected function extractDataFromFilename(): void {
-        $matches = $this->getMatches();
-
-        $this->setClient($matches[1]);
-        $this->setDate((int) $matches[3], (int) $matches[2]);
-    }
+    //                                        1               2              3            4                   5             6
+    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_(BerechSchema_[A-Za-z]+)_(\d{5})_([A-Z0-9]{2,3})\.pdf$/i';
 }

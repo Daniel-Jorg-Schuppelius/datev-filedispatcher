@@ -1,9 +1,18 @@
 {
+	"Path": [
+		{
+			"key": "internalStore",
+			"value": "/tmp/internal_store_test/{tenant}",
+			"type": "text",
+			"description": "Path to the internal store where the tenant files are stored",
+			"enabled": true
+		}
+	],
 	"Document": [
 		{
 			"key": "number",
-			"value": "99999",
-			"type": "text",
+			"value": 99999,
+			"type": "number",
 			"description": "",
 			"enabled": true
 		},
@@ -23,5 +32,9 @@
 			"description": "",
 			"enabled": true
 		}
+	],
+	"TenantIDs":[
+		50004,
+		20542
 	]
 }
