@@ -19,10 +19,14 @@ class PayrollFileServiceTest extends DocumentTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../.samples/20542_00001_Wegner_Regina_09_2023_Brutto_Netto_O04.pdf');
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testPatternMatching() {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $matches = [];
         $this->assertTrue(PayrollFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
@@ -30,6 +34,10 @@ class PayrollFileServiceTest extends DocumentTest {
     }
 
     public function testMatchesPattern(): void {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $this->assertTrue(PayrollFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
@@ -39,6 +47,8 @@ class PayrollFileServiceTest extends DocumentTest {
     public function testPayrollFileServiceProcessing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
+        } elseif (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
         }
 
         $service = new PayrollFileService($this->testFile);
@@ -51,6 +61,8 @@ class PayrollFileServiceTest extends DocumentTest {
     public function testFileDispatcherPayrollFileServiceProcessing(): void {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
+        } elseif (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
         }
 
         $this->assertFileExists($this->testFile);

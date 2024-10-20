@@ -23,6 +23,10 @@ class DMSBasicFileServiceTest extends DocumentTest {
     }
 
     public function testPatternMatching() {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $matches = [];
         $this->assertTrue(DMSBasicFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
@@ -30,6 +34,10 @@ class DMSBasicFileServiceTest extends DocumentTest {
     }
 
     public function testMatchesPattern(): void {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $this->assertTrue(DMSBasicFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
@@ -39,6 +47,8 @@ class DMSBasicFileServiceTest extends DocumentTest {
     public function testDMSBasicFileServiceProcessing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
+        } elseif (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
         }
 
         $service = new DMSBasicFileService($this->testFile);
@@ -50,6 +60,8 @@ class DMSBasicFileServiceTest extends DocumentTest {
     public function testFileDispatcherDMSBasicFileServiceProcessing(): void {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
+        } elseif (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
         }
 
         $this->assertFileExists($this->testFile);

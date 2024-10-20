@@ -21,6 +21,7 @@ use Datev\Entities\DocumentManagement\Registers\Register;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Tests\Config\TestConfig;
 
 class InternalStoreMapperTest extends TestCase {
 
@@ -37,7 +38,7 @@ class InternalStoreMapperTest extends TestCase {
             $this->markTestSkipped("Per Period ist nicht konfiguriert.");
         }
 
-        $this->internalStorePath = sys_get_temp_dir() . '/internal_store_test/{tenant}';
+        $this->internalStorePath = TestConfig::getInstance()->getInternalStorePath();
         $this->tempDir = str_replace("{tenant}", "12345", $this->internalStorePath);
 
         if (!is_dir(dirname($this->tempDir))) {

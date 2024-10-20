@@ -12,18 +12,10 @@ declare(strict_types=1);
 
 namespace App\Services\Payroll;
 
-use App\Contracts\Abstracts\FileServices\PeriodicFileServiceAbstract;
+use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
-class SettlementOfGrossNetRemunerationsFileService extends PeriodicFileServiceAbstract {
+class SettlementOfGrossNetRemunerationsFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Brutto_Netto_Bau_00001_AA0.pdf
-    //                               1       2       3                    4           5             6
-    protected const PATTERN = '/^(\d{5})_(\d{2})_(\d{4})_Brutto_Netto_([A-Za-z]+)_(\d{5})_([A-Z0-9]{2,3})\.pdf$/i';
-    protected const SUBFOLDER = "02 Entgeltabrechnung";
-
-    protected function extractDataFromFilename(): void {
-        $matches = $this->getMatches();
-
-        $this->setClient($matches[1]);
-        $this->setDate((int) $matches[3], (int) $matches[2]);
-    }
+    //                                        1               2              3                    4           5             6
+    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Brutto_Netto_([A-Za-z]+)_(\d{5})_([A-Z0-9]{2,3})\.pdf$/i';
 }

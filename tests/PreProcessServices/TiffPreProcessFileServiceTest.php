@@ -25,6 +25,10 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
     }
 
     public function testPatternMatching() {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $matches = [];
         $this->assertTrue(TiffPreProcessFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
@@ -32,6 +36,10 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
     }
 
     public function testMatchesPattern(): void {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $this->assertTrue(TiffPreProcessFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';

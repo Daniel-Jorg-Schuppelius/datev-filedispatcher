@@ -30,7 +30,7 @@ class FileDispatcher extends HelperAbstract {
     protected static string $preProcessNamespace = 'App\\PreProcessServices';
     protected static ?array $services = null;
     protected static ?array $preProcessServices = null;
-    protected static array $fileTypesWithoutPreProcessing = ['xlsm', 'csv'];
+    protected static array $fileTypesWithoutGenericPreProcessing = ['xlsm', 'csv'];
 
     // Allgemeine Methode für das Setzen von Services oder PreProcessServices
     protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
@@ -105,10 +105,6 @@ class FileDispatcher extends HelperAbstract {
 
         $fileType = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        if (in_array($fileType, self::$fileTypesWithoutPreProcessing)) {
-            return true; // Datei benötigt keine Vorverarbeitung
-        }
-
         try {
             foreach (self::$preProcessServices as $preProcessServiceClass) {
                 if ($preProcessServiceClass::matchesPattern($filename)) {
@@ -120,15 +116,20 @@ class FileDispatcher extends HelperAbstract {
                 }
             }
 
-            self::$logger->notice("Kein passender preProcessService für Datei: $filename gefunden. Versuche automatische Vorverarbeitung.");
-            return self::autoPreProcessFile($filename, $fileType);
+            if (in_array($fileType, self::$fileTypesWithoutGenericPreProcessing)) {
+                self::$logger->notice("Kein passender preProcessService für Datei: $filename gefunden.");
+                return true; // Datei benötigt keine generische Vorverarbeitung
+            }
+
+            self::$logger->notice("Kein passender preProcessService für Datei: $filename gefunden. Versuche generische Vorverarbeitung.");
+            return self::genericPreProcessFile($filename, $fileType);
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der Datei $filename: " . $e->getMessage());
             return false;
         }
     }
 
-    private static function autoPreProcessFile(string $filename, string $fileType): bool {
+    private static function genericPreProcessFile(string $filename, string $fileType): bool {
         switch ($fileType) {
             case 'zip':
                 self::preProcessZipFile($filename);

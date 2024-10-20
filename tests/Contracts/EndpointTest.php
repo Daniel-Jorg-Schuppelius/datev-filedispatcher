@@ -16,7 +16,6 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
-use App\Factories\StorageFactory;
 use App\Helper\FileSystem\File;
 use Datev\API\Desktop\Endpoints\Diagnostics\EchoEndpoint;
 use FilesystemIterator;
@@ -24,14 +23,16 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Tests\Config\TestConfig;
 
 abstract class EndpointTest extends TestCase {
     protected ?LoggerInterface $logger = null;
 
     protected ?ApiClientInterface $client;
 
-    protected string $internalStorePath;
-    protected string $tempDir;
+    protected TestConfig $testConfig;
+
+    protected array $tenantIds;
     protected string $testFile;
 
     protected bool $apiDisabled = false;
@@ -42,23 +43,22 @@ abstract class EndpointTest extends TestCase {
         $config->setDebug(true);
         $this->logger = LoggerFactory::getLogger();
         $this->client = APIClientFactory::getClient();
+
+        $this->testConfig = TestConfig::getInstance();
+        $this->tenantIds = $this->testConfig->getTenantIds();
     }
 
     final protected function setUp(): void {
-        $this->internalStorePath = sys_get_temp_dir() . '/internal_store_test/{tenant}';
-        $tenantIds = ['20542', '50004'];  // Füge hier die Mandanten hinzu, für die du Verzeichnisse erstellen willst
 
-        foreach ($tenantIds as $tenantId) {
-            $this->tempDir = str_replace("{tenant}", $tenantId, $this->internalStorePath);
+        foreach ($this->tenantIds as $tenantId) {
+            $tempDir = str_replace("{tenant}", (string)$tenantId, $this->testConfig->getInternalStorePath());
 
-            if (!is_dir(dirname($this->tempDir))) {
-                mkdir(dirname($this->tempDir));
+            if (!is_dir(dirname($tempDir))) {
+                mkdir(dirname($tempDir));
             }
-            if (!is_dir($this->tempDir)) {
-                mkdir($this->tempDir);
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir);
             }
-
-            StorageFactory::setInternalStorePath($this->internalStorePath);
 
             $categories = [
                 "04 Sonstiges/Belege",
@@ -69,7 +69,7 @@ abstract class EndpointTest extends TestCase {
             ];
 
             foreach ($categories as $category) {
-                $fullPath = $this->tempDir . '/' . $category;
+                $fullPath = $tempDir . '/' . $category;
                 if (!is_dir($fullPath)) {
                     mkdir($fullPath, 0777, true);
                 }
@@ -89,23 +89,26 @@ abstract class EndpointTest extends TestCase {
     }
 
     protected function tearDown(): void {
-        if (is_dir($this->tempDir)) {
-            foreach (
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($this->tempDir, FilesystemIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::CHILD_FIRST
-                ) as $fileInfo
-            ) {
-                // Überprüfen, ob es sich um eine Datei oder ein Verzeichnis handelt und dann entsprechend löschen
-                if ($fileInfo->isDir()) {
-                    rmdir($fileInfo->getRealPath());  // Verzeichnis entfernen
-                } else {
-                    unlink($fileInfo->getRealPath());  // Datei entfernen
+        foreach ($this->tenantIds as $tenantId) {
+            $tempDir = str_replace("{tenant}", (string)$tenantId, $this->testConfig->getInternalStorePath());
+            if (is_dir($tempDir)) {
+                foreach (
+                    new RecursiveIteratorIterator(
+                        new RecursiveDirectoryIterator($tempDir, FilesystemIterator::SKIP_DOTS),
+                        RecursiveIteratorIterator::CHILD_FIRST
+                    ) as $fileInfo
+                ) {
+                    // Überprüfen, ob es sich um eine Datei oder ein Verzeichnis handelt und dann entsprechend löschen
+                    if ($fileInfo->isDir()) {
+                        rmdir($fileInfo->getRealPath());  // Verzeichnis entfernen
+                    } else {
+                        unlink($fileInfo->getRealPath());  // Datei entfernen
+                    }
                 }
+                rmdir($tempDir);  // Hauptverzeichnis entfernen
             }
-            rmdir($this->tempDir);  // Hauptverzeichnis entfernen
         }
-        if (!File::exists($this->testFile)) {
+        if (!empty($this->testFile) && !File::exists($this->testFile)) {
             copy($this->testFile . '.bak', $this->testFile);
         }
         parent::tearDown();
