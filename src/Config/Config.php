@@ -119,6 +119,7 @@ class Config {
         foreach ($debuggingConfig as $value) {
             if (isset($value['key']) && $value['key'] === 'debug' && $value['enabled']) {
                 $this->debug = (bool)$value['value'];
+                $this->logLevel = LogLevel::DEBUG;
             }
         }
     }

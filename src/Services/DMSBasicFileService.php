@@ -24,4 +24,14 @@ class DMSBasicFileService extends DMSFileServiceAbstract {
 
         $this->setPropertiesFromDMS($matches[1]);
     }
+
+    protected function getDestinationFilename(): string {
+        $matches = $this->getMatches();
+
+        if (isset($matches[3])) {
+            return $matches[2] . ' - ' . $matches[3] . '.pdf';
+        }
+
+        return $matches[2] . '.pdf';
+    }
 }
