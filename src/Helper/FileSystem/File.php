@@ -126,10 +126,10 @@ class File extends HelperAbstract implements FileSystemInterface {
         self::$logger->debug("Datei umbenannt von $oldName zu $newName");
     }
 
-    public static function move(string $sourceFile, string $destinationFolder): void {
+    public static function move(string $sourceFile, string $destinationFolder, ?string $destinationFileName = null): void {
         self::setLogger();
+        $destinationFile = $destinationFolder . DIRECTORY_SEPARATOR . (is_null($destinationFileName) ? basename($sourceFile) : $destinationFileName);
 
-        $destinationFile = $destinationFolder . DIRECTORY_SEPARATOR . basename($sourceFile);
         if (!self::exists($sourceFile)) {
             self::$logger->error("Die Datei $sourceFile existiert nicht");
             throw new Exception("Die Datei $sourceFile existiert nicht");
@@ -141,11 +141,11 @@ class File extends HelperAbstract implements FileSystemInterface {
         }
 
         if (!rename($sourceFile, $destinationFile)) {
-            self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
-            throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFolder");
+            self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
+            throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
         }
 
-        self::$logger->debug("Datei von $sourceFile zu $destinationFolder verschoben");
+        self::$logger->debug("Datei von $sourceFile zu $destinationFile verschoben");
     }
 
     public static function delete(string $file): void {
