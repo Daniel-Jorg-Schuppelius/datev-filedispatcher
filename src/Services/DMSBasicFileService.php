@@ -19,7 +19,7 @@ class DMSBasicFileService extends DMSFileServiceAbstract {
     //                              1         2           (3)
     protected const PATTERN = '/^([0-9]+) - (.+?)(?: - (\d{4}_\d+))?\.pdf$/i';
 
-    protected function extractDataFromFilename(): void {
+    protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
 
         $this->setPropertiesFromDMS($matches[1]);

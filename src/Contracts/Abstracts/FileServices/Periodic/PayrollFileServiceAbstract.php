@@ -1,4 +1,12 @@
 <?php
+/*
+ * Created on   : Tue Oct 22 2024
+ * Author       : Daniel Jörg Schuppelius
+ * Author Uri   : https://schuppelius.org
+ * Filename     : PayrollFileServiceAbstract.php
+ * License      : MIT License
+ * License Uri  : https://opensource.org/license/mit
+ */
 
 declare(strict_types=1);
 
@@ -9,7 +17,7 @@ use App\Contracts\Abstracts\FileServices\PeriodicFileServiceAbstract;
 abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
     protected const SUBFOLDER = "02 Entgeltabrechnung";
 
-    protected function extractDataFromFilename(): void {
+    protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
 
         if (array_key_exists("tenant", $matches)) {

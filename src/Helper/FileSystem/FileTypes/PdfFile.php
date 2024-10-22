@@ -17,15 +17,15 @@ use App\Helper\Shell;
 use Exception;
 
 class PdfFile extends HelperAbstract {
-    public static function getMetaData(string $filename): array {
-        $command = sprintf("pdfinfo %s", escapeshellarg($filename));
+    public static function getMetaData(string $file): array {
+        $command = sprintf("pdfinfo %s", escapeshellarg($file));
         $output = [];
         $resultCode = 0;
 
         Shell::executeShellCommand($command, $output, $resultCode);
 
         if ($resultCode !== 0) {
-            throw new Exception("Fehler beim Abrufen der PDF-Metadaten für $filename");
+            throw new Exception("Fehler beim Abrufen der PDF-Metadaten für $file");
         }
 
         $metadata = [];
@@ -39,15 +39,15 @@ class PdfFile extends HelperAbstract {
         return $metadata;
     }
 
-    public static function isEncrypted(string $filename): bool {
-        $metadata = self::getMetaData($filename);
+    public static function isEncrypted(string $file): bool {
+        $metadata = self::getMetaData($file);
         return isset($metadata['Encrypted']) && $metadata['Encrypted'] === 'yes';
     }
 
-    public static function isValid(string $filename): bool {
+    public static function isValid(string $file): bool {
         $command = Shell::getPlatformSpecificCommand(
-            sprintf("mutool info %s 2>&1 | grep error", escapeshellarg($filename)),
-            sprintf('pdfinfo %s 2>&1 | findstr /R "Syntax.Error"', escapeshellarg($filename))
+            sprintf("mutool info %s 2>&1 | grep error", escapeshellarg($file)),
+            sprintf('pdfinfo %s 2>&1 | findstr /R "Syntax.Error"', escapeshellarg($file))
         );
         $output = [];
         $resultCode = 0;

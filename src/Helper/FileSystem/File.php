@@ -19,48 +19,48 @@ use Exception;
 use finfo;
 
 class File extends HelperAbstract implements FileSystemInterface {
-    public static function mimeType(string $filename): string|false {
+    public static function mimeType(string $file): string|false {
         self::setLogger();
 
         $result = false;
         if (function_exists('mime_content_type')) {
-            self::$logger->debug("Nutze mime_content_type für Erkennung des mime-types: $filename");
-            $result = @mime_content_type($filename);
+            self::$logger->debug("Nutze mime_content_type für Erkennung des mime-types: $file");
+            $result = @mime_content_type($file);
         } elseif (function_exists('finfo_open')) {
-            self::$logger->debug("Nutze finfo für Erkennung des mime-types: $filename");
+            self::$logger->debug("Nutze finfo für Erkennung des mime-types: $file");
             $finfo = new finfo(FILEINFO_MIME_TYPE);
-            $result = $finfo->buffer(file_get_contents($filename));
+            $result = $finfo->buffer(file_get_contents($file));
         }
 
         if (false === $result && PHP_OS_FAMILY === 'Linux') {
-            self::$logger->warning("Nutze Shell für Erkennung des mime-types: $filename");
-            $result = self::mimeTypeByShell($filename);
+            self::$logger->warning("Nutze Shell für Erkennung des mime-types: $file");
+            $result = self::mimeTypeByShell($file);
         }
         return $result;
     }
 
-    private static function mimeTypeByShell(string $filename): string|false {
+    private static function mimeTypeByShell(string $file): string|false {
         self::setLogger();
 
         $result = false;
 
-        if (!self::exists($filename)) {
-            self::$logger->error("Datei existiert nicht: $filename");
+        if (!self::exists($file)) {
+            self::$logger->error("Datei existiert nicht: $file");
             return $result;
         }
 
-        $command = sprintf('file -b --mime-type -m /usr/share/misc/magic %s', escapeshellarg($filename));
+        $command = sprintf('file -b --mime-type -m /usr/share/misc/magic %s', escapeshellarg($file));
         $output = [];
         $success = Shell::executeShellCommand($command, $output);
 
         if (!$success || empty($output)) {
-            self::$logger->error("Problem bei der Bestimmung des MIME-Typs für $filename");
-            throw new Exception("Problem bei der Bestimmung des MIME-Typs für $filename");
+            self::$logger->error("Problem bei der Bestimmung des MIME-Typs für $file");
+            throw new Exception("Problem bei der Bestimmung des MIME-Typs für $file");
         }
 
         if (!empty($output)) {
             $result = trim(implode("\n", $output));
-            self::$logger->info("MIME-Typ für $filename: " . $result);
+            self::$logger->info("MIME-Typ für $file: " . $result);
         }
         return $result;
     }

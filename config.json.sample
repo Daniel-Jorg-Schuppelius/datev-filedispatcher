@@ -31,6 +31,10 @@
 			"enabled": true
 		}
 	],
+	"ExcludedFolders": [
+		"/tmp/internal_store_test/abc",
+		"/tmp/internal_store_test/123"
+	],
 	"Logging": [
 		{
 			"key": "log",

@@ -15,7 +15,6 @@ namespace App\PreProcessServices;
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use App\Helper\FileSystem\Files;
 use App\Helper\FileSystem\FileTypes\TifFile;
-use OutOfRangeException;
 
 class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.tif(f)
@@ -30,46 +29,46 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     protected const DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN = "/^(.+?)(_\d+(_\d+)?)?\.tif{1,2}$/i";
     protected const DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN = "/tif{1,2}\((\d+)\)$/i";
 
-    protected function extractDataFromFilename(): void {
-        $this->logger->info("Extrahiere Daten aus dem Dateinamen: {$this->filename}");
+    protected function extractDataFromFile(): void {
+        $this->logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
 
         $this->setPropertiesFromDMS($matches[1]);
     }
 
     public function preProcess(): bool {
-        $this->logger->info("Preprocessing der TIFF-Datei: {$this->filename}");
+        $this->logger->info("Preprocessing der TIFF-Datei: {$this->file}");
 
         $matches = [];
         if (preg_match(self::FILE_EXTENSION_PATTERN, $this->document->getExtension())) {
-            $this->logger->info("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->filename}");
+            $this->logger->info("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->file}");
             return false;
         }
 
         if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $this->document->getExtension(), $matches)) {
-            $this->logger->info("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->filename}");
-            $fileNameMatches = [];
-            preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->filename), $fileNameMatches);
+            $this->logger->info("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->file}");
+            $fileMatches = [];
+            preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->file), $fileMatches);
 
-            $tiffFiles = Files::get(dirname($this->filename), false, ["tif", "tiff"], null, $fileNameMatches[1]);
+            $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $fileMatches[1]);
 
             $istFileCount = count($tiffFiles);
             $sollFileCount = (int)$matches[1];
             if ($istFileCount != $sollFileCount) {
-                $this->logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->filename}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
+                $this->logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->file}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
                 return true;
             }
 
             if (!empty($tiffFiles)) {
-                $this->logger->info("Mehrseitige TIFF-Dateien gefunden: {$this->filename}");
-                $outputFilePath = dirname($this->filename) . DIRECTORY_SEPARATOR . $fileNameMatches[1] . '.tif';
+                $this->logger->info("Mehrseitige TIFF-Dateien gefunden: {$this->file}");
+                $outputFilePath = dirname($this->file) . DIRECTORY_SEPARATOR . $fileMatches[1] . '.tif';
 
                 TifFile::merge($tiffFiles, $outputFilePath);
                 TifFile::convertToPdf($outputFilePath);
             }
         }
 
-        $this->logger->info("Preprocessing der TIFF-Datei abgeschlossen: {$this->filename}");
+        $this->logger->info("Preprocessing der TIFF-Datei abgeschlossen: {$this->file}");
 
         return true;
     }

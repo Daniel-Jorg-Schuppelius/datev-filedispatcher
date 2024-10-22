@@ -16,10 +16,12 @@ use Datev\Entities\ClientMasterData\Clients\Client;
 
 interface FileServiceInterface {
     public static function getPattern(): string;
-    public static function matchesPattern(string $filename, array &$matches = null): bool;
+    public static function matchesPattern(string $file, array &$matches = null): bool;
 
     public function process(): void;
 
+    public function getFile(): string;
     public function getFilename(): string;
+
     public function getClient(): ?Client;
 }

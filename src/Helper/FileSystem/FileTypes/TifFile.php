@@ -22,16 +22,16 @@ use Exception;
 class TifFile extends HelperAbstract {
     private const FILE_EXTENSION_PATTERN = "/\.tif{1,2}$/i";
 
-    public static function repair(string $filename, bool $forceRepair = false): string {
+    public static function repair(string $file, bool $forceRepair = false): string {
 
         self::setLogger();
-        $mimeType = File::mimeType($filename);
+        $mimeType = File::mimeType($file);
 
-        if ($mimeType !== 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
-            $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".jpg", $filename);
-            File::rename($filename, $newFilename);
+        if ($mimeType !== 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $file)) {
+            $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".jpg", $file);
+            File::rename($file, $newFilename);
 
-            $command = sprintf("convert %s %s", escapeshellarg($newFilename), escapeshellarg($filename));
+            $command = sprintf("convert %s %s", escapeshellarg($newFilename), escapeshellarg($file));
             if (Shell::executeShellCommand($command)) {
                 self::$logger->info("TIFF-Datei erfolgreich von JPEG repariert: $newFilename");
             } else {
@@ -41,20 +41,20 @@ class TifFile extends HelperAbstract {
 
             File::delete($newFilename);
 
-            return $filename;
-        } elseif ($mimeType === 'image/tiff' && !preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
-            $newFilename = preg_replace("/\.[^.]+$/", ".tif", $filename);
-            File::rename($filename, $newFilename);
+            return $file;
+        } elseif ($mimeType === 'image/tiff' && !preg_match(self::FILE_EXTENSION_PATTERN, $file)) {
+            $newFilename = preg_replace("/\.[^.]+$/", ".tif", $file);
+            File::rename($file, $newFilename);
             return self::repair($newFilename);
-        } elseif ($mimeType === 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
-            self::$logger->info("Die Datei ist bereits im TIFF-Format: $filename");
+        } elseif ($mimeType === 'image/tiff' && preg_match(self::FILE_EXTENSION_PATTERN, $file)) {
+            self::$logger->info("Die Datei ist bereits im TIFF-Format: $file");
             if ($forceRepair) {
-                self::$logger->notice("Erzwinge Reparatur der TIFF-Datei: $filename");
-                $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".original.tif", $filename);
-                File::rename($filename, $newFilename);
+                self::$logger->notice("Erzwinge Reparatur der TIFF-Datei: $file");
+                $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".original.tif", $file);
+                File::rename($file, $newFilename);
 
                 self::$logger->notice("Erstelle monochrome Kopie der TIFF-Datei: $newFilename");
-                $command = sprintf("convert %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($filename));
+                $command = sprintf("convert %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($file));
                 if (Shell::executeShellCommand($command)) {
                     self::$logger->info("TIFF-Datei erfolgreich repariert: $newFilename");
                 } else {
@@ -64,14 +64,14 @@ class TifFile extends HelperAbstract {
 
                 File::delete($newFilename);
 
-                return $filename;
+                return $file;
             }
         } else {
-            self::$logger->error("Die Datei ist nicht im TIFF-Format: $filename");
-            throw new Exception("Die Datei ist nicht im TIFF-Format: $filename");
+            self::$logger->error("Die Datei ist nicht im TIFF-Format: $file");
+            throw new Exception("Die Datei ist nicht im TIFF-Format: $file");
         }
 
-        return $filename;
+        return $file;
     }
 
     public static function convertToPdf(string $tiffFile, ?string $pdfFile = null, bool $compressed = true, bool $deleteSourceFile = true): void {
@@ -144,21 +144,21 @@ class TifFile extends HelperAbstract {
         }
     }
 
-    public static function isValid(string $filename): bool {
+    public static function isValid(string $file): bool {
         self::setLogger();
-        if (preg_match(self::FILE_EXTENSION_PATTERN, $filename)) {
-            $command = sprintf("tiffinfo %s 2>&1", escapeshellarg($filename));
+        if (preg_match(self::FILE_EXTENSION_PATTERN, $file)) {
+            $command = sprintf("tiffinfo %s 2>&1", escapeshellarg($file));
             $output = [];
 
             if (Shell::executeShellCommand($command, $output)) {
-                self::$logger->info("TIFF-Datei ist gültig: $filename");
+                self::$logger->info("TIFF-Datei ist gültig: $file");
                 return true;
             } else {
-                self::$logger->warning("TIFF-Datei ist ungültig: $filename");
+                self::$logger->warning("TIFF-Datei ist ungültig: $file");
                 return false;
             }
         }
-        self::$logger->warning("Datei ist keine TIFF-Datei: $filename");
+        self::$logger->warning("Datei ist keine TIFF-Datei: $file");
         return false;
     }
 }

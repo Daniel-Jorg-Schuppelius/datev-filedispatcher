@@ -31,18 +31,18 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
     protected const SUBFOLDER = '';
 
-    public function __construct(string $filename, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
+    public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
         $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->config = Config::getInstance();
 
-        $this->filename = $filename;
+        $this->file = $file;
 
         try {
-            $this->extractDataFromFilename();
+            $this->extractDataFromFile();
         } catch (Exception $e) {
-            $this->logger->error("Fehler bei der Verarbeitung der Datei: $filename (" . $e->getMessage() . ")");
+            $this->logger->error("Fehler bei der Verarbeitung der Datei: $file (" . $e->getMessage() . ")");
             throw $e;
         }
     }
@@ -60,12 +60,12 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     }
 
     public function process(): void {
-        $this->logger->notice("Verarbeite Datei: {$this->filename} mit FileService: " . static::class . ".");
-        File::move($this->filename, $this->getDestinationFolder(), $this->getDestinationFilename());
+        $this->logger->notice("Verarbeite Datei: {$this->file} mit FileService: " . static::class . ".");
+        File::move($this->file, $this->getDestinationFolder(), $this->getDestinationFilename());
     }
 
     protected function getDestinationFilename(): string {
-        return $this->filename;
+        return $this->getFilename();
     }
 
     protected function getSubFolder(): string {
@@ -79,5 +79,5 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         }
     }
 
-    abstract protected function extractDataFromFilename(): void;
+    abstract protected function extractDataFromFile(): void;
 }
