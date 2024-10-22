@@ -29,12 +29,16 @@ trait FileServiceTrait {
 
     protected Config $config;
 
-    protected string $filename;
+    protected string $file;
     protected ?Client $client = null;
     protected ?Document $document = null;
 
+    public final function getFile(): string {
+        return $this->file;
+    }
+
     public final function getFilename(): string {
-        return $this->filename;
+        return basename($this->file);
     }
 
     public final function getClient(): ?Client {
@@ -47,9 +51,9 @@ trait FileServiceTrait {
 
     protected function getMatches(): array {
         $matches = [];
-        if (!self::matchesPattern($this->filename, $matches)) {
-            $this->logger->error("Ungültiger Dateiname: {$this->filename}");
-            throw new InvalidArgumentException("Der Dateiname entspricht nicht dem erwarteten Muster: {$this->filename}");
+        if (!self::matchesPattern($this->file, $matches)) {
+            $this->logger->error("Ungültiger Dateiname: {$this->file}");
+            throw new InvalidArgumentException("Der Dateiname entspricht nicht dem erwarteten Muster: {$this->file}");
         }
         $this->logger->debug("Matches für ServiceKlasse (" . static::class . "):" . implode(", ", $matches));
 
@@ -96,7 +100,7 @@ trait FileServiceTrait {
         return static::PATTERN;
     }
 
-    public static function matchesPattern(string $filename, array &$matches = null): bool {
-        return preg_match(static::getPattern(), basename($filename), $matches) === 1;
+    public static function matchesPattern(string $file, array &$matches = null): bool {
+        return preg_match(static::getPattern(), basename($file), $matches) === 1;
     }
 }

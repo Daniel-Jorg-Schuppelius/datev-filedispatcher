@@ -34,6 +34,8 @@ class Config {
     private ?array $perYear = null;
     private ?array $perPeriod = null;
 
+    private ?array $excludedFolders = null;
+
     private function __construct() {
         $this->loadConfig();
     }
@@ -67,6 +69,7 @@ class Config {
         $this->datevDMSMapping = $config['DatevDMSMapping'] ?? null;
         $this->perYear = $config['PerYear'] ?? null;
         $this->perPeriod = $config['PerPeriod'] ?? null;
+        $this->excludedFolders = $config['ExcludedFolders'] ?? null;
     }
 
     private function setApiConfig(array $apiConfig): void {
@@ -163,6 +166,10 @@ class Config {
 
     public function getDatevDMSMapping(): ?array {
         return $this->datevDMSMapping;
+    }
+
+    public function getExcludedFolders(): ?array {
+        return $this->excludedFolders;
     }
 
     public function getPerYear(): ?array {

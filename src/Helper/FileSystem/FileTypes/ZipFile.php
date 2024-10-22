@@ -42,46 +42,46 @@ class ZipFile extends HelperAbstract {
         return true;
     }
 
-    public static function extract(string $filename, string $destinationFolder, bool $deleteSourceFile = true): void {
+    public static function extract(string $file, string $destinationFolder, bool $deleteSourceFile = true): void {
         self::setLogger();
         $zip = new ZipArchive();
 
-        if ($zip->open($filename) === true) {
+        if ($zip->open($file) === true) {
             $zip->extractTo($destinationFolder);
             $zip->close();
-            self::$logger->info("ZIP-Datei erfolgreich extrahiert: $filename nach $destinationFolder");
+            self::$logger->info("ZIP-Datei erfolgreich extrahiert: $file nach $destinationFolder");
 
             if ($deleteSourceFile) {
-                File::delete($filename);
+                File::delete($file);
             }
         } else {
-            self::$logger->error("Fehler beim Extrahieren der ZIP-Datei: $filename");
-            throw new Exception("Fehler beim Extrahieren der ZIP-Datei: $filename");
+            self::$logger->error("Fehler beim Extrahieren der ZIP-Datei: $file");
+            throw new Exception("Fehler beim Extrahieren der ZIP-Datei: $file");
         }
     }
 
-    public static function isValid(string $filename): bool {
+    public static function isValid(string $file): bool {
         self::setLogger();
         $zip = new ZipArchive();
-        $result = $zip->open($filename);
+        $result = $zip->open($file);
 
         if ($result === true) {
-            self::$logger->info("ZIP-Datei ist gültig: $filename");
+            self::$logger->info("ZIP-Datei ist gültig: $file");
             $zip->close();
             return true;
         } else {
             switch ($result) {
                 case ZipArchive::ER_NOZIP:
-                    self::$logger->error("Die Datei ist keine gültige ZIP-Datei: $filename");
+                    self::$logger->error("Die Datei ist keine gültige ZIP-Datei: $file");
                     break;
                 case ZipArchive::ER_INCONS:
-                    self::$logger->error("Das ZIP-Archiv ist inkonsistent: $filename");
+                    self::$logger->error("Das ZIP-Archiv ist inkonsistent: $file");
                     break;
                 case ZipArchive::ER_MEMORY:
-                    self::$logger->error("Speicherproblem beim Öffnen des ZIP-Archivs: $filename");
+                    self::$logger->error("Speicherproblem beim Öffnen des ZIP-Archivs: $file");
                     break;
                 default:
-                    self::$logger->error("Unbekannter Fehler beim Öffnen des ZIP-Archivs: $filename");
+                    self::$logger->error("Unbekannter Fehler beim Öffnen des ZIP-Archivs: $file");
             }
             return false;
         }

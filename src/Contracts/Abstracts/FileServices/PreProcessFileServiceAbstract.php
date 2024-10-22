@@ -25,23 +25,23 @@ use Psr\Log\LoggerInterface;
 abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
     use FileServiceTrait;
 
-    public function __construct(string $filename, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
+    public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
         $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->config = Config::getInstance();
 
-        $this->filename = $filename;
+        $this->file = $file;
 
         try {
-            $this->extractDataFromFilename();
+            $this->extractDataFromFile();
         } catch (\Exception $e) {
             $this->logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
             throw $e;
         }
     }
 
-    abstract protected function extractDataFromFilename(): void;
+    abstract protected function extractDataFromFile(): void;
 
     abstract public function preProcess(): bool;
 }
