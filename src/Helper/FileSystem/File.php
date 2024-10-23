@@ -118,6 +118,10 @@ class File extends HelperAbstract implements FileSystemInterface {
             throw new Exception("Die Datei $newName existiert bereits");
         }
 
+        if ($newName == basename($newName)) {
+            $newName = dirname($oldName) . DIRECTORY_SEPARATOR . $newName;
+        }
+
         if (!rename($oldName, $newName)) {
             self::$logger->error("Fehler beim Umbenennen der Datei von $oldName nach $newName");
             throw new Exception("Fehler beim Umbenennen der Datei von $oldName nach $newName");

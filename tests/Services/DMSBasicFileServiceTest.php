@@ -54,7 +54,7 @@ class DMSBasicFileServiceTest extends DocumentTest {
         $service = new DMSBasicFileService($this->testFile);
         $service->process();
 
-        $this->assertEquals('219628', $service->getDocument()->getNumber());
+        $this->assertEquals(219628, $service->getDocument()->getNumber());
     }
 
     public function testFileDispatcherDMSBasicFileServiceProcessing(): void {

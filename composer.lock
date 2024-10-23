@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk.git",
-                "reference": "c4d0c6635ef4762c3b1403b069d77cb76dca9e22"
+                "reference": "912e59da7fdee4f854a4cbc59c081d7234f9fcbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/c4d0c6635ef4762c3b1403b069d77cb76dca9e22",
-                "reference": "c4d0c6635ef4762c3b1403b069d77cb76dca9e22",
+                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/912e59da7fdee4f854a4cbc59c081d7234f9fcbb",
+                "reference": "912e59da7fdee4f854a4cbc59c081d7234f9fcbb",
                 "shasum": ""
             },
             "require": {
@@ -51,20 +51,20 @@
                 "issues": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/issues",
                 "source": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/tree/main"
             },
-            "time": "2024-10-17T05:49:39+00:00"
+            "time": "2024-10-22T13:04:30+00:00"
         },
         {
             "name": "daniel-jorg-schuppelius/php-api-toolkit",
-            "version": "v1.1.3",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit.git",
-                "reference": "1ef86dd87ce2914b62c8f6c2470d9e6bdc6173b8"
+                "reference": "1556bbe0de999e7578017138fffa22f4824706a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/php-api-toolkit/zipball/1ef86dd87ce2914b62c8f6c2470d9e6bdc6173b8",
-                "reference": "1ef86dd87ce2914b62c8f6c2470d9e6bdc6173b8",
+                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/php-api-toolkit/zipball/1556bbe0de999e7578017138fffa22f4824706a7",
+                "reference": "1556bbe0de999e7578017138fffa22f4824706a7",
                 "shasum": ""
             },
             "require": {
@@ -94,9 +94,9 @@
             "description": "Reused codes for my api php sdks",
             "support": {
                 "issues": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/issues",
-                "source": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/tree/v1.1.3"
+                "source": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/tree/v1.2.0"
             },
-            "time": "2024-10-19T13:55:44+00:00"
+            "time": "2024-10-22T12:59:51+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

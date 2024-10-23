@@ -22,6 +22,7 @@ use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
+use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
 use Exception;
 use OutOfRangeException;
 use Psr\Log\LoggerInterface;
@@ -34,6 +35,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
         $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
+        $this->payrollClientsEndpoint = new PayrollClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->config = Config::getInstance();
 

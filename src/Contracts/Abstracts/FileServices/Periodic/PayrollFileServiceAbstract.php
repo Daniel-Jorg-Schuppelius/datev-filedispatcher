@@ -21,7 +21,7 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
         $matches = $this->getMatches();
 
         if (array_key_exists("tenant", $matches)) {
-            $this->setClient($matches["tenant"]);
+            $this->setClients($matches["tenant"]);
         }
 
         if (array_key_exists("year", $matches) && array_key_exists("month", $matches)) {

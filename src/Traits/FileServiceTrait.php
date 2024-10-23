@@ -14,8 +14,10 @@ use App\Config\Config;
 use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
+use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
+use Datev\Entities\Payroll\Clients\Client as PayrollClient;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -25,13 +27,16 @@ trait FileServiceTrait {
 
     protected ClientsEndpoint $clientsEndpoint;
     protected DocumentsEndpoint $documentEndpoint;
+    protected PayrollClientsEndpoint $payrollClientsEndpoint;
     protected LoggerInterface $logger;
+
 
     protected Config $config;
 
     protected string $file;
     protected ?Client $client = null;
     protected ?Document $document = null;
+    protected ?PayrollClient $payrollClient = null;
 
     public final function getFile(): string {
         return $this->file;
@@ -60,13 +65,35 @@ trait FileServiceTrait {
         return $matches;
     }
 
+    protected function setClients(string $clientNumber): void {
+        $this->setClient($clientNumber);
+        $this->setPayrollClient($clientNumber);
+    }
+
     protected function setClient(string $clientNumber): void {
         $clients = $this->clientsEndpoint->search(["filter" => "number eq $clientNumber"]);
         if (is_null($clients)) {
             $this->logger->error("Client konnte nicht gefunden werden: $clientNumber");
+            $this->logger->notice("Client angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Client konnte nicht gefunden werden: $clientNumber");
         }
         $this->client = $clients->getFirstValue();
+    }
+
+    protected function setPayrollClient(string $clientNumber): void {
+        $payrollClients = $this->payrollClientsEndpoint->search();
+        if (!is_null($payrollClients)) {
+            $this->payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
+            if (is_null($this->payrollClient)) {
+                $this->logger->error("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
+                $this->logger->notice("Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+                throw new RuntimeException("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
+            }
+        } else {
+            $this->logger->error("Es wurden keine Clients (Payroll) gefunden.");
+            $this->logger->notice("Payroll aktiv? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            throw new RuntimeException("Es wurden keine Clients (Payroll) gefunden.");
+        }
     }
 
     protected function setDocument(string $documentNumber): void {
@@ -79,13 +106,21 @@ trait FileServiceTrait {
         $this->document = $documents->getFirstValue();
     }
 
-    protected function setPropertiesFromDMS(string $documentNumber) {
+    protected function setPropertiesFromDMS(string $documentNumber, bool $withPayroll = false): void {
         $this->setDocument($documentNumber);
 
         $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
         if (is_null($this->client)) {
-            $this->logger->error("Client konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
-            throw new RuntimeException("Client konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+            $this->logger->error("Client (Client Master Data) konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+            throw new RuntimeException("Client (Client Master Data) konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+        }
+
+        if ($withPayroll) {
+            try {
+                $this->setPayrollClient((string)$this->client->getNumber(), true);
+            } catch (RuntimeException $e) {
+                $this->logger->debug("Exception abgefangen: " . $e->getMessage());
+            }
         }
     }
 
