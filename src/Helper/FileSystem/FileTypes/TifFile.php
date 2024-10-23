@@ -101,8 +101,8 @@ class TifFile extends HelperAbstract {
         }
 
         $command = $compressed
-            ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile' 2>&1"
-            : "tiff2pdf -F -n -c internal_dispatcher -a internal_dispatcher -m0 -o '$pdfFile' '$tiffFile' 2>&1";
+            ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1"
+            : "tiff2pdf -F -n -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1";
 
         Shell::executeShellCommand($command);
 

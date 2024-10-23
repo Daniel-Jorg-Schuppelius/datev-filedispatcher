@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace App\Helper\FileSystem\FileTypes;
 
 use App\Contracts\Abstracts\HelperAbstract;
+use App\Helper\FileSystem\File;
 use App\Helper\Shell;
 use Exception;
 
@@ -52,6 +53,6 @@ class PdfFile extends HelperAbstract {
         $output = [];
         $resultCode = 0;
 
-        return Shell::executeShellCommand($command, $output, $resultCode, false, 1) && empty($output);
+        return File::exists($file) && Shell::executeShellCommand($command, $output, $resultCode, false, 1) && empty($output);
     }
 }

@@ -45,6 +45,10 @@ class TiffFileTest extends TestCase {
     }
 
     public function testConvertToPDF() {
+        if (empty($this->testFile)) {
+            $this->markTestSkipped('Test file not found');
+        }
+
         $pdfFile = str_replace('.tiff', '.pdf', $this->testFile); // Ziel PDF-Dateiname
 
         TifFile::convertToPdf($this->testFile);
