@@ -22,13 +22,14 @@ class PayrollProcessFileService extends PreProcessFileServiceAbstract {
         $this->logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
 
-        $this->setPropertiesFromDMS($matches[1]);
+        $this->setPropertiesFromDMS($matches[1], true);
     }
 
     public function preProcess(): bool {
         $matches = $this->getMatches();;
 
-        $employee = $this->payrollClient->getEmployees()->getFirstValue('id', $matches[5]);
+        $employees = $this->payrollClient->getEmployees();
+        $employee = $employees->getFirstValue('id', $matches[5]);
         if (!is_null($employee)) {
             match ($matches[4]) {
                 'Brutto_Netto' => $documentType = "Entgeltabrechnung",

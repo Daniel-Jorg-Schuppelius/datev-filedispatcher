@@ -33,11 +33,13 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     protected const SUBFOLDER = '';
 
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
-        $this->clientsEndpoint = new ClientsEndpoint($client ?? APIClientFactory::getClient());
-        $this->documentEndpoint = new DocumentsEndpoint($client ?? APIClientFactory::getClient());
-        $this->payrollClientsEndpoint = new PayrollClientsEndpoint($client ?? APIClientFactory::getClient());
         $this->logger = $logger ?? LoggerFactory::getLogger();
         $this->config = Config::getInstance();
+
+        $client = $client ?? APIClientFactory::getClient();
+        $this->clientsEndpoint = new ClientsEndpoint($client, $this->logger);
+        $this->documentEndpoint = new DocumentsEndpoint($client, $this->logger);
+        $this->payrollClientsEndpoint = new PayrollClientsEndpoint($client, $this->logger);
 
         $this->file = $file;
 
