@@ -26,18 +26,23 @@ class TimeCodeProcessFileService extends PreProcessFileServiceAbstract {
     protected function extractDataFromFile(): void {
         $this->logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
+        $date = false;
 
         if (strpos($matches[1], '_') !== false) {
-            $this->fileDate = DateTime::createFromFormat('Ymd_His', $matches[1]);
+            $date = DateTime::createFromFormat('Ymd_His', $matches[1]);
         } else {
-            $this->fileDate = DateTime::createFromFormat('YmdHis', $matches[1]);
+            $date = DateTime::createFromFormat('YmdHis', $matches[1]);
+        }
+
+        if (!$date) {
+            $this->fileDate = $date;
         }
     }
 
     public function preProcess(): bool {
         $matches = $this->getMatches();
 
-        if ($this->fileDate && $this->fileDate->format(strpos($matches[1], '_') !== false ? 'Ymd_His' : 'YmdHis') === $matches[1]) {
+        if (!is_null($this->fileDate) && $this->fileDate->format(strpos($matches[1], '_') !== false ? 'Ymd_His' : 'YmdHis') === $matches[1]) {
             File::rename($this->file, str_replace($matches[1], "", $this->file));
             return false; // Die Verarbeitung wurde abgebrochen, da die Datei umbenannt wurde
         }
