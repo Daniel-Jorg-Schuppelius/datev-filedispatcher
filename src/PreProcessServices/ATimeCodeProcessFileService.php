@@ -14,7 +14,7 @@ use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use App\Helper\FileSystem\File;
 use DateTime;
 
-class TimeCodeProcessFileService extends PreProcessFileServiceAbstract {
+class ATimeCodeProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - BvFA Feststellungsbescheid 2022 - 20241021132856_5.tif
     // oder
     // 000000 - BvFA Feststellungsbescheid 2022 - 20241021_132856_5.tif

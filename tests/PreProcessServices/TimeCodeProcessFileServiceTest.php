@@ -11,7 +11,7 @@
 namespace Tests\PreProcessServices;
 
 use App\Helper\FileDispatcher;
-use App\PreProcessServices\TimeCodeProcessFileService;
+use App\PreProcessServices\ATimeCodeProcessFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class TimeCodeProcessFileServiceTest extends DocumentTest {
@@ -29,7 +29,7 @@ class TimeCodeProcessFileServiceTest extends DocumentTest {
         }
 
         $matches = [];
-        $this->assertTrue(TimeCodeProcessFileService::matchesPattern($this->testFile, $matches));
+        $this->assertTrue(ATimeCodeProcessFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
         $this->assertCount(2, $matches);
     }
@@ -39,10 +39,10 @@ class TimeCodeProcessFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $this->assertTrue(TimeCodeProcessFileService::matchesPattern($this->testFile));
+        $this->assertTrue(ATimeCodeProcessFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
-        $this->assertFalse(TimeCodeProcessFileService::matchesPattern($invalidFilename));
+        $this->assertFalse(ATimeCodeProcessFileService::matchesPattern($invalidFilename));
     }
 
     public function testPayrollFileServiceProcessing() {
@@ -52,7 +52,7 @@ class TimeCodeProcessFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $service = new TimeCodeProcessFileService($this->testFile);
+        $service = new ATimeCodeProcessFileService($this->testFile);
         $service->preProcess();
 
         $this->assertEquals('20542', $service->getClient()->getNumber());
