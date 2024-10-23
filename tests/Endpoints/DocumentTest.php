@@ -15,7 +15,6 @@ use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\Entities\DocumentManagement\Documents\Documents;
 use Tests\Config\TestConfig;
 use Tests\Contracts\EndpointTest;
-use Tests\TestDispatcherFactory;
 
 class DocumentTest extends EndpointTest {
     protected ?ClientsEndpoint $preEndpoint;
@@ -38,7 +37,7 @@ class DocumentTest extends EndpointTest {
         }
         $documents = $this->endpoint->search(["filter" => "number eq " . $this->testConfig->getDocumentNumber()]);
         $this->assertInstanceOf(Documents::class, $documents);
-        $document = $documents->getValues()[0];
+        $document = $documents->getFirstValue();
         $client = $this->preEndpoint->get($document->getCorrespondencePartnerGUID());
     }
 }

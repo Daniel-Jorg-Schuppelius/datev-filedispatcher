@@ -42,8 +42,8 @@ abstract class DMSFileServiceAbstract extends FileServiceAbstract {
         return InternalStoreMapper::getMapping4InternalStorePath($this->document);
     }
 
-    protected function setPropertiesFromDMS(string $documentNumber) {
-        parent::setPropertiesFromDMS($documentNumber);
+    protected function setPropertiesFromDMS(string $documentNumber, bool $withPayroll = false): void {
+        parent::setPropertiesFromDMS($documentNumber, $withPayroll);
         $this->setDate($this->document->getYear(), $this->document->getMonth());
     }
 }
