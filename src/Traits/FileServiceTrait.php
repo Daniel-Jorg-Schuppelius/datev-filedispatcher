@@ -18,6 +18,7 @@ use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoin
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 use Datev\Entities\Payroll\Clients\Client as PayrollClient;
+use Datev\Entities\Payroll\Employees\Employees as PayrollEmployees;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -37,6 +38,7 @@ trait FileServiceTrait {
     protected ?Client $client = null;
     protected ?Document $document = null;
     protected ?PayrollClient $payrollClient = null;
+    protected ?PayrollEmployees $payrollEmployees = null;
 
     public final function getFile(): string {
         return $this->file;

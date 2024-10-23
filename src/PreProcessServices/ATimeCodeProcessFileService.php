@@ -43,10 +43,9 @@ class ATimeCodeProcessFileService extends PreProcessFileServiceAbstract {
         $matches = $this->getMatches();
 
         if (!is_null($this->fileDate) && $this->fileDate->format(strpos($matches[1], '_') !== false ? 'Ymd_His' : 'YmdHis') === $matches[1]) {
-            File::rename($this->file, str_replace($matches[1], "", $this->file));
-            return false; // Die Verarbeitung wurde abgebrochen, da die Datei umbenannt wurde
+            File::rename($this->file, str_replace(" - " . $matches[1], "", $this->file));
         }
 
-        return true; // Fortfahren mit der Verarbeitung
+        return false; // Es können noch weitere Preprozessoren antreten.
     }
 }

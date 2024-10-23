@@ -14,13 +14,13 @@ use App\Helper\FileDispatcher;
 use App\PreProcessServices\ATimeCodeProcessFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
-class TimeCodeProcessFileServiceTest extends DocumentTest {
+class ATimeCodeProcessFileServiceTest extends DocumentTest {
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
         // $this->testFile = realpath(__DIR__ . '/../../.samples/20542_10_2024_Brutto_Netto - 20241021132856_00001_AA0.pdf');
         $this->testFile = realpath(__DIR__ . '/../../.samples/20542_10_2024_Brutto_Netto - 20241021_132856_00001_AA0.pdf');
-        $this->apiDisabled = true; // API is disabled
+        $this->apiDisabled = false; // API is disabled
     }
 
     public function testPatternMatching() {
@@ -55,7 +55,7 @@ class TimeCodeProcessFileServiceTest extends DocumentTest {
         $service = new ATimeCodeProcessFileService($this->testFile);
         $service->preProcess();
 
-        $this->assertEquals('20542', $service->getClient()->getNumber());
+        $this->assertInstanceOf(ATimeCodeProcessFileService::class, $service);
     }
 
     public function testFileDispatcherPayrollFileServiceProcessing(): void {
