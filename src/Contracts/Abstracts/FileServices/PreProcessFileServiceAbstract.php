@@ -21,6 +21,7 @@ use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
@@ -39,7 +40,7 @@ abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInt
 
         try {
             $this->extractDataFromFile();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
             throw $e;
         }

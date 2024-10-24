@@ -18,7 +18,6 @@ use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoin
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 use Datev\Entities\Payroll\Clients\Client as PayrollClient;
-use Datev\Entities\Payroll\Employees\Employees as PayrollEmployees;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -38,7 +37,6 @@ trait FileServiceTrait {
     protected ?Client $client = null;
     protected ?Document $document = null;
     protected ?PayrollClient $payrollClient = null;
-    protected ?PayrollEmployees $payrollEmployees = null;
 
     public final function getFile(): string {
         return $this->file;
@@ -85,12 +83,14 @@ trait FileServiceTrait {
     protected function setPayrollClient(string $clientNumber): void {
         $payrollClients = $this->payrollClientsEndpoint->search();
         if (!is_null($payrollClients)) {
-            $this->payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
+            $payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
             if (is_null($this->payrollClient)) {
                 $this->logger->error("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
                 $this->logger->notice("Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
                 throw new RuntimeException("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
             }
+
+            $this->payrollClient = $this->payrollClientsEndpoint->get($payrollClient->getID()) ?? $payrollClient;
         } else {
             $this->logger->error("Es wurden keine Clients (Payroll) gefunden.");
             $this->logger->notice("Payroll aktiv? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");

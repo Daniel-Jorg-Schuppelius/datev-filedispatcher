@@ -42,7 +42,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
         $matches = [];
         if (preg_match(self::FILE_EXTENSION_PATTERN, $this->document->getExtension())) {
             $this->logger->info("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->file}");
-            return false;
+            return true;
         }
 
         if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $this->document->getExtension(), $matches)) {
@@ -56,7 +56,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             $sollFileCount = (int)$matches[1];
             if ($istFileCount != $sollFileCount) {
                 $this->logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->file}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
-                return true;
+                return false;
             }
 
             if (!empty($tiffFiles)) {
