@@ -14,12 +14,12 @@ use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use App\Helper\FileSystem\File;
 use DateTime;
 
-class ATimeCodeProcessFileService extends PreProcessFileServiceAbstract {
-    // 000000 - BvFA Feststellungsbescheid 2022 - 20241021132856_5.tif
+class PDFTimeCodeProcessFileService extends PreProcessFileServiceAbstract {
+    // 000000 - BvFA Feststellungsbescheid 2022 - 20241021132856 Abc 001293.pdf
     // oder
-    // 000000 - BvFA Feststellungsbescheid 2022 - 20241021_132856_5.tif
+    // 000000 - BvFA Feststellungsbescheid 2022 - 20241021_132856.pdf
     //                                   1
-    protected const PATTERN = '/ - (\d{8}(?:_\d{6}|\d{6}))(?=_)/';
+    protected const PATTERN = '/(\d{8}(?:_\d{6}|\d{6})).*\.pdf$/i';
 
     private ?DateTime $fileDate = null;
 
@@ -34,7 +34,7 @@ class ATimeCodeProcessFileService extends PreProcessFileServiceAbstract {
             $date = DateTime::createFromFormat('YmdHis', $matches[1]);
         }
 
-        if (!$date) {
+        if ($date) {
             $this->fileDate = $date;
         }
     }
@@ -46,6 +46,6 @@ class ATimeCodeProcessFileService extends PreProcessFileServiceAbstract {
             File::rename($this->file, str_replace(" - " . $matches[1], "", $this->file));
         }
 
-        return false; // Es können noch weitere Preprozessoren antreten.
+        return true;
     }
 }
