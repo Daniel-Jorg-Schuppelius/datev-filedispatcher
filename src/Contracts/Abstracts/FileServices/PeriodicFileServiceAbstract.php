@@ -35,7 +35,7 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
             return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
         }
 
-        $this->logger->error("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
+        $this->logError("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
         return null;
     }
 }

@@ -10,6 +10,7 @@
 
 namespace App\Traits;
 
+use APIToolkit\Traits\ErrorLog;
 use App\Config\Config;
 use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
@@ -23,13 +24,12 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 trait FileServiceTrait {
+    use ErrorLog;
     protected const PATTERN = '';
 
     protected ClientsEndpoint $clientsEndpoint;
     protected DocumentsEndpoint $documentEndpoint;
     protected PayrollClientsEndpoint $payrollClientsEndpoint;
-    protected LoggerInterface $logger;
-
 
     protected Config $config;
 
@@ -57,10 +57,10 @@ trait FileServiceTrait {
     protected function getMatches(): array {
         $matches = [];
         if (!self::matchesPattern($this->file, $matches)) {
-            $this->logger->error("Ungültiger Dateiname: {$this->file}");
+            $this->logError("Ungültiger Dateiname: {$this->file}");
             throw new InvalidArgumentException("Der Dateiname entspricht nicht dem erwarteten Muster: {$this->file}");
         }
-        $this->logger->debug("Matches für ServiceKlasse (" . static::class . "):" . implode(", ", $matches));
+        $this->logDebug("Matches für ServiceKlasse (" . static::class . "):" . implode(", ", $matches));
 
         return $matches;
     }
@@ -73,8 +73,8 @@ trait FileServiceTrait {
     protected function setClient(string $clientNumber): void {
         $clients = $this->clientsEndpoint->search(["filter" => "number eq $clientNumber"]);
         if (is_null($clients)) {
-            $this->logger->error("Client konnte nicht gefunden werden: $clientNumber");
-            $this->logger->notice("Client angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            $this->logError("Client konnte nicht gefunden werden: $clientNumber");
+            $this->logNotice("Client angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Client konnte nicht gefunden werden: $clientNumber");
         }
         $this->client = $clients->getFirstValue();
@@ -84,16 +84,16 @@ trait FileServiceTrait {
         $payrollClients = $this->payrollClientsEndpoint->search();
         if (!is_null($payrollClients)) {
             $payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
-            if (is_null($this->payrollClient)) {
-                $this->logger->error("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
-                $this->logger->notice("Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            if (is_null($payrollClient)) {
+                $this->logError("Client (Payroll) konnte nicht gefunden werden: $clientNumber");
+                $this->logNotice("Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
                 throw new RuntimeException("Client (Payroll) konnte nicht gefunden werden: " . $clientNumber);
             }
 
             $this->payrollClient = $this->payrollClientsEndpoint->get($payrollClient->getID()) ?? $payrollClient;
         } else {
-            $this->logger->error("Es wurden keine Clients (Payroll) gefunden.");
-            $this->logger->notice("Payroll aktiv? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            $this->logError("Es wurden keine Clients (Payroll) gefunden.");
+            $this->logNotice("Payroll aktiv? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Es wurden keine Clients (Payroll) gefunden.");
         }
     }
@@ -101,8 +101,8 @@ trait FileServiceTrait {
     protected function setDocument(string $documentNumber): void {
         $documents = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"]);
         if (is_null($documents)) {
-            $this->logger->error("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
-            $this->logger->notice("Document im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            $this->logError("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
+            $this->logNotice("Document im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
         }
         $this->document = $documents->getFirstValue();
@@ -113,7 +113,7 @@ trait FileServiceTrait {
 
         $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
         if (is_null($this->client)) {
-            $this->logger->error("Client (Client Master Data) konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
+            $this->logError("Client (Client Master Data) konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
             throw new RuntimeException("Client (Client Master Data) konnte nicht gefunden werden: $this->document->getCorrespondencePartnerGUID()");
         }
 
@@ -121,7 +121,7 @@ trait FileServiceTrait {
             try {
                 $this->setPayrollClient((string)$this->client->getNumber(), true);
             } catch (RuntimeException $e) {
-                $this->logger->debug("Exception abgefangen: " . $e->getMessage());
+                $this->logDebug("Exception abgefangen: " . $e->getMessage());
             }
         }
     }

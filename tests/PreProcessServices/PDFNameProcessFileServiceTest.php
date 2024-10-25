@@ -10,12 +10,11 @@
 
 namespace Tests\PreProcessServices;
 
-use App\Helper\FileDispatcher;
 use App\Helper\FileSystem\File;
-use App\PreProcessServices\PDFFileNameProcessFileService;
+use App\PreProcessServices\PDFNameProcessFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
-class PDFFileNameProcessFileServiceTest extends DocumentTest {
+class PDFNameProcessFileServiceTest extends DocumentTest {
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
@@ -29,7 +28,7 @@ class PDFFileNameProcessFileServiceTest extends DocumentTest {
         }
 
         $matches = [];
-        $this->assertTrue(PDFFileNameProcessFileService::matchesPattern($this->testFile, $matches));
+        $this->assertTrue(PDFNameProcessFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
         $this->assertCount(2, $matches);
     }
@@ -39,10 +38,10 @@ class PDFFileNameProcessFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $this->assertTrue(PDFFileNameProcessFileService::matchesPattern($this->testFile));
+        $this->assertTrue(PDFNameProcessFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
-        $this->assertFalse(PDFFileNameProcessFileService::matchesPattern($invalidFilename));
+        $this->assertFalse(PDFNameProcessFileService::matchesPattern($invalidFilename));
     }
 
     public function testPayrollFileServiceProcessing() {
@@ -50,10 +49,10 @@ class PDFFileNameProcessFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $service = new PDFFileNameProcessFileService($this->testFile);
+        $service = new PDFNameProcessFileService($this->testFile);
         $service->preProcess();
 
-        $this->assertInstanceOf(PDFFileNameProcessFileService::class, $service);
+        $this->assertInstanceOf(PDFNameProcessFileService::class, $service);
         File::delete(__DIR__ . '/../../.samples/235309 - ESt-Bescheid 2023 - S25C-924070208151.pdf');
     }
 }
