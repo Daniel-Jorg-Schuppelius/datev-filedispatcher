@@ -8,17 +8,17 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace Tests\Services;
+namespace Tests\Services\Payroll;
 
 use App\Helper\FileDispatcher;
-use App\Services\Payroll\EmployeePayrollFileService;
+use App\Services\Payroll\EmployeeFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
-class EmployeePayrollFileServiceTest extends DocumentTest {
+class EmployeeFileServiceTest extends DocumentTest {
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
-        $this->testFile = realpath(__DIR__ . '/../../.samples/20542_10_2024_Brutto_Netto_00001_AA0.pdf');
+        $this->testFile = realpath(__DIR__ . '/../../../.samples/20542_10_2024_Brutto_Netto_00001_AA0.pdf');
         $this->apiDisabled = false; // API is disabled
     }
 
@@ -28,7 +28,7 @@ class EmployeePayrollFileServiceTest extends DocumentTest {
         }
 
         $matches = [];
-        $this->assertTrue(EmployeePayrollFileService::matchesPattern($this->testFile, $matches));
+        $this->assertTrue(EmployeeFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
         $this->assertCount(10, $matches);
     }
@@ -38,10 +38,10 @@ class EmployeePayrollFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $this->assertTrue(EmployeePayrollFileService::matchesPattern($this->testFile));
+        $this->assertTrue(EmployeeFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
-        $this->assertFalse(EmployeePayrollFileService::matchesPattern($invalidFilename));
+        $this->assertFalse(EmployeeFileService::matchesPattern($invalidFilename));
     }
 
     public function testPayrollFileServiceProcessing() {
@@ -51,7 +51,7 @@ class EmployeePayrollFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $service = new EmployeePayrollFileService($this->testFile);
+        $service = new EmployeeFileService($this->testFile);
         $service->Process();
 
         $this->assertEquals('20542', $service->getClient()->getNumber());

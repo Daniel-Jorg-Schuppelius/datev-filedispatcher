@@ -134,6 +134,15 @@ class TifFile extends HelperAbstract {
 
     public static function merge(array $tiffFiles, string $mergedFile, bool $deleteSourceFiles = true): void {
         self::setLogger();
+
+        if (File::exists($mergedFile)) {
+            self::$logger->error("Die Datei existiert bereits: $mergedFile");
+            throw new Exception("Die Datei existiert bereits: $mergedFile");
+        } elseif (!Files::exists($tiffFiles)) {
+            self::$logger->error("Die Dateien existieren nicht: " . implode(", ", $tiffFiles));
+            throw new NotFoundException("Die Dateien existieren nicht: " . implode(", ", $tiffFiles));
+        }
+
         $command = sprintf("tiffcp %s %s", implode(" ", array_map('escapeshellarg', $tiffFiles)), escapeshellarg($mergedFile));
         Shell::executeShellCommand($command);
 
@@ -146,6 +155,12 @@ class TifFile extends HelperAbstract {
 
     public static function isValid(string $file): bool {
         self::setLogger();
+
+        if (!File::exists($file)) {
+            self::$logger->error("Datei existiert nicht: $file");
+            throw new NotFoundException("Datei existiert nicht: $file");
+        }
+
         if (preg_match(self::FILE_EXTENSION_PATTERN, $file)) {
             $command = sprintf("tiffinfo %s 2>&1", escapeshellarg($file));
             $output = [];

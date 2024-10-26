@@ -46,6 +46,10 @@ trait FileServiceTrait {
         return basename($this->file);
     }
 
+    public final function getFolder(): string {
+        return dirname($this->file);
+    }
+
     public final function getClient(): ?Client {
         return $this->client;
     }

@@ -62,6 +62,12 @@ class ZipFile extends HelperAbstract {
 
     public static function isValid(string $file): bool {
         self::setLogger();
+
+        if (!File::exists($file)) {
+            self::$logger->error("Datei $file nicht gefunden.");
+            throw new Exception("Datei $file nicht gefunden.");
+        }
+
         $zip = new ZipArchive();
         $result = $zip->open($file);
 
