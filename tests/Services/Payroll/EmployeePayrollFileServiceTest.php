@@ -8,18 +8,18 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace Tests\Services;
+namespace Tests\Services\Payroll;
 
 use App\Helper\FileDispatcher;
-use App\Services\Payroll\PayrollFileService;
+use App\Services\Payroll\EmployeePayrollFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
-class PayrollFileServiceTest extends DocumentTest {
+class EmployeePayrollFileServiceTest extends DocumentTest {
     public function __construct($name) {
         parent::__construct($name);
         // Pfad zur Testdatei
-        $this->testFile = realpath(__DIR__ . '/../../.samples/20542_00001_Wegner_Regina_09_2023_Brutto_Netto_O04.pdf');
-        $this->apiDisabled = true; // API is disabled
+        $this->testFile = realpath(__DIR__ . '/../../../.samples/20542_00001_Wegner_Regina_09_2023_Brutto_Netto_O04.pdf');
+        $this->apiDisabled = false; // API is disabled
     }
 
     public function testPatternMatching() {
@@ -28,7 +28,7 @@ class PayrollFileServiceTest extends DocumentTest {
         }
 
         $matches = [];
-        $this->assertTrue(PayrollFileService::matchesPattern($this->testFile, $matches));
+        $this->assertTrue(EmployeePayrollFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
         $this->assertCount(10, $matches);
     }
@@ -38,10 +38,10 @@ class PayrollFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $this->assertTrue(PayrollFileService::matchesPattern($this->testFile));
+        $this->assertTrue(EmployeePayrollFileService::matchesPattern($this->testFile));
 
         $invalidFilename = 'some_invalid_file_name.txt';
-        $this->assertFalse(PayrollFileService::matchesPattern($invalidFilename));
+        $this->assertFalse(EmployeePayrollFileService::matchesPattern($invalidFilename));
     }
 
     public function testPayrollFileServiceProcessing() {
@@ -51,7 +51,7 @@ class PayrollFileServiceTest extends DocumentTest {
             $this->markTestSkipped('Test file not found');
         }
 
-        $service = new PayrollFileService($this->testFile);
+        $service = new EmployeePayrollFileService($this->testFile);
         $service->process();
 
         $this->assertEquals('9', $service->getMonth());

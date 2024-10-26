@@ -18,8 +18,10 @@ use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
 use App\Helper\FileSystem\File;
 use App\Helper\FileSystem\Files;
+use App\Helper\FileSystem\FileTypes\CsvFile;
 use App\Helper\FileSystem\FileTypes\PdfFile;
 use App\Helper\FileSystem\FileTypes\TifFile;
+use App\Helper\FileSystem\FileTypes\XmlFile;
 use App\Helper\FileSystem\FileTypes\ZipFile;
 use Exception;
 use ReflectionClass;
@@ -31,7 +33,7 @@ class FileDispatcher extends HelperAbstract {
     protected static string $preProcessNamespace = 'App\\PreProcessServices';
     protected static ?array $services = null;
     protected static ?array $preProcessServices = null;
-    protected static array $fileTypesWithoutGenericPreProcessing = ['xlsm', 'csv'];
+    protected static array $fileTypesWithoutGenericPreProcessing = ['xlsm', 'txt'];
 
     // Allgemeine Methode für das Setzen von Services oder PreProcessServices
     protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
@@ -126,7 +128,7 @@ class FileDispatcher extends HelperAbstract {
     private static function preProcessFile(string $file): bool {
         self::setLogger();
 
-        $fileType = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $fileType = pathinfo($file, PATHINFO_EXTENSION);
 
         try {
             foreach (self::$preProcessServices as $preProcessServiceClass) {
@@ -153,15 +155,21 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function genericPreProcessFile(string $file, string $fileType): bool {
-        switch ($fileType) {
-            case 'zip':
-                self::preProcessZipFile($file);
+        switch (strtolower($fileType)) {
+            case 'csv':
+                self::preProcessCsvFile($file);
+                break;
+            case 'pdf':
+                self::preProcessPdfFile($file);
                 break;
             case 'tif':
                 self::preProcessTiffFile($file);
                 break;
-            case 'pdf':
-                self::preProcessPdfFile($file);
+            case 'xml':
+                self::preProcessXmlFile($file);
+                break;
+            case 'zip':
+                self::preProcessZipFile($file);
                 break;
             default:
                 self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $file");
@@ -180,14 +188,15 @@ class FileDispatcher extends HelperAbstract {
         }
     }
 
-    private static function preProcessTiffFile(string $file): void {
+    private static function preProcessCsvFile(string $file): void {
         self::setLogger();
         try {
-            self::checkAndRepairFile($file, 'image/tiff', [TifFile::class, 'repair']);
-            TifFile::convertToPdf($file);
-            self::$logger->info("TIFF-Datei $file wurde erfolgreich in PDF umgewandelt.");
+            if (!CsvFile::isWellFormed($file)) {
+                throw new Exception("Fehlerhafte CSV-Datei: $file");
+            }
+            self::$logger->info("CSV-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der TIFF-Datei $file: " . $e->getMessage());
+            self::$logger->error("Fehler bei der Vorverarbeitung der CSV-Datei $file: " . $e->getMessage());
         }
     }
 
@@ -200,6 +209,29 @@ class FileDispatcher extends HelperAbstract {
             self::$logger->info("PDF-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
             self::$logger->error("Fehler bei der Vorverarbeitung der PDF-Datei $file: " . $e->getMessage());
+        }
+    }
+
+    private static function preProcessTiffFile(string $file): void {
+        self::setLogger();
+        try {
+            self::checkAndRepairFile($file, 'image/tiff', [TifFile::class, 'repair']);
+            TifFile::convertToPdf($file);
+            self::$logger->info("TIFF-Datei $file wurde erfolgreich in PDF umgewandelt.");
+        } catch (Exception $e) {
+            self::$logger->error("Fehler bei der Vorverarbeitung der TIFF-Datei $file: " . $e->getMessage());
+        }
+    }
+
+    private static function preProcessXmlFile(string $file): void {
+        self::setLogger();
+        try {
+            if (!XmlFile::isWellFormed($file)) {
+                throw new Exception("Fehlerhafte XML-Datei: $file");
+            }
+            self::$logger->info("XML-Datei $file erfolgreich validiert.");
+        } catch (Exception $e) {
+            self::$logger->error("Fehler bei der Vorverarbeitung der XML-Datei $file: " . $e->getMessage());
         }
     }
 

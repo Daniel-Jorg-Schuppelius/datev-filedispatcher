@@ -69,19 +69,33 @@ class File extends HelperAbstract implements FileSystemInterface {
         return file_exists($file);
     }
 
-    public static function copy(string $sourceFile, string $destinationFile): void {
+    public static function copy(string $sourceFile, string $destinationFile, bool $overwrite = true): void {
         self::setLogger();
 
         if (!self::exists($sourceFile)) {
             self::$logger->error("Die Datei $sourceFile existiert nicht");
             throw new Exception("Die Datei $sourceFile existiert nicht");
-        } elseif (self::exists($destinationFile)) {
-            self::$logger->warning("Die Datei $destinationFile existiert bereits, wird überschrieben.");
         }
 
-        if (!copy($sourceFile, $destinationFile)) {
-            self::$logger->error("Fehler beim Kopieren der Datei von $sourceFile nach $destinationFile");
-            throw new Exception("Fehler beim Kopieren der Datei von $sourceFile nach $destinationFile");
+        if (self::exists($destinationFile)) {
+            if (!$overwrite) {
+                self::$logger->info("Die Datei $destinationFile existiert bereits und wird nicht überschrieben.");
+                return;
+            }
+            self::$logger->warning("Die Datei $destinationFile existiert bereits und wird überschrieben.");
+        }
+
+        if (!@copy($sourceFile, $destinationFile)) {
+            if (self::exists($destinationFile) && filesize($destinationFile) === 0) {
+                unlink($destinationFile);
+                self::$logger->warning("0-Byte-Datei $destinationFile nach fehlgeschlagenem Kopieren gelöscht.");
+            }
+
+            self::$logger->info("Zweiter Versuch, die Datei $sourceFile nach $destinationFile zu kopieren.");
+            if (!@copy($sourceFile, $destinationFile)) {
+                self::$logger->error("Fehler beim erneuten Kopieren der Datei von $sourceFile nach $destinationFile");
+                throw new Exception("Fehler beim erneuten Kopieren der Datei von $sourceFile nach $destinationFile");
+            }
         }
 
         self::$logger->info("Datei von $sourceFile nach $destinationFile kopiert");
@@ -130,7 +144,7 @@ class File extends HelperAbstract implements FileSystemInterface {
         self::$logger->debug("Datei umbenannt von $oldName zu $newName");
     }
 
-    public static function move(string $sourceFile, string $destinationFolder, ?string $destinationFileName = null): void {
+    public static function move(string $sourceFile, string $destinationFolder, ?string $destinationFileName = null, bool $overwrite = true): void {
         self::setLogger();
         $destinationFile = $destinationFolder . DIRECTORY_SEPARATOR . (is_null($destinationFileName) ? basename($sourceFile) : $destinationFileName);
 
@@ -140,13 +154,27 @@ class File extends HelperAbstract implements FileSystemInterface {
         } elseif (!self::exists($destinationFolder)) {
             self::$logger->error("Das Zielverzeichnis $destinationFolder existiert nicht");
             throw new Exception("Das Zielverzeichnis $destinationFolder existiert nicht");
-        } elseif (self::exists($destinationFile)) {
-            self::$logger->warning("Die Datei $destinationFile existiert bereits, wird überschrieben.");
         }
 
-        if (!rename($sourceFile, $destinationFile)) {
-            self::$logger->error("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
-            throw new Exception("Fehler beim Verschieben der Datei von $sourceFile nach $destinationFile");
+        if (self::exists($destinationFile)) {
+            if (!$overwrite) {
+                self::$logger->info("Die Datei $destinationFile existiert bereits und wird nicht überschrieben.");
+                return;
+            }
+            self::$logger->warning("Die Datei $destinationFile existiert bereits und wird überschrieben.");
+        }
+
+        if (!@rename($sourceFile, $destinationFile)) {
+            if (self::exists($destinationFile) && filesize($destinationFile) === 0) {
+                unlink($destinationFile);
+                self::$logger->warning("0-Byte-Datei $destinationFile nach fehlgeschlagenem Verschieben gelöscht.");
+            }
+
+            self::$logger->info("Zweiter Versuch, die Datei $sourceFile nach $destinationFile zu verschieben.");
+            if (!@rename($sourceFile, $destinationFile)) {
+                self::$logger->error("Fehler beim erneuten Verschieben der Datei von $sourceFile nach $destinationFile");
+                throw new Exception("Fehler beim erneuten Verschieben der Datei von $sourceFile nach $destinationFile");
+            }
         }
 
         self::$logger->debug("Datei von $sourceFile zu $destinationFile verschoben");
