@@ -20,11 +20,11 @@ class BookingBatchManualFileService  extends PayrollFileServiceAbstract {
     //                                                  1                  2              3              4       5
     protected const PATTERN = '/^LUG_Buchungsbelege_(\d{6,7})_(?<tenant>\d{5})_(?<year>\d{4})(?<month>\d{2})\.(csv|txt)$/i';
 
-    protected function getDestinationFilename(): string {
-        $matches = $this->getMatches();
+    // protected function getDestinationFilename(): string {
+    //     $matches = $this->getMatches();
 
-        $documentType = "Lohnbuchungsbelege";
+    //     $documentType = "Lohnbuchungsbelege";
 
-        return "{$documentType}.{$matches[5]}";
-    }
+    //     return "{$documentType}.{$matches[5]}";
+    // }
 }

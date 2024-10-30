@@ -19,9 +19,9 @@ class BookingBatchFileService extends PayrollFileServiceAbstract {
     //                                    1                  2                                3              4       5       6
     protected const PATTERN = '/^DTVF_(\d{6,7})_(?<tenant>\d{5})_LOHNBUCHUNGEN_LUG_(?<year>\d{4})(?<month>\d{2})_(\d{8})_(\d{4})\.csv$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "DTVF_Lohnbuchungen";
+    // protected function getDestinationFilename(): string {
+    //     $documentType = "DTVF_Lohnbuchungen";
 
-        return "{$documentType}.csv";
-    }
+    //     return "{$documentType}.csv";
+    // }
 }

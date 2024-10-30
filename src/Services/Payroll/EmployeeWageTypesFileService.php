@@ -19,11 +19,11 @@ class EmployeeWageTypesFileService extends PayrollFileServiceAbstract {
     //                               1                  2    3               4              5
     protected const PATTERN = '/^(\d{6,7})_(?<tenant>\d{5})_(.+)_(?<month>\d{2})_(?<year>\d{4})\.xlsm$/i';
 
-    protected function getDestinationFilename(): string {
-        $matches = $this->getMatches();
+    // protected function getDestinationFilename(): string {
+    //     $matches = $this->getMatches();
 
-        $documentType = "Lohnarten";
+    //     $documentType = "Lohnarten";
 
-        return "{$documentType} - {$matches[3]}.xlsm";
-    }
+    //     return "{$documentType} - {$matches[3]}.xlsm";
+    // }
 }

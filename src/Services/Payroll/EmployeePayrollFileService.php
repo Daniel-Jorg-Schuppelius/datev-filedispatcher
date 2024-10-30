@@ -32,7 +32,7 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
             if (!is_null($employees)) {
                 $employee = $employees->getFirstValue('id', $matches[2]);
                 if (!is_null($employee)) {
-                    return "{$documentType} - {$matches[2]}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                    return "{$documentType}_{$matches[2]}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
                 }
 
                 $this->logError("Mitarbeiter nicht gefunden: {$matches[5]}");
