@@ -19,11 +19,11 @@ class SEPAPayrollFileService extends PayrollFileServiceAbstract {
     //                                             1              2               3                  4
     protected const PATTERN = '/^SEPA-(?<tenant>\d{5})-(?<year>\d{4})_(?<month>\d{2})-[A-Z0-9]{2,3}-(.+)+\.xml$/i';
 
-    // protected function getDestinationFilename(): string {
-    //     $matches = $this->getMatches();
+    protected function getDestinationFilename(): string {
+        $matches = $this->getMatches();
 
-    //     $documentType = "SEPA";
+        $documentType = "SEPA";
 
-    //     return "{$documentType} - {$matches[4]}.xml";
-    // }
+        return "{$documentType} - {$matches[4]}_{$matches[2]}_{$matches[3]}.xml";
+    }
 }
