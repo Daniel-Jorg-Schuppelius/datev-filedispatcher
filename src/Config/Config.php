@@ -18,8 +18,8 @@ class Config {
 
     private bool $debug = false;
 
-    private ?LogType $logType = LogType::NULL;
-    private ?string $logLevel = LogLevel::DEBUG;
+    private LogType $logType = LogType::NULL;
+    private string $logLevel = LogLevel::DEBUG;
     private ?string $logPath = null;
 
     private ?string $resourceUrl = null;
@@ -122,7 +122,8 @@ class Config {
         foreach ($debuggingConfig as $value) {
             if (isset($value['key']) && $value['key'] === 'debug' && $value['enabled']) {
                 $this->debug = (bool)$value['value'];
-                $this->logLevel = LogLevel::DEBUG;
+                if ($this->debug)
+                    $this->logLevel = LogLevel::DEBUG;
             }
         }
     }
@@ -145,11 +146,11 @@ class Config {
     }
 
     public function getLogType(): LogType {
-        return $this->logType ?? LogType::NULL;
+        return $this->logType;
     }
 
     public function getLogLevel(): string {
-        return $this->logLevel ?? LogLevel::DEBUG;
+        return $this->logLevel;
     }
 
     public function getLogPath(): ?string {
