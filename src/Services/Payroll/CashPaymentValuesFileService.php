@@ -19,9 +19,9 @@ class CashPaymentValuesFileService extends PayrollFileServiceAbstract {
     //                                        1               2              3                                 4
     protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Barauszahlungswerte_([A-Z0-9]{2,3})\.pdf$/i';
 
-    // protected function getDestinationFilename(): string {
-    //     $documentType = "Barauszahlungswerte";
+    protected function getDestinationFilename(): string {
+        $documentType = "Barauszahlungswerte";
 
-    //     return "{$documentType}.pdf";
-    // }
+        return "{$documentType}.pdf";
+    }
 }
