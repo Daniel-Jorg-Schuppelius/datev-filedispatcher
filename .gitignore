@@ -404,5 +404,5 @@ phpunit.xml
 /vendor/
 
 # Schuppe
-/.samples/config.json
-/config.json
+/tests/Config/config.json
+/src/Config/config.json
