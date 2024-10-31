@@ -19,7 +19,7 @@ class EmployeeFileServiceTest extends DocumentTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../../.samples/20542_10_2024_Brutto_Netto_00001_AA0.pdf');
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testPatternMatching() {
