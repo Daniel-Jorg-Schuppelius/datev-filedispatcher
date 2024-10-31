@@ -47,5 +47,12 @@ Für die PDF- und XPS-Dokumentverarbeitung.
 2. Den `datev-filedispatcher` herunterladen und konfigurieren.
 3. Ausführung: Nach dem Platzieren der Dateien im Überwachungsordner beginnt die automatische Sortierung in die entsprechenden Mandantenordner.
 
+### Bash-Skript für die Überwachung des entsprechenden Ordners
+Um das Bash-Skript unter Linux als Dienst zu aktivieren, führen Sie die folgenden Befehle aus:
+```bash
+sudo ln -s /path/to/your/project/config/init.d/filedispatcher /etc/init.d/filedispatcher
+sudo update-rc.d filedispatcher defaults
+```
+
 ## Lizenz
 Dieses Projekt steht unter der MIT-Lizenz. Weitere Informationen finden Sie in der Datei [LICENSE](LICENSE). Es wäre nett, wenn ihr bei einer entsprechenden kommerziellen Nutzung an mich denken würdet.
