@@ -1,18 +1,18 @@
 # datev-filedispatcher
 
-Ein Tool zur automatischen Organisation und Sortierung von Mandantendateien, die aus dem DATEV Dokumenten-Management-System (DMS) in ein Verzeichnis gezogen werden. Die Dateien werden anhand ihrer Mandantenzuordnung in die entsprechenden Verzeichnisse verschoben.
+A tool for automatically organizing and sorting client files that are pulled from the DATEV Document Management System (DMS) into a directory. The files are moved into the corresponding client directories based on their assignment.
 
-## Funktionsweise
-Das Tool nutzt die DATEV API, um die Dokumente automatisiert in die passenden Mandantenordner zu sortieren. Dabei wird eine Dateistruktur erstellt, die das schnelle Wiederauffinden und eine strukturierte Ablage ermöglicht. Unterstützt werden dabei verschiedene Datei- und Bildformate.
+## Functionality
+The tool uses the DATEV API to automatically sort documents into the appropriate client folders. This creates a file structure that enables quick retrieval and structured storage. Various file and image formats are supported.
 
-### Hinweis zur Nutzung mit Nextcloud
-`datev-filedispatcher` kann in Verbindung mit Nextcloud eingesetzt werden, um Mandantendateien einfach und sicher zu teilen. Da viele Kanzleien oder Unternehmen für die Mandantenkommunikation häufig noch auf E-Mails setzen, ermöglicht der Einsatz dieses Tools in Kombination mit Nextcloud eine strukturierte und moderne Alternative zur Bereitstellung von Dokumenten. Die Mandanten erhalten direkten Zugriff auf die für sie relevanten Dateien und können so auf dem aktuellen Stand bleiben, ohne auf E-Mail-Kommunikation angewiesen zu sein. Hierbei werden die Dateien direkt in das Nextcloudverzeichnis einsortiert.
+### Note on Using with Nextcloud
+`datev-filedispatcher` can be used in conjunction with Nextcloud to share client files easily and securely. Since many law firms or companies still rely on email for client communication, using this tool in combination with Nextcloud provides a structured and modern alternative for document distribution. Clients have direct access to their relevant files and can stay up to date without relying on email communication. The files are directly sorted into the Nextcloud directory.
 
-## Voraussetzungen
-Um den `datev-filedispatcher` erfolgreich auszuführen, sind folgende Tools erforderlich:
+## Requirements
+The following tools are required to successfully run `datev-filedispatcher`:
 
 ### 1. TIFF Tools
-Wird zur Bearbeitung und Verarbeitung von TIFF-Dateien benötigt.
+Required for processing and handling TIFF files.
 - **Windows**: [GnuWin32 TIFF Tools](https://gnuwin32.sourceforge.net/packages/tiff.htm)
 - **Debian/Ubuntu**: 
   ```bash
@@ -20,7 +20,7 @@ Wird zur Bearbeitung und Verarbeitung von TIFF-Dateien benötigt.
   ```
 
 ### 2. Xpdf
-Erforderlich für die Bearbeitung von PDF-Dateien.
+Required for handling PDF files.
 - **Windows**: [Xpdf Download](https://www.xpdfreader.com/download.html)
 - **Debian/Ubuntu**:
   ```bash
@@ -28,7 +28,7 @@ Erforderlich für die Bearbeitung von PDF-Dateien.
   ```
 
 ### 3. ImageMagick
-Zur Konvertierung und Bearbeitung von Bilddateien.
+For converting and processing image files.
 - **Windows**: [ImageMagick Installer](https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-39-Q16-HDRI-x64-dll.exe)
 - **Debian/Ubuntu**:
   ```bash
@@ -36,23 +36,23 @@ Zur Konvertierung und Bearbeitung von Bilddateien.
   ```
 
 ### 4. muPDF Tools
-Für die PDF- und XPS-Dokumentverarbeitung.
+For processing PDF and XPS documents.
 - **Debian/Ubuntu**:
   ```bash
   apt install mupdf-tools
   ```
 
-## Installation und Nutzung
-1. **Voraussetzungen** installieren (siehe oben).
-2. Den `datev-filedispatcher` herunterladen und konfigurieren.
-3. Ausführung: Nach dem Platzieren der Dateien im Überwachungsordner beginnt die automatische Sortierung in die entsprechenden Mandantenordner.
+## Installation and Usage
+1. Install the **requirements** (see above).
+2. Download and configure `datev-filedispatcher`.
+3. Execution: Once files are placed in the monitored directory, the automatic sorting into the corresponding client folders begins.
 
-### Bash-Skript für die Überwachung des entsprechenden Ordners
-Um das Bash-Skript unter Linux als Dienst zu aktivieren, führen Sie die folgenden Befehle aus:
+### Bash Script for Monitoring the Corresponding Directory
+To activate the Bash script as a service on Linux, run the following commands:
 ```bash
 sudo ln -s /path/to/your/project/config/init.d/filedispatcher /etc/init.d/filedispatcher
 sudo update-rc.d filedispatcher defaults
 ```
 
-## Lizenz
-Dieses Projekt steht unter der MIT-Lizenz. Weitere Informationen finden Sie in der Datei [LICENSE](LICENSE). Es wäre nett, wenn ihr bei einer entsprechenden kommerziellen Nutzung an mich denken würdet.
+## License
+This project is licensed under the MIT License. For more information, see the [LICENSE](LICENSE) file. It would be nice if you consider supporting me for any commercial use.
