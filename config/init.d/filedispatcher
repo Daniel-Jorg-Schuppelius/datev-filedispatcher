@@ -1,0 +1,118 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          Internal Dispatcher
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the internal dispatcher Script
+# Description:       Internal Dispatcher observes a directory tree for files that can be moved into
+#                    internal area
+### END INIT INFO
+
+# Authors: Daniel Jörg Schuppelius <daniel.schuppelius@gmail.com>
+#          Georg Klimm <gklimm@gmail.com>
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Internal Dispatcher"
+NAME="filedispatcher.sh"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/../../"  
+SCRIPT="$PROJECT_ROOT/scripts/$NAME"
+
+DAEMON="$SCRIPT"
+DAEMON_ARGS=""
+PIDFILE="/var/run/$NAME.pid"
+SCRIPTNAME="/etc/init.d/filedispatcher"
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+# Funktion, die den Daemon/Dienst startet
+do_start() {
+    # Return:
+    #   0, wenn der Daemon gestartet wurde
+    #   1, wenn der Daemon bereits läuft
+    #   2, wenn der Daemon nicht gestartet werden konnte
+    start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON --test > /dev/null || return 1
+    start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_ARGS || return 2
+}
+
+# Funktion, die den Daemon/Dienst stoppt
+do_stop() {
+    # Return:
+    #   0, wenn der Daemon gestoppt wurde
+    #   1, wenn der Daemon bereits gestoppt war
+    #   2, wenn der Daemon nicht gestoppt werden konnte
+    start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+
+    # Warten, bis alle Kindprozesse beendet sind
+    start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+    [ "$?" = 2 ] && return 2
+
+    # Lösche die PID-Datei
+    rm -f $PIDFILE
+    return "$RETVAL"
+}
+
+# Funktion zum Neustarten des Daemons
+do_reload() {
+    # SIGHUP senden, wenn der Daemon seine Konfiguration neu laden kann
+    start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+    return 0
+}
+
+# Hauptsteuerung des Dienstes
+case "$1" in
+  start)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+    do_start
+    case "$?" in
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  stop)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  restart|force-reload)
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+        do_start
+        case "$?" in
+            0) log_end_msg 0 ;;
+            1) log_end_msg 1 ;; # Der alte Prozess läuft noch
+            *) log_end_msg 1 ;; # Start fehlgeschlagen
+        esac
+        ;;
+      *)
+        log_end_msg 1 ;; # Stopp fehlgeschlagen
+    esac
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+    exit 3
+    ;;
+esac
+
+exit 0
