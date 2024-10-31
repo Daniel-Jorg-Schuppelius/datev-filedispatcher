@@ -41,10 +41,10 @@ class TestConfig {
     }
 
     private function loadConfig(): void {
-        $filePath = realpath(__DIR__ . '/../../.samples/config.json');
+        $filePath = realpath(__DIR__ . '/config.json');
 
         if (!$filePath || !file_exists($filePath)) {
-            error_log('TestConfig file not found, please create one at ../../.samples/config.json');
+            error_log('TestConfig file not found, please create one at ./tests/Config/config.json');
             return;
         }
 
