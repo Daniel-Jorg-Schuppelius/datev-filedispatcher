@@ -46,10 +46,10 @@ jobs:
       run: php -r "file_exists('phpunit.xml') || copy('phpunit.xml.dist', 'phpunit.xml');"
 
     - name: Copy config.json
-      run: php -r "file_exists('src/Config/config.json') || copy('src/Config/config.json.sample', 'src/Config/config.json');"
+      run: php -r "file_exists('config/config.json') || copy('config/config.json.sample', 'config/config.json');"
 
-    - name: Copy .samples/config.json
-      run: php -r "file_exists('tests/Config/config.json') || copy('tests/Config/config.json.sample', 'tests/Config/config.json');"
+    - name: Copy testconfig.json
+      run: php -r "file_exists('config/testconfig.json') || copy('config/testconfig.json.sample', 'config/testconfig.json');"
 
     - name: Run test suite
       run: composer run-script test

@@ -52,10 +52,10 @@ class Config {
     }
 
     private function loadConfig(): void {
-        $filePath = realpath(__DIR__ . '/config.json');
+        $filePath = realpath(__DIR__ . '/../../config/config.json');
 
         if (!$filePath || !file_exists($filePath)) {
-            error_log('Config file not found, please create one at ./src/Config/config.json');
+            error_log('Config file not found, please create one at config/config.json');
             return;
         }
 
