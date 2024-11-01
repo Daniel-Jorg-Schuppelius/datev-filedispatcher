@@ -31,7 +31,10 @@ class TifFile extends HelperAbstract {
             $newFilename = preg_replace(self::FILE_EXTENSION_PATTERN, ".jpg", $file);
             File::rename($file, $newFilename);
 
-            $command = sprintf("convert %s %s", escapeshellarg($newFilename), escapeshellarg($file));
+            $command = Shell::getPlatformSpecificCommand(
+                sprintf("convert %s %s", escapeshellarg($newFilename), escapeshellarg($file)),
+                sprintf("magick %s %s", escapeshellarg($newFilename), escapeshellarg($file))
+            );
             if (Shell::executeShellCommand($command)) {
                 self::$logger->info("TIFF-Datei erfolgreich von JPEG repariert: $newFilename");
             } else {
@@ -54,7 +57,10 @@ class TifFile extends HelperAbstract {
                 File::rename($file, $newFilename);
 
                 self::$logger->notice("Erstelle monochrome Kopie der TIFF-Datei: $newFilename");
-                $command = sprintf("convert %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($file));
+                $command = Shell::getPlatformSpecificCommand(
+                    sprintf("convert %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($file)),
+                    sprintf("magick %s -monochrome %s", escapeshellarg($newFilename), escapeshellarg($file))
+                );
                 if (Shell::executeShellCommand($command)) {
                     self::$logger->info("TIFF-Datei erfolgreich repariert: $newFilename");
                 } else {
@@ -99,11 +105,16 @@ class TifFile extends HelperAbstract {
             self::$logger->error("Die Datei existiert bereits: $pdfFile");
             throw new Exception("Die Datei existiert bereits: $pdfFile");
         }
+        $command = Shell::getPlatformSpecificCommand(
+            ($compressed
+                ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1"
+                : "tiff2pdf -F -n -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1"),
+            ($compressed
+                ? "tiff2pdf -j -c internal_dispatcher -a internal_dispatcher -o \"$pdfFile\" \"$tiffFile\" 2>&1"
+                : "tiff2pdf -n -c internal_dispatcher -a internal_dispatcher -o \"$pdfFile\" \"$tiffFile\" 2>&1")
+        );
 
-        $command = $compressed
-            ? "tiff2pdf -F -j -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1"
-            : "tiff2pdf -F -n -c internal_dispatcher -a internal_dispatcher -o '$pdfFile' '$tiffFile' 2>&1";
-
+        File::wait4Ready($tiffFile);
         Shell::executeShellCommand($command);
 
         if (PdfFile::isValid($pdfFile)) {
@@ -166,6 +177,10 @@ class TifFile extends HelperAbstract {
             $output = [];
 
             if (Shell::executeShellCommand($command, $output)) {
+                if (str_contains(strtolower(implode($output)), "not a tiff")) {
+                    self::$logger->warning("TIFF-Datei ist ungültig: $file");
+                    return false;
+                }
                 self::$logger->info("TIFF-Datei ist gültig: $file");
                 return true;
             } else {

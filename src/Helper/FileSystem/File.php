@@ -229,4 +229,47 @@ class File extends HelperAbstract implements FileSystemInterface {
 
         self::$logger->info("Daten in Datei gespeichert: $file");
     }
+
+    public static function isReadable(string $file): bool {
+        self::setLogger();
+        if (!self::exists($file)) {
+            self::$logger->error("Die Datei $file existiert nicht");
+            return false;
+        }
+
+        if (!is_readable($file)) {
+            self::$logger->error("Die Datei $file ist nicht lesbar");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function isReady(string $file): bool {
+        self::setLogger();
+        if (!self::exists($file)) {
+            self::$logger->error("Die Datei $file existiert nicht");
+            return false;
+        }
+
+        $handle = @fopen($file, 'r');
+        if ($handle === false) {
+            return false;
+        }
+        fclose($handle);
+        return true;
+    }
+
+    public static function wait4Ready(string $file, int $timeout = 30): bool {
+        self::setLogger();
+        $start = time();
+        while (!self::isReady($file)) {
+            if (time() - $start >= $timeout) {
+                self::$logger->error("Timeout beim Warten auf die Datei $file");
+                return false;
+            }
+            sleep(1);
+        }
+        return true;
+    }
 }
