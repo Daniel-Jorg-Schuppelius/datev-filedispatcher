@@ -22,6 +22,14 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
 
         if (array_key_exists("tenant", $matches)) {
             $this->setClients($matches["tenant"]);
+            if (is_null($this->client) && !is_null($this->payrollClient)) {
+                $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
+                if (is_null($this->client)) {
+                    $this->logger->error("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches["tenant"]);
+                } else {
+                    $this->logger->notice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
+                }
+            }
         }
 
         if (array_key_exists("year", $matches) && array_key_exists("month", $matches)) {
