@@ -25,6 +25,10 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
             try {
                 $this->setClients($matches["tenant"]);
             } catch (RuntimeException $e) {
+                if (is_null($this->payrollClient)) {
+                    $this->setPayrollClient($matches["tenant"]);
+                }
+
                 if (is_null($this->client) && !is_null($this->payrollClient)) {
                     $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
                     if (is_null($this->client)) {

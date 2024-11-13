@@ -13,6 +13,7 @@ namespace Tests\Endpoints\DocumentManagement;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
+use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Documents;
 use Datev\Entities\Payroll\Clients\Client as PayrollClient;
 use Tests\Config\TestConfig;
@@ -33,7 +34,7 @@ class DocumentTest extends EndpointTest {
         $this->payrollEndpoint = new PayrollClientsEndpoint($this->client, $this->logger);
 
         $this->testConfig = TestConfig::getInstance();
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testGetClient() {
@@ -55,5 +56,6 @@ class DocumentTest extends EndpointTest {
         $client = $this->payrollEndpoint->get($client->getID());
         $otherClient = $this->preEndpoint->get($client->getID());
         $this->assertInstanceOf(PayrollClient::class, $client);
+        $this->assertInstanceOf(Client::class, $otherClient);
     }
 }
