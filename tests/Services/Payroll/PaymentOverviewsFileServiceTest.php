@@ -19,7 +19,7 @@ class PaymentOverviewsFileServiceTest extends DocumentTest {
         parent::__construct($name);
         // Pfad zur Testdatei
         $this->testFile = realpath(__DIR__ . '/../../../.samples/40699_09_2023_Übersicht_Zahlungen_R03.pdf');
-        $this->apiDisabled = false; // API is disabled
+        $this->apiDisabled = true; // API is disabled
     }
 
     public function testPatternMatching() {
