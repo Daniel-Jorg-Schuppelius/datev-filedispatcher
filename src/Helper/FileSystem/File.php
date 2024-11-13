@@ -245,10 +245,12 @@ class File extends HelperAbstract implements FileSystemInterface {
         return true;
     }
 
-    public static function isReady(string $file): bool {
+    public static function isReady(string $file, bool $logging = true): bool {
         self::setLogger();
         if (!self::exists($file)) {
-            self::$logger->error("Die Datei $file existiert nicht");
+            if ($logging) {
+                self::$logger->error("Die Datei $file existiert nicht");
+            }
             return false;
         }
 
@@ -263,12 +265,23 @@ class File extends HelperAbstract implements FileSystemInterface {
     public static function wait4Ready(string $file, int $timeout = 30): bool {
         self::setLogger();
         $start = time();
-        while (!self::isReady($file)) {
-            if (time() - $start >= $timeout) {
-                self::$logger->error("Timeout beim Warten auf die Datei $file");
+        if (!self::exists($file)) {
+            self::$logger->info("Datei $file existiert nicht.");
+            return false;
+        }
+
+        while (!self::isReady($file, false)) {
+            if (self::exists($file)) {
+                if (time() - $start >= $timeout) {
+                    self::$logger->error("Timeout beim Warten auf die Datei $file");
+                    return false;
+                }
+
+                sleep(1);
+            } else {
+                self::$logger->info("Datei $file existiert nicht mehr.");
                 return false;
             }
-            sleep(1);
         }
         return true;
     }
