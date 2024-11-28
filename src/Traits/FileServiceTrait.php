@@ -20,7 +20,6 @@ use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 use Datev\Entities\Payroll\Clients\Client as PayrollClient;
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 trait FileServiceTrait {
