@@ -3,7 +3,7 @@
  * Created on   : Sun Oct 06 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : PayrollService.php
+ * Filename     : SEPAPayrollFileService.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
