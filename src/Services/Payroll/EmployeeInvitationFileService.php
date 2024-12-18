@@ -14,6 +14,7 @@ namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\FileServiceAbstract;
 use App\Helper\FileSystem\File;
+use RuntimeException;
 
 class EmployeeInvitationFileService extends FileServiceAbstract {
     // Arbeitnehmer online - Einladungsstatus - 000000 - 00000 - Regina Wegner.csv
@@ -28,7 +29,23 @@ class EmployeeInvitationFileService extends FileServiceAbstract {
     protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
 
-        $this->setClient($matches[2]);
+        try {
+            $this->setClients($matches[2]);
+        } catch (RuntimeException $e) {
+            if (is_null($this->payrollClient)) {
+                $this->setPayrollClient($matches[2]);
+            }
+
+            if (is_null($this->client) && !is_null($this->payrollClient)) {
+                $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
+                if (is_null($this->client)) {
+                    $this->logger->error("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches[2]);
+                    throw $e;
+                }
+
+                $this->logger->notice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
+            }
+        }
     }
 
     protected function getDestinationFilename(): string {
