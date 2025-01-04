@@ -34,7 +34,7 @@ class SettlementOfGrossNetRemunerations4SeveralMonthsFileService extends Payroll
             $employee = $employees->getFirstValue('id', $employeeNumber);
             if (!is_null($employee)) {
                 $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                return "{$documentType}_{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
             }
 
             $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");

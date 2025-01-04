@@ -24,6 +24,6 @@ class EmployeesWageTypesFileService extends PayrollFileServiceAbstract {
 
         $documentType = "Lohnarten";
 
-        return "{$documentType} - {$matches[3]}.xlsm";
+        return "{$documentType}-{$matches[3]}.xlsm";
     }
 }

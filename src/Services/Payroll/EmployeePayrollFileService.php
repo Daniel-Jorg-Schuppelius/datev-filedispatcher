@@ -22,6 +22,7 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
 
     protected function getDestinationFilename(): string {
         $matches = $this->getMatches();
+        $employeeNumber = $matches[2];
 
         $documentType = "Entgeltabrechnung";
 
@@ -30,13 +31,13 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
 
             $employees = $this->payrollClient->getEmployees();
             if (!is_null($employees)) {
-                $employee = $employees->getFirstValue('id', $matches[2]);
+                $employee = $employees->getFirstValue('id', $employeeNumber);
                 if (!is_null($employee)) {
-                    return "{$documentType}_{$matches[2]}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                    return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
                 }
 
-                $this->logError("Mitarbeiter nicht gefunden: {$matches[5]}");
-                throw new Exception("Mitarbeiter nicht gefunden: {$matches[5]}");
+                $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");
+                throw new Exception("Mitarbeiter nicht gefunden: {$employeeNumber}");
             }
 
             $this->logError("Keine Mitarbeiter für Client: {$this->payrollClient->getNumber()} gefunden");

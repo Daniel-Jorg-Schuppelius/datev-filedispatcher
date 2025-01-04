@@ -22,6 +22,7 @@ class PayrollAccountsFileService extends PayrollFileServiceAbstract {
 
     protected function getDestinationFilename(): string {
         $matches = $this->getMatches();
+        $employeeNumber = $matches[4];
 
         $documentType = "Lohnkonto";
 
@@ -29,14 +30,14 @@ class PayrollAccountsFileService extends PayrollFileServiceAbstract {
             $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
 
             $employees = $this->payrollClient->getEmployees();
-            $employee = $employees->getFirstValue('id', $matches[4]);
+            $employee = $employees->getFirstValue('id', $employeeNumber);
             if (!is_null($employee)) {
                 $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                return "{$documentType}_{$matches[4]}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
             }
 
-            $this->logError("Mitarbeiter nicht gefunden: {$matches[4]}");
-            throw new Exception("Mitarbeiter nicht gefunden: {$matches[4]}");
+            $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");
+            throw new Exception("Mitarbeiter nicht gefunden: {$employeeNumber}");
         }
 
         $this->logError("Client nicht gefunden: {$matches[1]}");

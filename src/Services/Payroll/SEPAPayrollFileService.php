@@ -24,6 +24,6 @@ class SEPAPayrollFileService extends PayrollFileServiceAbstract {
 
         $documentType = "SEPA";
 
-        return "{$documentType} - {$matches[4]}_{$matches[2]}_{$matches[3]}.xml";
+        return "{$documentType}-{$matches[4]}_{$matches[2]}_{$matches[3]}.xml";
     }
 }

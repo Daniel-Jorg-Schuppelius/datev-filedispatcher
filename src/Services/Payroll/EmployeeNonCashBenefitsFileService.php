@@ -22,19 +22,20 @@ class EmployeeNonCashBenefitsFileService extends PayrollFileServiceAbstract {
 
     protected function getDestinationFilename(): string {
         $matches = $this->getMatches();
+        $employeeNumber = $matches[5];
 
         if (!is_null($this->payrollClient)) {
             $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
 
             $employees = $this->payrollClient->getEmployees();
-            $employee = $employees->getFirstValue('id', $matches[5]);
+            $employee = $employees->getFirstValue('id', $employeeNumber);
             if (!is_null($employee)) {
                 $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                return "{$matches[4]}_{$matches[5]}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                return "{$matches[4]}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
             }
 
-            $this->logError("Mitarbeiter nicht gefunden: {$matches[5]}");
-            throw new Exception("Mitarbeiter nicht gefunden: {$matches[5]}");
+            $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");
+            throw new Exception("Mitarbeiter nicht gefunden: {$employeeNumber}");
         }
 
         $this->logError("Client nicht gefunden: {$matches[1]}");
