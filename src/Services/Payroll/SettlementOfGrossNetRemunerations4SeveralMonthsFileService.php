@@ -25,7 +25,7 @@ class SettlementOfGrossNetRemunerations4SeveralMonthsFileService extends Payroll
         $matches = $this->getMatches();
         $employeeNumber = $matches[6];
 
-        $documentType = "Mehrmonatige Entgeltabrechnung";
+        $documentType = "Mehrmonatige_Entgeltabrechnung";
 
         if (!is_null($this->payrollClient)) {
             $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
