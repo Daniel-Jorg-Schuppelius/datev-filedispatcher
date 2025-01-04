@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk.git",
-                "reference": "2edc8b4448b92747976aa7310c3a1459cbbccf4d"
+                "reference": "4ff0024864e345eb85df16accbad8c86c5aaf4f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/2edc8b4448b92747976aa7310c3a1459cbbccf4d",
-                "reference": "2edc8b4448b92747976aa7310c3a1459cbbccf4d",
+                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/4ff0024864e345eb85df16accbad8c86c5aaf4f1",
+                "reference": "4ff0024864e345eb85df16accbad8c86c5aaf4f1",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "issues": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/issues",
                 "source": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/tree/main"
             },
-            "time": "2025-01-03T15:10:22+00:00"
+            "time": "2025-01-04T08:33:59+00:00"
         },
         {
             "name": "daniel-jorg-schuppelius/php-api-toolkit",
