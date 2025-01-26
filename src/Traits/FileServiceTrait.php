@@ -10,7 +10,7 @@
 
 namespace App\Traits;
 
-use APIToolkit\Traits\ErrorLog;
+use ERRORToolkit\Traits\ErrorLog;
 use App\Config\Config;
 use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;

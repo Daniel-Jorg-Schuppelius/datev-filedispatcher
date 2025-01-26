@@ -12,9 +12,9 @@ declare(strict_types=1);
 
 namespace App\Factories;
 
-use APIToolkit\Contracts\Interfaces\LoggerFactoryInterface;
-use APIToolkit\Logger\ConsoleLogger;
-use APIToolkit\Logger\FileLogger;
+use ERRORToolkit\Contracts\Interfaces\LoggerFactoryInterface;
+use ERRORToolkit\Logger\ConsoleLogger;
+use ERRORToolkit\Logger\FileLogger;
 use App\Config\Config;
 use App\Enums\LogType;
 use Psr\Log\LoggerInterface;
