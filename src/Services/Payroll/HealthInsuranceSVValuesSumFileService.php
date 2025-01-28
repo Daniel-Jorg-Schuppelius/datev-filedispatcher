@@ -1,9 +1,9 @@
 <?php
 /*
- * Created on   : Wed Jan 22 2025
+ * Created on   : Tue Jan 28 2025
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : HealthInsuranceSVValuesFileService.php
+ * Filename     : HealthInsuranceSVValuesSumFileService.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
@@ -14,14 +14,14 @@ namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
-class HealthInsuranceSVValuesFileService extends PayrollFileServiceAbstract {
-    // 00000_10_2024_KK_SV_Werte___gesamt_v_AA0.pdf
-    // 00000_10_2024_KK_SV_Werte___gesamt_AA0.pdf
+class HealthInsuranceSVValuesSumFileService extends PayrollFileServiceAbstract {
+    // 00000_10_2024_KK_SV_Werte___Summen_v_AA0.pdf
+    // 00000_10_2024_KK_SV_Werte___Summen_AA0.pdf
     //                                        1               2              3                                         4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_KK_SV_Werte___gesamt(?:_v)?_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_KK_SV_Werte___Summen(?:_v)?_([A-Z0-9]{2,3})\.pdf$/i';
 
     protected function getDestinationFilename(): string {
-        $documentType = "Krankenkasse_SV-Werte_gesamt";
+        $documentType = "Krankenkasse_SV-Werte_Summen";
 
         return "{$documentType}.pdf";
     }
