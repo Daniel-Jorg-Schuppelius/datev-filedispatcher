@@ -8,35 +8,22 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\Config;
 
 use App\Enums\LogType;
+use ConfigToolkit\ConfigLoader;
 use Psr\Log\LogLevel;
+use Exception;
 
 class Config {
     private static ?Config $instance = null;
-
-    private bool $debug = false;
-
-    private LogType $logType = LogType::NULL;
-    private string $logLevel = LogLevel::DEBUG;
-    private ?string $logPath = null;
-
-    private ?string $resourceUrl = null;
-    private ?string $user = null;
-    private ?string $password = null;
-
-    private ?string $internalStorePath = null;
-    private ?int $previousYears4Internal = null;
-    private ?string $previousYearsFolderName4Internal = null;
-
-    private ?array $datevDMSMapping = null;
-    private ?array $perYear = null;
-    private ?array $perPeriod = null;
-
-    private ?array $excludedFolders = null;
+    private ConfigLoader $configLoader;
+    private ?bool $debugOverride = null; // Ermöglicht das Überschreiben in Tests
 
     private function __construct() {
+        $this->configLoader = ConfigLoader::getInstance();
         $this->loadConfig();
     }
 
@@ -48,144 +35,92 @@ class Config {
     }
 
     public function isConfigured(): bool {
-        return !is_null($this->resourceUrl) && !is_null($this->user) && !is_null($this->password);
+        return $this->getResourceUrl() !== null
+            && $this->getUser() !== null
+            && $this->getPassword() !== null;
     }
 
     private function loadConfig(): void {
-        $filePath = realpath(__DIR__ . '/../../config/config.json');
-
-        if (!$filePath || !file_exists($filePath)) {
-            error_log('Config file not found, please create one at config/config.json');
-            return;
-        }
-
-        $config = json_decode(file_get_contents($filePath), true);
-
-        $this->setApiConfig($config['DatevAPI'] ?? []);
-        $this->setPathConfig($config['Path'] ?? []);
-        $this->setMaxYearsConfig($config['maxYears'] ?? []);
-        $this->setLoggingConfig($config['Logging'] ?? []);
-        $this->setDebugConfig($config['Debugging'] ?? []);
-        $this->datevDMSMapping = $config['DatevDMSMapping'] ?? null;
-        $this->perYear = $config['PerYear'] ?? null;
-        $this->perPeriod = $config['PerPeriod'] ?? null;
-        $this->excludedFolders = $config['ExcludedFolders'] ?? null;
-    }
-
-    private function setApiConfig(array $apiConfig): void {
-        foreach ($apiConfig as $value) {
-            if ($value['enabled']) {
-                match ($value['key']) {
-                    'resourceurl' => $this->resourceUrl = $value['value'],
-                    'user' => $this->user = $value['value'],
-                    'password' => $this->password = $value['value'],
-                    default => null,
-                };
+        try {
+            $configPath = realpath(__DIR__ . '/../../config/config.json');
+            if (!$configPath) {
+                throw new Exception("Config file not found.");
             }
+
+            $this->configLoader->loadConfigFile($configPath);
+        } catch (Exception $e) {
+            error_log("Config-Fehler: " . $e->getMessage());
         }
     }
 
-    private function setPathConfig(array $pathConfig): void {
-        foreach ($pathConfig as $value) {
-            if ($value['enabled'] && $value['key'] === 'internalStore') {
-                $this->internalStorePath = $value['value'];
-            }
-        }
-    }
-
-    private function setMaxYearsConfig(array $maxYearsConfig): void {
-        foreach ($maxYearsConfig as $value) {
-            if ($value['enabled']) {
-                match ($value['key']) {
-                    'previousYears4Internal' => $this->previousYears4Internal = (int)$value['value'],
-                    'previousYearsFolderName4Internal' => $this->previousYearsFolderName4Internal = $value['value'],
-                    default => null,
-                };
-            }
-        }
-    }
-
-    private function setLoggingConfig(array $loggingConfig): void {
-        foreach ($loggingConfig as $value) {
-            if ($value['enabled']) {
-                match ($value['key']) {
-                    'log' => $this->logType = LogType::fromString($value['value']),
-                    'level' => $this->logLevel = $value['value'],
-                    'path' => $this->logPath = $value['value'],
-                    default => null,
-                };
-            }
-        }
-    }
-
-    private function setDebugConfig(array $debuggingConfig): void {
-        foreach ($debuggingConfig as $value) {
-            if (isset($value['key']) && $value['key'] === 'debug' && $value['enabled']) {
-                $this->debug = (bool)$value['value'];
-                if ($this->debug)
-                    $this->logLevel = LogLevel::DEBUG;
-            }
-        }
-    }
-
-    // Getter methods for config values
-    public function getInternalStorePath(): ?string {
-        return $this->internalStorePath;
-    }
-
+    // Getter für API-Konfiguration
     public function getResourceUrl(): ?string {
-        return $this->resourceUrl;
+        return $this->configLoader->get("DatevAPI", "resourceurl");
     }
 
     public function getUser(): ?string {
-        return $this->user;
+        return $this->configLoader->get("DatevAPI", "user");
     }
 
     public function getPassword(): ?string {
-        return $this->password;
+        return $this->configLoader->get("DatevAPI", "password");
     }
 
+    // Getter für Logging
     public function getLogType(): LogType {
-        return $this->logType;
+        return LogType::fromString($this->configLoader->get("Logging", "log", LogType::NULL->value));
     }
 
     public function getLogLevel(): string {
-        return $this->logLevel;
+        return $this->configLoader->get("Logging", "level", LogLevel::DEBUG);
     }
 
     public function getLogPath(): ?string {
-        return $this->logPath;
+        return $this->configLoader->get("Logging", "path");
     }
 
-    public function getPreviousYears4Internal(): ?int {
-        return $this->previousYears4Internal;
-    }
-
-    public function getPreviousYearsFolderName4Internal(): ?string {
-        return $this->previousYearsFolderName4Internal;
-    }
-
-    public function getDatevDMSMapping(): ?array {
-        return $this->datevDMSMapping;
-    }
-
-    public function getExcludedFolders(): ?array {
-        return $this->excludedFolders;
-    }
-
-    public function getPerYear(): ?array {
-        return $this->perYear;
-    }
-
-    public function getPerPeriod(): ?array {
-        return $this->perPeriod;
-    }
-
+    // Getter für Debugging (unterstützt Test-Überschreibung)
     public function isDebugEnabled(): bool {
-        return $this->debug;
+        return $this->debugOverride ?? $this->configLoader->get("Debugging", "debug", false);
     }
 
     public function setDebug(bool $debug): void {
-        $this->debug = $debug;
+        $this->debugOverride = $debug;
+    }
+
+    // Getter für Dateipfade
+    public function getInternalStorePath(): ?string {
+        return $this->configLoader->get("Path", "internalStore");
+    }
+
+    // Getter für Jahreskonfiguration
+    public function getPreviousYears4Internal(): ?int {
+        return $this->configLoader->get("maxYears", "previousYears4Internal", 0);
+    }
+
+    public function getPreviousYearsFolderName4Internal(): ?string {
+        return $this->configLoader->get("maxYears", "previousYearsFolderName4Internal");
+    }
+
+    // Getter für Mappings & Listen
+    public function getDatevDMSMapping(): ?array {
+        return $this->configLoader->get("DatevDMSMapping", null, []);
+    }
+
+    public function getExcludedFolders(): ?array {
+        return $this->configLoader->get("ExcludedFolders", null, []);
+    }
+
+    public function getPerYear(): ?array {
+        return $this->configLoader->get("PerYear", null, []);
+    }
+
+    public function getPerPeriod(): ?array {
+        return $this->configLoader->get("PerPeriod", null, []);
+    }
+
+    // Getter für Tenant-IDs
+    public function getTenantIDs(): ?array {
+        return $this->configLoader->get("TenantIDs", null, []);
     }
 }

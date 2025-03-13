@@ -20,7 +20,8 @@
     "php": "^7.4 || ^8.0",
     "guzzlehttp/guzzle": "^7.9",
     "psr/log": "^3.0@dev",
-    "daniel-jorg-schuppelius/datev-php-sdk": "dev-main"
+    "daniel-jorg-schuppelius/datev-php-sdk": "dev-main",
+    "dschuppelius/php-common-toolkit": "^0.2.2"
   },
 
   "autoload-dev": {
