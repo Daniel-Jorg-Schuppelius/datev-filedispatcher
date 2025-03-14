@@ -11,7 +11,7 @@
 namespace App\PreProcessServices;
 
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 
 class PDFNameProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - BvFA Feststellungsbescheid 2022 - 20241021132856 Abc 001293.pdf

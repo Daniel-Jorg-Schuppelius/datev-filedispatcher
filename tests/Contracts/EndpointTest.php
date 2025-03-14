@@ -16,7 +16,7 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 use Datev\API\Desktop\Endpoints\Diagnostics\EchoEndpoint;
 use FilesystemIterator;
 use PHPUnit\Framework\TestCase;

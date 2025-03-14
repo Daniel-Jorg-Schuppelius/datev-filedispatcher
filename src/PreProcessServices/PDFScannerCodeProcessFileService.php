@@ -11,7 +11,7 @@
 namespace App\PreProcessServices;
 
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 use DateTime;
 
 class PDFScannerCodeProcessFileService extends PreProcessFileServiceAbstract {

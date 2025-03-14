@@ -10,8 +10,8 @@
 
 namespace Tests\Helper;
 
-use App\Helper\FileSystem\File;
-use App\Helper\FileSystem\FileTypes\TifFile;
+use CommonToolkit\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 use PHPUnit\Framework\TestCase;
 
 class TiffFileTest extends TestCase {

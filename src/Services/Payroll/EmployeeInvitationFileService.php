@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\FileServiceAbstract;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 use RuntimeException;
 
 class EmployeeInvitationFileService extends FileServiceAbstract {

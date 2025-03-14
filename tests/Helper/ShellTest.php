@@ -10,7 +10,7 @@
 
 namespace Tests\Helper;
 
-use App\Helper\Shell;
+use CommonToolkit\Helper\Shell;
 use Exception;
 use PHPUnit\Framework\TestCase;
 

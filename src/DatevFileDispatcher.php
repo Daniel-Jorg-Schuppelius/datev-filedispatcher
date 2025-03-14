@@ -13,7 +13,7 @@ namespace App;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Helper\FileDispatcher;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 
 $self = $argv[0];
 $filename = null;

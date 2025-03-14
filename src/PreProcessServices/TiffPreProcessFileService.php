@@ -13,8 +13,8 @@ declare(strict_types=1);
 namespace App\PreProcessServices;
 
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
-use App\Helper\FileSystem\Files;
-use App\Helper\FileSystem\FileTypes\TifFile;
+use CommonToolkit\Helper\FileSystem\Files;
+use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 
 class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.tif(f)

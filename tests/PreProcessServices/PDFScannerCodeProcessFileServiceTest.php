@@ -11,7 +11,7 @@
 namespace Tests\PreProcessServices;
 
 use App\Helper\FileDispatcher;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 use App\PreProcessServices\PDFFileNameProcessFileService;
 use App\PreProcessServices\PDFScannerCodeProcessFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;

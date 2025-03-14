@@ -17,7 +17,7 @@ use App\Config\Config;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Factories\APIClientFactory;
 use App\Factories\LoggerFactory;
-use App\Helper\FileSystem\File;
+use CommonToolkit\Helper\FileSystem\File;
 use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
