@@ -14,7 +14,6 @@ namespace App\Config;
 
 use ConfigToolkit\ConfigLoader;
 use ERRORToolkit\Enums\LogType;
-use ERRORToolkit\Factories\ConsoleLoggerFactory;
 use Psr\Log\LogLevel;
 use Exception;
 
@@ -24,7 +23,7 @@ class Config {
     private ?bool $debugOverride = null; // Ermöglicht das Überschreiben in Tests
 
     private function __construct() {
-        $this->configLoader = ConfigLoader::getInstance(ConsoleLoggerFactory::getLogger());
+        $this->configLoader = ConfigLoader::getInstance();
         $this->loadConfig();
     }
 
