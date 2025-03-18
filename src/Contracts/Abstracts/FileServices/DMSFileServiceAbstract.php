@@ -28,10 +28,10 @@ abstract class DMSFileServiceAbstract extends FileServiceAbstract {
         $subFolder = $this->prepareSubFolder($subFolder, $requiresPeriod, $requiresYear);
 
         if ($requiresPeriod) {
-            self::$logger->info("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
+            $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
             return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
         } elseif ($requiresYear) {
-            self::$logger->info("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+            $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
             return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
         } else {
             return parent::getDestinationFolder($leadingZero);

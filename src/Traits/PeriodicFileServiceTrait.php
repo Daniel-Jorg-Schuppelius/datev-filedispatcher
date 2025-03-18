@@ -46,7 +46,7 @@ trait PeriodicFileServiceTrait {
         $minYearValue->modify("-" . $this->config->getPreviousYears4Internal() . " years");
 
         if ($this->date < $minYearValue) {
-            self::$logger->debug("Datum liegt vor dem Mindestjahr: " . $minYearValue->format('Y') . " für die Datei: {$this->file}, wird auf Vorjahresordner gesetzt.");
+            $this->logDebug("Datum liegt vor dem Mindestjahr: " . $minYearValue->format('Y') . " für die Datei: {$this->file}, wird auf Vorjahresordner gesetzt.");
             $yearFormatted = $this->config->getPreviousYearsFolderName4Internal() . DIRECTORY_SEPARATOR . $yearFormatted;
         }
 
@@ -67,7 +67,7 @@ trait PeriodicFileServiceTrait {
         try {
             $this->date = new DateTime("$year-$month-$day");
         } catch (Exception) {
-            self::$logger->error("Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
+            $this->logError("Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
             throw new OutOfRangeException("Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
         }
     }
@@ -76,10 +76,10 @@ trait PeriodicFileServiceTrait {
         parent::validateConfig();
 
         if (is_null($this->config->getPreviousYears4Internal())) {
-            self::$logger->error("Ungültige Konfiguration für die Anzahl der Vorjahre.");
+            $this->logError("Ungültige Konfiguration für die Anzahl der Vorjahre.");
             throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
         } elseif (is_null($this->config->getPreviousYearsFolderName4Internal())) {
-            self::$logger->error("Ungültige Konfiguration für den Namen des Vorjahresordners.");
+            $this->logError("Ungültige Konfiguration für den Namen des Vorjahresordners.");
             throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
         }
     }

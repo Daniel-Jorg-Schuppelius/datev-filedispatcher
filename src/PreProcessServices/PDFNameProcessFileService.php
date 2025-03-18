@@ -23,7 +23,7 @@ class PDFNameProcessFileService extends PreProcessFileServiceAbstract {
     protected ?string $existingFilenamePart = null;
 
     protected function extractDataFromFile(): void {
-        self::$logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
+        $this->logInfo("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
 
         if (isset($matches[1])) {

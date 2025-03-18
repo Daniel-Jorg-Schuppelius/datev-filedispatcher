@@ -32,11 +32,11 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
                 if (is_null($this->client) && !is_null($this->payrollClient)) {
                     $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
                     if (is_null($this->client)) {
-                        self::$logger->error("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches["tenant"]);
+                        self::logError("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches["tenant"]);
                         throw $e;
                     }
 
-                    self::$logger->notice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
+                    self::logNotice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
                 }
             }
         }

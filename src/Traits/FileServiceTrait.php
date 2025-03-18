@@ -12,7 +12,6 @@ namespace App\Traits;
 
 use ERRORToolkit\Traits\ErrorLog;
 use App\Config\Config;
-use App\Factories\LoggerFactory;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
@@ -23,7 +22,6 @@ use InvalidArgumentException;
 use RuntimeException;
 
 trait FileServiceTrait {
-    use ErrorLog;
     protected const PATTERN = '';
 
     protected ClientsEndpoint $clientsEndpoint;
@@ -105,7 +103,7 @@ trait FileServiceTrait {
         $documents = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"]);
         if (is_null($documents)) {
             $this->logError("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
-            $this->logNotice("Document im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            $this->logNotice("Dokument im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             throw new RuntimeException("Dokument konnte im DMS nicht gefunden werden: $documentNumber");
         }
         $this->document = $documents->getFirstValue();
@@ -130,10 +128,8 @@ trait FileServiceTrait {
     }
 
     public static function getPattern(): string {
-        $logger = LoggerFactory::getLogger();
-
         if (empty(static::PATTERN)) {
-            $logger->error("Kein Pattern in " . static::class . " definiert.");
+            self::logError("Kein Pattern in " . static::class . " definiert.");
             throw new RuntimeException("Kein Pattern in " . static::class . " definiert.");
         }
 

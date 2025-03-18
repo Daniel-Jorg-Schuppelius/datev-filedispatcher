@@ -21,14 +21,15 @@ use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
+use ERRORToolkit\Traits\ErrorLog;
 use Exception;
 use Psr\Log\LoggerInterface;
 
 abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
-    use FileServiceTrait;
+    use ErrorLog, FileServiceTrait;
 
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
-        self::$logger = $logger ?? LoggerFactory::getLogger();
+        self::setLogger($logger ?? LoggerFactory::getLogger());
         $this->config = Config::getInstance();
 
         $client = $client ?? APIClientFactory::getClient();
@@ -41,7 +42,7 @@ abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInt
         try {
             $this->extractDataFromFile();
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
+            $this->logError("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
             throw $e;
         }
     }

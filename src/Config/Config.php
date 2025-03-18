@@ -12,10 +12,9 @@ declare(strict_types=1);
 
 namespace App\Config;
 
-use App\Enums\LogType;
 use ConfigToolkit\ConfigLoader;
+use ERRORToolkit\Enums\LogType;
 use ERRORToolkit\Factories\ConsoleLoggerFactory;
-use ERRORToolkit\Logger\ConsoleLogger;
 use Psr\Log\LogLevel;
 use Exception;
 

@@ -16,7 +16,7 @@ use ERRORToolkit\Contracts\Interfaces\LoggerFactoryInterface;
 use ERRORToolkit\Logger\ConsoleLogger;
 use ERRORToolkit\Logger\FileLogger;
 use App\Config\Config;
-use App\Enums\LogType;
+use ERRORToolkit\Enums\LogType;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

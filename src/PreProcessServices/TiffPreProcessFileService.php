@@ -30,23 +30,23 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     protected const DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN = "/tif{1,2}\((\d+)\)$/i";
 
     protected function extractDataFromFile(): void {
-        self::$logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
+        $this->logInfo("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
 
         $this->setPropertiesFromDMS($matches[1]);
     }
 
     public function preProcess(): bool {
-        self::$logger->info("Preprocessing der TIFF-Datei: {$this->file}");
+        $this->logInfo("Preprocessing der TIFF-Datei: {$this->file}");
 
         $matches = [];
         if (preg_match(self::FILE_EXTENSION_PATTERN, $this->document->getExtension())) {
-            self::$logger->info("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->file}");
+            $this->logInfo("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->file}");
             return true;
         }
 
         if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $this->document->getExtension(), $matches)) {
-            self::$logger->info("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->file}");
+            $this->logInfo("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->file}");
             $fileMatches = [];
             preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->file), $fileMatches);
 
@@ -55,12 +55,12 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             $istFileCount = count($tiffFiles);
             $sollFileCount = (int)$matches[1];
             if ($istFileCount != $sollFileCount) {
-                self::$logger->warning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->file}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
+                $this->logWarning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->file}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
                 return false;
             }
 
             if (!empty($tiffFiles)) {
-                self::$logger->info("Mehrseitige TIFF-Dateien gefunden: {$this->file}");
+                $this->logInfo("Mehrseitige TIFF-Dateien gefunden: {$this->file}");
                 $outputFilePath = dirname($this->file) . DIRECTORY_SEPARATOR . $fileMatches[1] . '.tif';
 
                 TifFile::merge($tiffFiles, $outputFilePath);
@@ -68,7 +68,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             }
         }
 
-        self::$logger->info("Preprocessing der TIFF-Datei abgeschlossen: {$this->file}");
+        $this->logInfo("Preprocessing der TIFF-Datei abgeschlossen: {$this->file}");
 
         return true;
     }

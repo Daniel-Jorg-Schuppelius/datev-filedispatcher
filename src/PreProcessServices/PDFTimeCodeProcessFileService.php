@@ -24,7 +24,7 @@ class PDFTimeCodeProcessFileService extends PreProcessFileServiceAbstract {
     private ?DateTime $fileDate = null;
 
     protected function extractDataFromFile(): void {
-        self::$logger->info("Extrahiere Daten aus dem Dateinamen: {$this->file}");
+        $this->logInfo("Extrahiere Daten aus dem Dateinamen: {$this->file}");
         $matches = $this->getMatches();
         $date = false;
 

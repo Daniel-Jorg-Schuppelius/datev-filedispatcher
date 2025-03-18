@@ -13,9 +13,9 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Config\Config;
+use App\Contracts\Abstracts\HelperAbstract;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
-use CommonToolkit\Contracts\Abstracts\HelperAbstract;
 use CommonToolkit\Helper\FileSystem\File;
 use CommonToolkit\Helper\FileSystem\FileTypes\CsvFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\PdfFile;
