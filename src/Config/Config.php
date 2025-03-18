@@ -14,6 +14,8 @@ namespace App\Config;
 
 use App\Enums\LogType;
 use ConfigToolkit\ConfigLoader;
+use ERRORToolkit\Factories\ConsoleLoggerFactory;
+use ERRORToolkit\Logger\ConsoleLogger;
 use Psr\Log\LogLevel;
 use Exception;
 
@@ -23,7 +25,7 @@ class Config {
     private ?bool $debugOverride = null; // Ermöglicht das Überschreiben in Tests
 
     private function __construct() {
-        $this->configLoader = ConfigLoader::getInstance();
+        $this->configLoader = ConfigLoader::getInstance(ConsoleLoggerFactory::getLogger());
         $this->loadConfig();
     }
 
@@ -104,23 +106,23 @@ class Config {
 
     // Getter für Mappings & Listen
     public function getDatevDMSMapping(): ?array {
-        return $this->configLoader->get("DatevDMSMapping", null, []);
+        return $this->configLoader->get("DatevDMSMapping");
     }
 
     public function getExcludedFolders(): ?array {
-        return $this->configLoader->get("ExcludedFolders", null, []);
+        return $this->configLoader->get("ExcludedFolders");
     }
 
     public function getPerYear(): ?array {
-        return $this->configLoader->get("PerYear", null, []);
+        return $this->configLoader->get("PerYear");
     }
 
     public function getPerPeriod(): ?array {
-        return $this->configLoader->get("PerPeriod", null, []);
+        return $this->configLoader->get("PerPeriod");
     }
 
     // Getter für Tenant-IDs
     public function getTenantIDs(): ?array {
-        return $this->configLoader->get("TenantIDs", null, []);
+        return $this->configLoader->get("TenantIDs");
     }
 }

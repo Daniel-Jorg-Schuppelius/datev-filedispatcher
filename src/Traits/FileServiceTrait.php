@@ -140,7 +140,7 @@ trait FileServiceTrait {
         return static::PATTERN;
     }
 
-    public static function matchesPattern(string $file, array &$matches = null): bool {
+    public static function matchesPattern(string $file, ?array &$matches = null): bool {
         return preg_match(static::getPattern(), basename($file), $matches) === 1;
     }
 }

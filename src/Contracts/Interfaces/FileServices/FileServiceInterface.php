@@ -16,7 +16,7 @@ use Datev\Entities\ClientMasterData\Clients\Client;
 
 interface FileServiceInterface {
     public static function getPattern(): string;
-    public static function matchesPattern(string $file, array &$matches = null): bool;
+    public static function matchesPattern(string $file, ?array &$matches = null): bool;
 
     public function process(): void;
 

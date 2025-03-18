@@ -57,6 +57,6 @@ class TestConfig {
     }
 
     public function getTenantIds(): ?array {
-        return $this->configLoader->get('TenantIDs', 'values', []);
+        return $this->configLoader->get('TenantIDs');
     }
 }

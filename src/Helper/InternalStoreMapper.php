@@ -13,8 +13,8 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Config\Config;
-use App\Contracts\Abstracts\HelperAbstract;
 use App\Factories\StorageFactory;
+use CommonToolkit\Contracts\Abstracts\HelperAbstract;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 

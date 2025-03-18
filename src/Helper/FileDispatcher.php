@@ -13,18 +13,17 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Config\Config;
-use App\Contracts\Abstracts\HelperAbstract;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
+use CommonToolkit\Contracts\Abstracts\HelperAbstract;
 use CommonToolkit\Helper\FileSystem\File;
-use CommonToolkit\Helper\FileSystem\Files;
 use CommonToolkit\Helper\FileSystem\FileTypes\CsvFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\PdfFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\XmlFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\ZipFile;
+use ConfigToolkit\ClassLoader;
 use Exception;
-use ReflectionClass;
 
 class FileDispatcher extends HelperAbstract {
     protected static string $servicesDirectory = __DIR__ . '/../Services';
@@ -40,35 +39,8 @@ class FileDispatcher extends HelperAbstract {
         self::setLogger();
 
         if (is_null($serviceStorage)) {
-            $serviceStorage = [];
-            $serviceDir = realpath($directory);
-
-            if ($serviceDir === false) {
-                self::$logger->error("Das Verzeichnis für Services konnte nicht aufgelöst werden: " . $directory);
-                return;
-            }
-
-            $files = Files::get($serviceDir, true, ['php']);
-            foreach ($files as $file) {
-                $relativePath = str_replace($serviceDir . DIRECTORY_SEPARATOR, '', $file);
-                $className = ($relativePath != pathinfo($file, PATHINFO_BASENAME))
-                    ? $namespace . '\\' . str_replace(DIRECTORY_SEPARATOR, '\\', pathinfo($relativePath, PATHINFO_DIRNAME)) . '\\' . pathinfo($file, PATHINFO_FILENAME)
-                    : $namespace . '\\' . pathinfo($file, PATHINFO_FILENAME);
-
-                if (class_exists($className)) {
-                    $reflectionClass = new ReflectionClass($className);
-                    if ($reflectionClass->implementsInterface($interface) && !$reflectionClass->isAbstract()) {
-                        $serviceStorage[] = $className;
-                        self::$logger->debug("Serviceklasse gefunden und erfolgreich hinzugefügt: $className");
-                    }
-                } else {
-                    self::$logger->warning("Klasse existiert nicht oder konnte nicht geladen werden: $className");
-                }
-            }
-
-            if (empty($serviceStorage)) {
-                self::$logger->warning("Keine passenden Services gefunden.");
-            }
+            $classLoader = new ClassLoader($directory, $namespace, $interface, self::$logger);
+            $serviceStorage = $classLoader->getClasses();
         }
     }
 

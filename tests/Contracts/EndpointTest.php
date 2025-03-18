@@ -63,7 +63,7 @@ abstract class EndpointTest extends TestCase {
             $categories = [
                 "04 Sonstiges/Belege",
                 "04 Sonstiges/Einkommensbescheinigungen",
-                "02 Entgeltabrechnung/2022/01 Januar",
+                "02 Entgeltabrechnung/Vorjahre/2022/01 Januar",
                 "02 Entgeltabrechnung/2023/09 September",
                 "02 Entgeltabrechnung/2024/10 Oktober",
                 "01 Finanzbuchhaltung/2023/FA Mahnungen, Umbuchung etc"

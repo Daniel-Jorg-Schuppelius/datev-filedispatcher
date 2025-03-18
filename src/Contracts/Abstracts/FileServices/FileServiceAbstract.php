@@ -33,20 +33,20 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     protected const SUBFOLDER = '';
 
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
-        $this->logger = $logger ?? LoggerFactory::getLogger();
+        self::$logger = $logger ?? LoggerFactory::getLogger();
         $this->config = Config::getInstance();
 
         $client = $client ?? APIClientFactory::getClient();
-        $this->clientsEndpoint = new ClientsEndpoint($client, $this->logger);
-        $this->documentEndpoint = new DocumentsEndpoint($client, $this->logger);
-        $this->payrollClientsEndpoint = new PayrollClientsEndpoint($client, $this->logger);
+        $this->clientsEndpoint = new ClientsEndpoint($client, self::$logger);
+        $this->documentEndpoint = new DocumentsEndpoint($client, self::$logger);
+        $this->payrollClientsEndpoint = new PayrollClientsEndpoint($client, self::$logger);
 
         $this->file = $file;
 
         try {
             $this->extractDataFromFile();
         } catch (Exception $e) {
-            $this->logger->error("Fehler bei der Verarbeitung der Datei: $file (" . $e->getMessage() . ")");
+            self::$logger->error("Fehler bei der Verarbeitung der Datei: $file (" . $e->getMessage() . ")");
             throw $e;
         }
     }
@@ -64,7 +64,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     }
 
     public function process(): void {
-        $this->logger->notice("Verarbeite Datei: {$this->file} mit FileService: " . static::class . ".");
+        self::$logger->notice("Verarbeite Datei: {$this->file} mit FileService: " . static::class . ".");
         File::move($this->file, $this->getDestinationFolder(), $this->getDestinationFilename());
     }
 
@@ -78,7 +78,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
     protected function validateConfig(): void {
         if (is_null($this->config->getInternalStorePath())) {
-            $this->logger->critical("Ungültige Konfiguration für den internen Speicherpfad.");
+            self::$logger->critical("Ungültige Konfiguration für den internen Speicherpfad.");
             throw new OutOfRangeException("Ungültige Konfiguration für den internen Speicherpfad.");
         }
     }
