@@ -20,7 +20,7 @@ abstract class HelperAbstract extends CommonHelperAbstract {
     public static function setLogger(?LoggerInterface $logger = null): void {
         if (!is_null($logger)) {
             self::$logger = $logger;
-        } elseif (is_null(self::$logger)) {
+        } elseif (self::$logger != LoggerFactory::getLogger()) {
             self::$logger = LoggerFactory::getLogger();
         }
     }
