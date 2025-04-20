@@ -21,7 +21,7 @@
     "guzzlehttp/guzzle": "^7.9",
     "psr/log": "^3.0@dev",
     "daniel-jorg-schuppelius/datev-php-sdk": "dev-main",
-    "dschuppelius/php-common-toolkit": "^0.2.2"
+    "dschuppelius/php-common-toolkit": "^0.4.2"
   },
 
   "autoload-dev": {

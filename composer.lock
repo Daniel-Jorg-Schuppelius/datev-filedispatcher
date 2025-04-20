@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a745dc15a43593e7cebf321d2736f019",
+    "content-hash": "2270102a73a4a3d15ba8540217ca117c",
     "packages": [
         {
             "name": "daniel-jorg-schuppelius/datev-php-sdk",
@@ -102,16 +102,16 @@
         },
         {
             "name": "dschuppelius/php-common-toolkit",
-            "version": "v0.2.9",
+            "version": "v0.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DSchuppelius/php-common-toolkit.git",
-                "reference": "f85422174676e28a946b7f2e1e3638461d78abaf"
+                "reference": "df90ff94aa028dafb84d2137cd155b17a4013287"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DSchuppelius/php-common-toolkit/zipball/f85422174676e28a946b7f2e1e3638461d78abaf",
-                "reference": "f85422174676e28a946b7f2e1e3638461d78abaf",
+                "url": "https://api.github.com/repos/DSchuppelius/php-common-toolkit/zipball/df90ff94aa028dafb84d2137cd155b17a4013287",
+                "reference": "df90ff94aa028dafb84d2137cd155b17a4013287",
                 "shasum": ""
             },
             "require": {
@@ -144,9 +144,9 @@
             "description": "Project description.",
             "support": {
                 "issues": "https://github.com/DSchuppelius/php-common-toolkit/issues",
-                "source": "https://github.com/DSchuppelius/php-common-toolkit/tree/v0.2.9"
+                "source": "https://github.com/DSchuppelius/php-common-toolkit/tree/v0.4.2"
             },
-            "time": "2025-04-03T19:40:41+00:00"
+            "time": "2025-04-20T13:23:45+00:00"
         },
         {
             "name": "dschuppelius/php-config-toolkit",
