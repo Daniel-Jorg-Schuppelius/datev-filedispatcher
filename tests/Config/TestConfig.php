@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Config;
 
-use App\Factories\LoggerFactory;
 use ConfigToolkit\ConfigLoader;
-use Datev\Entities\ClientMasterData\Clients\ClientID;
+use Datev\Entities\Common\Clients\ClientID;
 use Exception;
 
 class TestConfig {
@@ -14,7 +13,7 @@ class TestConfig {
     private ConfigLoader $configLoader;
 
     private function __construct() {
-        $this->configLoader = ConfigLoader::getInstance(LoggerFactory::getLogger());
+        $this->configLoader = ConfigLoader::getInstance();
         $this->configLoader->loadConfigFile(__DIR__ . '/../../config/testconfig.json');
     }
 

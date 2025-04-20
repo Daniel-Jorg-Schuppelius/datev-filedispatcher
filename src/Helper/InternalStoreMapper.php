@@ -13,16 +13,13 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Config\Config;
-use App\Contracts\Abstracts\HelperAbstract;
 use App\Factories\StorageFactory;
+use CommonToolkit\Contracts\Abstracts\HelperAbstract;
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 
 class InternalStoreMapper extends HelperAbstract {
-
     public static function getInternalStorePath(Client $client, string $subPath, ?string $parameter = null): ?string {
-        self::setLogger();
-
         $internalStorePath = StorageFactory::getInternalStorePathForClient($client);
         if ($internalStorePath === null) {
             self::$logger->critical("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
@@ -35,8 +32,6 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     public static function getInternalStorePath4Document(Client $client, Document $document, ?string $parameter = null): ?string {
-        self::setLogger();
-
         $subPath = self::getMapping4InternalStorePath($document);
         if ($subPath === null) {
             self::$logger->error("Kein Mapping für Dokument: '{$document->getFolder()->getName()} {$document->getRegister()->getName()}' gefunden.");
@@ -47,8 +42,6 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     public static function getMapping4InternalStorePath(Document $document): ?string {
-        self::setLogger();
-
         $config = Config::getInstance();
         $datevDMSMapping = $config->getDatevDMSMapping();
 
@@ -64,8 +57,6 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     public static function requiresPattern(string $internalPath, array $patterns): bool {
-        self::setLogger();
-
         self::$logger->debug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
 
         if (in_array($internalPath, $patterns)) {
@@ -85,8 +76,6 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     private static function buildInternalStorePath(string $basePath, string $mappedPath, ?string $parameter): string {
-        self::setLogger();
-
         $path = $basePath . '/' . $mappedPath;
 
         if ($parameter !== null && strpos($path, '%s') !== false) {
@@ -99,8 +88,6 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     private static function validatePath(string $path): ?string {
-        self::setLogger();
-
         $realPath = realpath($path);
         if ($realPath === false) {
             self::$logger->error("Der Pfad '$path' konnte nicht validiert werden.");

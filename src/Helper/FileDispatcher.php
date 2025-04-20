@@ -13,9 +13,10 @@ declare(strict_types=1);
 namespace App\Helper;
 
 use App\Config\Config;
-use App\Contracts\Abstracts\HelperAbstract;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
+use App\Factories\LoggerFactory;
+use CommonToolkit\Contracts\Abstracts\HelperAbstract;
 use CommonToolkit\Helper\FileSystem\File;
 use CommonToolkit\Helper\FileSystem\FileTypes\CsvFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\PdfFile;
@@ -23,6 +24,7 @@ use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\XmlFile;
 use CommonToolkit\Helper\FileSystem\FileTypes\ZipFile;
 use ConfigToolkit\ClassLoader;
+use ERRORToolkit\LoggerRegistry;
 use Exception;
 
 class FileDispatcher extends HelperAbstract {
@@ -36,8 +38,6 @@ class FileDispatcher extends HelperAbstract {
 
     // Allgemeine Methode für das Setzen von Services oder PreProcessServices
     protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
-        self::setLogger();
-
         if (is_null($serviceStorage)) {
             $classLoader = new ClassLoader($directory, $namespace, $interface, self::$logger);
             $serviceStorage = $classLoader->getClasses();
@@ -53,12 +53,12 @@ class FileDispatcher extends HelperAbstract {
     }
 
     public static function processFile($file): void {
-        self::setLogger();
+        $excludedFolders = Config::getInstance()->getExcludedFolders();
+
+        LoggerRegistry::setLogger(LoggerFactory::getLogger());
+
         self::setServices();
         self::setPreProcessServices();
-
-        $config = Config::getInstance();
-        $excludedFolders = $config->getExcludedFolders();
 
         if (empty($file)) {
             self::$logger->warning("Keine Datei zur Verarbeitung übergeben.");
@@ -98,8 +98,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessFile(string $file): bool {
-        self::setLogger();
-
         $fileType = pathinfo($file, PATHINFO_EXTENSION);
 
         try {
@@ -151,7 +149,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function checkAndRepairFile(string $file, string $expectedMimeType, callable $repairFunction): void {
-        self::setLogger();
         $mimeType = File::mimeType($file);
 
         if ($mimeType !== $expectedMimeType) {
@@ -161,7 +158,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessCsvFile(string $file): void {
-        self::setLogger();
         try {
             if (!CsvFile::isWellFormed($file)) {
                 throw new Exception("Fehlerhafte CSV-Datei: $file");
@@ -173,7 +169,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessPdfFile(string $file): void {
-        self::setLogger();
         try {
             if (!PdfFile::isValid($file)) {
                 throw new Exception("Fehlerhafte PDF-Datei: $file");
@@ -185,7 +180,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessTiffFile(string $file): void {
-        self::setLogger();
         try {
             self::checkAndRepairFile($file, 'image/tiff', [TifFile::class, 'repair']);
             TifFile::convertToPdf($file);
@@ -196,7 +190,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessXmlFile(string $file): void {
-        self::setLogger();
         try {
             if (!XmlFile::isWellFormed($file)) {
                 throw new Exception("Fehlerhafte XML-Datei: $file");
@@ -208,7 +201,6 @@ class FileDispatcher extends HelperAbstract {
     }
 
     private static function preProcessZipFile(string $file): void {
-        self::setLogger();
         try {
             if (!ZipFile::isValid($file)) {
                 throw new Exception("Fehlerhaftes ZIP-Archiv: $file");

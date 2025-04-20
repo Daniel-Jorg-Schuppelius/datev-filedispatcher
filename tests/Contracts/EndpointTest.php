@@ -15,9 +15,11 @@ namespace Tests\Contracts;
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Factories\APIClientFactory;
-use App\Factories\LoggerFactory;
 use CommonToolkit\Helper\FileSystem\File;
 use Datev\API\Desktop\Endpoints\Diagnostics\EchoEndpoint;
+use ERRORToolkit\Factories\ConsoleLoggerFactory;
+use ERRORToolkit\LoggerRegistry;
+use Exception;
 use FilesystemIterator;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -39,9 +41,11 @@ abstract class EndpointTest extends TestCase {
 
     public function __construct($name) {
         parent::__construct($name);
-        $config = Config::getInstance();
-        $config->setDebug(true);
-        $this->logger = LoggerFactory::getLogger();
+        $this->logger = ConsoleLoggerFactory::getLogger();
+
+        LoggerRegistry::setLogger($this->logger);
+        Config::getInstance()->setDebug(true);
+
         $this->client = APIClientFactory::getClient();
 
         $this->testConfig = TestConfig::getInstance();
@@ -49,7 +53,6 @@ abstract class EndpointTest extends TestCase {
     }
 
     final protected function setUp(): void {
-
         foreach ($this->tenantIds as $tenantId) {
             $tempDir = str_replace("{tenant}", (string)$tenantId, $this->testConfig->getInternalStorePath());
 
@@ -82,7 +85,7 @@ abstract class EndpointTest extends TestCase {
                 $endpoint = new EchoEndpoint($this->client);
                 $echoResponse = $endpoint->get();
                 $this->apiDisabled = !$echoResponse->isValid();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 error_log("API disabled -> " . $e->getMessage());
                 $this->apiDisabled = true;
             }
