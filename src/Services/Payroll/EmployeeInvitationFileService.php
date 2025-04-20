@@ -39,11 +39,11 @@ class EmployeeInvitationFileService extends FileServiceAbstract {
             if (is_null($this->client) && !is_null($this->payrollClient)) {
                 $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
                 if (is_null($this->client)) {
-                    self::$logger->error("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches[2]);
+                    $this->logError("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches[2]);
                     throw $e;
                 }
 
-                self::$logger->notice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
+                $this->logNotice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
             }
         }
     }

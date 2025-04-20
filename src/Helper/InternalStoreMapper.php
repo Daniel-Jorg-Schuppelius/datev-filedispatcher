@@ -22,7 +22,7 @@ class InternalStoreMapper extends HelperAbstract {
     public static function getInternalStorePath(Client $client, string $subPath, ?string $parameter = null): ?string {
         $internalStorePath = StorageFactory::getInternalStorePathForClient($client);
         if ($internalStorePath === null) {
-            self::$logger->critical("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
+            self::logCritical("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
             return null;
         }
 
@@ -34,7 +34,7 @@ class InternalStoreMapper extends HelperAbstract {
     public static function getInternalStorePath4Document(Client $client, Document $document, ?string $parameter = null): ?string {
         $subPath = self::getMapping4InternalStorePath($document);
         if ($subPath === null) {
-            self::$logger->error("Kein Mapping für Dokument: '{$document->getFolder()->getName()} {$document->getRegister()->getName()}' gefunden.");
+            self::logError("Kein Mapping für Dokument: '{$document->getFolder()->getName()} {$document->getRegister()->getName()}' gefunden.");
             return null;
         }
 
@@ -47,9 +47,9 @@ class InternalStoreMapper extends HelperAbstract {
 
         $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
 
-        self::$logger->debug("Suche Mapping für: '$datevDMSCategory'.");
+        self::logDebug("Suche Mapping für: '$datevDMSCategory'.");
         if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
-            self::$logger->error("Kein Mapping für Kategorie '$datevDMSCategory' gefunden.");
+            self::logError("Kein Mapping für Kategorie '$datevDMSCategory' gefunden.");
             return null;
         }
 
@@ -57,7 +57,7 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     public static function requiresPattern(string $internalPath, array $patterns): bool {
-        self::$logger->debug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
+        self::logDebug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
 
         if (in_array($internalPath, $patterns)) {
             return true;
@@ -82,7 +82,7 @@ class InternalStoreMapper extends HelperAbstract {
             $path = sprintf($path, $parameter);
         }
 
-        self::$logger->debug("Interner Speicherpfad (ermittelt): '$path'.");
+        self::logDebug("Interner Speicherpfad (ermittelt): '$path'.");
 
         return $path;
     }
@@ -90,11 +90,11 @@ class InternalStoreMapper extends HelperAbstract {
     private static function validatePath(string $path): ?string {
         $realPath = realpath($path);
         if ($realPath === false) {
-            self::$logger->error("Der Pfad '$path' konnte nicht validiert werden.");
+            self::logError("Der Pfad '$path' konnte nicht validiert werden.");
             return null;
         }
 
-        self::$logger->info("Pfad für Internen Bereich (validiert): '$realPath'.");
+        self::logInfo("Pfad für Internen Bereich (validiert): '$realPath'.");
         return $realPath;
     }
 }

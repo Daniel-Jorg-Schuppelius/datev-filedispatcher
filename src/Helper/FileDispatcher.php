@@ -61,21 +61,21 @@ class FileDispatcher extends HelperAbstract {
         $excludedFolders = Config::getInstance()->getExcludedFolders();
 
         if (empty($file)) {
-            self::$logger->warning("Keine Datei zur Verarbeitung übergeben.");
+            self::logWarning("Keine Datei zur Verarbeitung übergeben.");
             return;
         }
 
         if (!is_null($excludedFolders)) {
             foreach ($excludedFolders as $folder) {
                 if (strpos($file, $folder) === 0) {
-                    self::$logger->info("Die Datei $file liegt im ausgeschlossenen Ordner $folder und wird nicht verarbeitet.");
+                    self::logInfo("Die Datei $file liegt im ausgeschlossenen Ordner $folder und wird nicht verarbeitet.");
                     return;
                 }
             }
         }
 
         if (!File::exists($file)) {
-            self::$logger->warning("Datei $file existiert nicht.");
+            self::logWarning("Datei $file existiert nicht.");
             return;
         }
 
@@ -83,16 +83,16 @@ class FileDispatcher extends HelperAbstract {
             if (self::preProcessFile($file) && File::exists($file)) {
                 foreach (self::$services as $serviceClass) {
                     if ($serviceClass::matchesPattern($file)) {
-                        self::$logger->debug("Service: " . $serviceClass . " für Datei: $file gefunden.");
+                        self::logDebug("Service: " . $serviceClass . " für Datei: $file gefunden.");
                         $service = new $serviceClass($file);
                         $service->process();
                         return;
                     }
                 }
-                self::$logger->warning("Kein passender Service für Datei: $file gefunden.");
+                self::logWarning("Kein passender Service für Datei: $file gefunden.");
             }
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Verarbeitung der Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Verarbeitung der Datei $file: " . $e->getMessage());
             throw $e;
         }
     }
@@ -103,7 +103,7 @@ class FileDispatcher extends HelperAbstract {
         try {
             foreach (self::$preProcessServices as $preProcessServiceClass) {
                 if ($preProcessServiceClass::matchesPattern($file)) {
-                    self::$logger->debug("PreProcessService: " . $preProcessServiceClass . " für Datei: $file gefunden.");
+                    self::logDebug("PreProcessService: " . $preProcessServiceClass . " für Datei: $file gefunden.");
                     $preProcessService = new $preProcessServiceClass($file);
                     if ($preProcessService->preProcess()) {
                         return true;
@@ -112,14 +112,14 @@ class FileDispatcher extends HelperAbstract {
             }
 
             if (in_array($fileType, self::$fileTypesWithoutGenericPreProcessing)) {
-                self::$logger->notice("Kein passender preProcessService für Datei: $file gefunden.");
+                self::logNotice("Kein passender preProcessService für Datei: $file gefunden.");
                 return true; // Datei benötigt keine generische Vorverarbeitung
             }
 
-            self::$logger->notice("Kein passender preProcessService für Datei: $file gefunden. Versuche generische Vorverarbeitung.");
+            self::logNotice("Kein passender preProcessService für Datei: $file gefunden. Versuche generische Vorverarbeitung.");
             return self::genericPreProcessFile($file, $fileType);
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung der Datei $file: " . $e->getMessage());
             return false;
         }
     }
@@ -142,7 +142,7 @@ class FileDispatcher extends HelperAbstract {
                 self::preProcessZipFile($file);
                 break;
             default:
-                self::$logger->warning("Unbekannter Dateityp: $fileType für Datei $file");
+                self::logWarning("Unbekannter Dateityp: $fileType für Datei $file");
                 return false;
         }
         return true;
@@ -152,7 +152,7 @@ class FileDispatcher extends HelperAbstract {
         $mimeType = File::mimeType($file);
 
         if ($mimeType !== $expectedMimeType) {
-            self::$logger->warning("$file ist ungültig, versuche zu reparieren.");
+            self::logWarning("$file ist ungültig, versuche zu reparieren.");
             $repairFunction($file);
         }
     }
@@ -162,9 +162,9 @@ class FileDispatcher extends HelperAbstract {
             if (!CsvFile::isWellFormed($file)) {
                 throw new Exception("Fehlerhafte CSV-Datei: $file");
             }
-            self::$logger->info("CSV-Datei $file erfolgreich validiert.");
+            self::logInfo("CSV-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der CSV-Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung der CSV-Datei $file: " . $e->getMessage());
         }
     }
 
@@ -173,9 +173,9 @@ class FileDispatcher extends HelperAbstract {
             if (!PdfFile::isValid($file)) {
                 throw new Exception("Fehlerhafte PDF-Datei: $file");
             }
-            self::$logger->info("PDF-Datei $file erfolgreich validiert.");
+            self::logInfo("PDF-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der PDF-Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung der PDF-Datei $file: " . $e->getMessage());
         }
     }
 
@@ -183,9 +183,9 @@ class FileDispatcher extends HelperAbstract {
         try {
             self::checkAndRepairFile($file, 'image/tiff', [TifFile::class, 'repair']);
             TifFile::convertToPdf($file);
-            self::$logger->info("TIFF-Datei $file wurde erfolgreich in PDF umgewandelt.");
+            self::logInfo("TIFF-Datei $file wurde erfolgreich in PDF umgewandelt.");
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der TIFF-Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung der TIFF-Datei $file: " . $e->getMessage());
         }
     }
 
@@ -194,9 +194,9 @@ class FileDispatcher extends HelperAbstract {
             if (!XmlFile::isWellFormed($file)) {
                 throw new Exception("Fehlerhafte XML-Datei: $file");
             }
-            self::$logger->info("XML-Datei $file erfolgreich validiert.");
+            self::logInfo("XML-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung der XML-Datei $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung der XML-Datei $file: " . $e->getMessage());
         }
     }
 
@@ -205,10 +205,10 @@ class FileDispatcher extends HelperAbstract {
             if (!ZipFile::isValid($file)) {
                 throw new Exception("Fehlerhaftes ZIP-Archiv: $file");
             }
-            self::$logger->info("ZIP-Archiv $file erfolgreich validiert.");
+            self::logInfo("ZIP-Archiv $file erfolgreich validiert.");
             ZipFile::extract($file, pathinfo($file, PATHINFO_DIRNAME));
         } catch (Exception $e) {
-            self::$logger->error("Fehler bei der Vorverarbeitung des ZIP-Archivs $file: " . $e->getMessage());
+            self::logError("Fehler bei der Vorverarbeitung des ZIP-Archivs $file: " . $e->getMessage());
         }
     }
 }
