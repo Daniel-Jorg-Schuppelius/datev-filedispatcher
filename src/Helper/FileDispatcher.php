@@ -53,12 +53,12 @@ class FileDispatcher extends HelperAbstract {
     }
 
     public static function processFile($file): void {
-        $excludedFolders = Config::getInstance()->getExcludedFolders();
-
         LoggerRegistry::setLogger(LoggerFactory::getLogger());
 
         self::setServices();
         self::setPreProcessServices();
+
+        $excludedFolders = Config::getInstance()->getExcludedFolders();
 
         if (empty($file)) {
             self::$logger->warning("Keine Datei zur Verarbeitung übergeben.");
