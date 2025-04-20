@@ -10,7 +10,7 @@
 
 namespace App\Traits;
 
-use APIToolkit\Enums\Month;
+use CommonToolkit\Enums\Month;
 use DateTime;
 use Exception;
 use OutOfRangeException;

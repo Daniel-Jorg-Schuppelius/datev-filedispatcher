@@ -42,8 +42,7 @@ class InternalStoreMapper extends HelperAbstract {
     }
 
     public static function getMapping4InternalStorePath(Document $document): ?string {
-        $config = Config::getInstance();
-        $datevDMSMapping = $config->getDatevDMSMapping();
+        $datevDMSMapping = Config::getInstance()->getDatevDMSMapping();
 
         $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
 
@@ -67,11 +66,13 @@ class InternalStoreMapper extends HelperAbstract {
 
     public static function requiresYear(string $internalPath): bool {
         $config = Config::getInstance();
+        self::logDebug("Prüfe Jahr-Pattern");
         return self::requiresPattern($internalPath, $config->getPerYear());
     }
 
     public static function requiresPeriod(string $internalPath): bool {
         $config = Config::getInstance();
+        self::logDebug("Prüfe Period-Pattern");
         return self::requiresPattern($internalPath, $config->getPerPeriod());
     }
 
