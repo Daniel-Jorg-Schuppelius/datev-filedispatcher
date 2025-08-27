@@ -72,12 +72,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk.git",
-                "reference": "1721869ca2ce18ea27462d25a3f9ce902dfb2583"
+                "reference": "eefb948dcf133e22652d02e76c280f6be0cfe418"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/1721869ca2ce18ea27462d25a3f9ce902dfb2583",
-                "reference": "1721869ca2ce18ea27462d25a3f9ce902dfb2583",
+                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/datev-php-sdk/zipball/eefb948dcf133e22652d02e76c280f6be0cfe418",
+                "reference": "eefb948dcf133e22652d02e76c280f6be0cfe418",
                 "shasum": ""
             },
             "require": {
@@ -112,20 +112,20 @@
                 "issues": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/issues",
                 "source": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk/tree/main"
             },
-            "time": "2025-04-21T07:04:41+00:00"
+            "time": "2025-08-27T11:19:50+00:00"
         },
         {
             "name": "daniel-jorg-schuppelius/php-api-toolkit",
-            "version": "v1.4",
+            "version": "v1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit.git",
-                "reference": "b4fd7dcf4f00af8351d2a1c4b6a8562f9b4d70e7"
+                "reference": "6a4595a1582d602396d992cb2843fd33f4fbeb66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/php-api-toolkit/zipball/b4fd7dcf4f00af8351d2a1c4b6a8562f9b4d70e7",
-                "reference": "b4fd7dcf4f00af8351d2a1c4b6a8562f9b4d70e7",
+                "url": "https://api.github.com/repos/Daniel-Jorg-Schuppelius/php-api-toolkit/zipball/6a4595a1582d602396d992cb2843fd33f4fbeb66",
+                "reference": "6a4595a1582d602396d992cb2843fd33f4fbeb66",
                 "shasum": ""
             },
             "require": {
@@ -157,9 +157,9 @@
             "description": "Reused codes for my api php sdks",
             "support": {
                 "issues": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/issues",
-                "source": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/tree/v1.4"
+                "source": "https://github.com/Daniel-Jorg-Schuppelius/php-api-toolkit/tree/v1.4.1"
             },
-            "time": "2025-07-10T10:47:19+00:00"
+            "time": "2025-08-27T10:59:31+00:00"
         },
         {
             "name": "dschuppelius/php-common-toolkit",
@@ -211,16 +211,16 @@
         },
         {
             "name": "dschuppelius/php-config-toolkit",
-            "version": "v0.2.11",
+            "version": "v0.2.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DSchuppelius/php-config-toolkit.git",
-                "reference": "f7c70cd07f0b58af56d9f9a08bb51e3504143058"
+                "reference": "b23db44461741c656227b117f5d670490a7d268f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DSchuppelius/php-config-toolkit/zipball/f7c70cd07f0b58af56d9f9a08bb51e3504143058",
-                "reference": "f7c70cd07f0b58af56d9f9a08bb51e3504143058",
+                "url": "https://api.github.com/repos/DSchuppelius/php-config-toolkit/zipball/b23db44461741c656227b117f5d670490a7d268f",
+                "reference": "b23db44461741c656227b117f5d670490a7d268f",
                 "shasum": ""
             },
             "require": {
@@ -250,9 +250,9 @@
             "description": "Ein Toolkit für JSON-basierte Konfigurationsverwaltung",
             "support": {
                 "issues": "https://github.com/DSchuppelius/php-config-toolkit/issues",
-                "source": "https://github.com/DSchuppelius/php-config-toolkit/tree/v0.2.11"
+                "source": "https://github.com/DSchuppelius/php-config-toolkit/tree/v0.2.13"
             },
-            "time": "2025-04-01T13:07:52+00:00"
+            "time": "2025-08-27T10:41:47+00:00"
         },
         {
             "name": "dschuppelius/php-error-toolkit",
