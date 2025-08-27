@@ -45,6 +45,7 @@ class DocumentTest extends EndpointTest {
         $this->assertInstanceOf(Documents::class, $documents);
         $document = $documents->getFirstValue();
         $client = $this->preEndpoint->get($document->getCorrespondencePartnerGUID());
+        $this->assertInstanceOf(Client::class, $client);
     }
 
     public function testGetClientFromPayroll() {

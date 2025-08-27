@@ -16,7 +16,6 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Factories\APIClientFactory;
-use App\Factories\LoggerFactory;
 use CommonToolkit\Helper\FileSystem\File;
 use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
@@ -34,7 +33,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     protected const SUBFOLDER = '';
 
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
-        self::setLogger($logger ?? LoggerFactory::getLogger());
+        self::setLogger($logger);
         $this->config = Config::getInstance();
 
         $client = $client ?? APIClientFactory::getClient();

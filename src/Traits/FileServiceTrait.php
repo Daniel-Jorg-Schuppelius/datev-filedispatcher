@@ -10,7 +10,6 @@
 
 namespace App\Traits;
 
-use ERRORToolkit\Traits\ErrorLog;
 use App\Config\Config;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;

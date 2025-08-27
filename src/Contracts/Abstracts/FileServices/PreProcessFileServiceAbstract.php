@@ -16,7 +16,6 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Contracts\Interfaces\FileServices\PreProcessFileServiceInterface;
 use App\Factories\APIClientFactory;
-use App\Factories\LoggerFactory;
 use App\Traits\FileServiceTrait;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
@@ -29,7 +28,7 @@ abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInt
     use ErrorLog, FileServiceTrait;
 
     public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
-        self::setLogger($logger ?? LoggerFactory::getLogger());
+        self::setLogger($logger);
         $this->config = Config::getInstance();
 
         $client = $client ?? APIClientFactory::getClient();

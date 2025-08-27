@@ -52,7 +52,7 @@ class SettlementOfGrossNetRemunerations4SeveralMonthsFileService extends Payroll
 
         $subFolder = $this->prepareSubFolder($subFolder, false, true);
 
-        self::$logger->info("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+        $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
         return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
     }
 }
