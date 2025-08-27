@@ -29,7 +29,7 @@ Required for handling PDF files.
 
 ### 3. ImageMagick
 For converting and processing image files.
-- **Windows**: [ImageMagick Installer](https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-39-Q16-HDRI-x64-dll.exe)
+- **Windows**: [ImageMagick Installer](https://imagemagick.org/script/download.php#windows)
 - **Debian/Ubuntu**:
   ```bash
   apt install imagemagick-6.q16hdri
