@@ -17,7 +17,9 @@ class DuplicateNumberProcessFileService extends PreProcessFileServiceAbstract {
     // Beispiele:
     // test (1).txt -> test.txt
     // abc (23).pdf -> abc.pdf
-    protected const PATTERN = '/\s\(\d+\)(?=\.[^.]+$)/';
+    // dokument - Kopie (2).docx -> dokument.docx
+    // dokument - Kopie (2) (3).docx -> dokument - Kopie (2).docx
+    protected const PATTERN = '/( - (Kopie|Copy)(?: \(\d+\))?)|(\s\(\d+\)(?=\.[^.]+$))/';
     private string $newFile;
 
     protected function extractDataFromFile(): void {

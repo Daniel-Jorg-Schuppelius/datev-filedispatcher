@@ -67,4 +67,35 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
 
         File::delete($expected);
     }
+
+    public function testNoChangeIfNoPattern(): void {
+        $filename = $this->testDir . 'simplefile.txt';
+
+        File::write($filename, 'textdata');
+
+        $service = new DuplicateNumberProcessFileService($filename);
+        $service->preProcess();
+
+        $this->assertTrue(File::exists($filename));
+
+        File::delete($filename);
+    }
+
+    public function testCopyPattern(): void {
+        $filename = $this->testDir . 'dokument - Kopie (2).docx';
+        $expected = $this->testDir . 'dokument.docx';
+
+        File::write($filename, 'docxdata');
+        if (File::exists($expected)) {
+            File::delete($expected);
+        }
+
+        $service = new DuplicateNumberProcessFileService($filename);
+        $service->preProcess();
+
+        $this->assertTrue(File::exists($expected));
+        $this->assertFalse(File::exists($filename));
+
+        File::delete($expected);
+    }
 }
