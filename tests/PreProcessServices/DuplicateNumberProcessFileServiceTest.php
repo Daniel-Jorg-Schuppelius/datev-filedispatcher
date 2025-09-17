@@ -98,4 +98,17 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
 
         File::delete($expected);
     }
+
+    public function testNumberNotAtEndIsNotAffected(): void {
+        $filename = $this->testDir . 'test (1) 2023.txt';
+        $expected = $filename; // darf sich nicht ändern
+
+        File::write($filename, 'dummy');
+
+        $service = new DuplicateNumberProcessFileService($filename);
+        $service->preProcess();
+
+        $this->assertTrue(File::exists($expected));
+        File::delete($expected);
+    }
 }
