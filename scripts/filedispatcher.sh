@@ -37,11 +37,11 @@ while [ "$quit" -ne 1 ]; do
     # Überwache das Arbeitsverzeichnis auf neue oder geänderte Dateien
     inotifywait --monitor --syslog --quiet --recursive \
                 --event create --event moved_to --event close_write --event move_self \
-                --exclude '(log\.txt)' "$WORKDIR" |
+                --exclude '(^|/)log\.txt(\.\d{8}_\d{6})?$' "$WORKDIR" |
     while read -r path action filename; do
         logger -s -t "$(basename "$0")" "The file '$filename' appeared in directory '$path' via '$action'"
         logger -s -t "$(basename "$0")" "Starting $DISPATCHER1 $path$filename"
-        
+
         # Überprüfen, ob die Datei existiert und ausführbar ist
         if [ -f "$path$filename" ]; then
             sleep 1  # Kurze Pause, um sicherzustellen, dass die Datei vollständig geschrieben wurde
