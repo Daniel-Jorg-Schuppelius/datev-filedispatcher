@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d37871b1efbc1b6d2d771c475dd49948",
+    "content-hash": "a60c00ff407d12e15df827bada97940f",
     "packages": [
         {
             "name": "brick/math",
@@ -68,7 +68,7 @@
         },
         {
             "name": "daniel-jorg-schuppelius/datev-php-sdk",
-            "version": "dev-main",
+            "version": "v0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Daniel-Jorg-Schuppelius/datev-php-sdk.git",
@@ -90,7 +90,6 @@
                 "dschuppelius/php-config-toolkit": "^0.2.3",
                 "phpunit/phpunit": "^11.3@dev"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -2873,7 +2872,6 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "psr/log": 20,
-        "daniel-jorg-schuppelius/datev-php-sdk": 20,
         "phpunit/phpunit": 20
     },
     "prefer-stable": true,
