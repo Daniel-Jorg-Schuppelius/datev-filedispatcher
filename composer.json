@@ -17,7 +17,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": "^7.4 || ^8.0",
+    "php": ">=8.2 <8.5",
     "guzzlehttp/guzzle": "^7.9",
     "psr/log": "^3.0@dev",
     "daniel-jorg-schuppelius/datev-php-sdk": "^0.4.1"
