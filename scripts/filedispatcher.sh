@@ -4,6 +4,7 @@
 CODEDIR="$(dirname "$0")"
 WORKDIR="/opt/internal_dispatcher/"
 DISPATCHER="$CODEDIR/../src/DatevFileDispatcher.php"
+LOCKDIR="/tmp/filedispatcher_locks"
 
 # Funktion zur Überprüfung, ob ein Befehl verfügbar ist
 check_command() {
@@ -17,6 +18,10 @@ check_command() {
 check_command inotifywait
 check_command logger
 check_command php
+check_command flock
+
+# Lock-Verzeichnis erstellen
+mkdir -p "$LOCKDIR"
 
 # Ins Arbeitsverzeichnis wechseln
 cd "$WORKDIR" || { echo "Fehler: Konnte nicht ins Arbeitsverzeichnis $WORKDIR wechseln."; exit 1; }
@@ -28,6 +33,34 @@ exec 2> >(logger -s -t "$(basename "$0")")
 logger -s -t "$(basename "$0")" "Starting filedispatcher"
 logger -s -t "$(basename "$0")" "Workdir: $WORKDIR"
 
+# Funktion zur Verarbeitung einer Datei mit Lock
+process_file() {
+    local filepath="$1"
+    local lockfile="$LOCKDIR/$(echo "$filepath" | md5sum | cut -d' ' -f1).lock"
+
+    # Versuche exklusives Lock zu bekommen (nicht-blockierend)
+    exec 200>"$lockfile"
+    if ! flock -n 200; then
+        logger -s -t "$(basename "$0")" "Datei wird bereits verarbeitet, überspringe: $filepath"
+        return 0
+    fi
+
+    # Kurze Pause, um sicherzustellen, dass die Datei vollständig geschrieben wurde
+    sleep 1
+
+    # Prüfen, ob die Datei noch existiert (könnte bereits verarbeitet worden sein)
+    if [ -f "$filepath" ]; then
+        logger -s -t "$(basename "$0")" "Verarbeite: $filepath"
+        php "$DISPATCHER" "$filepath"
+    else
+        logger -s -t "$(basename "$0")" "Datei existiert nicht mehr: $filepath"
+    fi
+
+    # Lock freigeben und Lockfile löschen
+    flock -u 200
+    rm -f "$lockfile"
+}
+
 # Signal zum Beenden einrichten
 trap 'quit=1' USR1
 
@@ -37,18 +70,17 @@ while [ "$quit" -ne 1 ]; do
     # Überwache das Arbeitsverzeichnis auf neue oder geänderte Dateien
     inotifywait --monitor --syslog --quiet --recursive \
                 --event create --event moved_to --event close_write --event move_self \
-                --exclude '(^|/)log\.txt(\.\d{8}_\d{6})?$' "$WORKDIR" |
+                --exclude '(^|/)log\.txt(\.\d{8}_\d{6})?$|\.lock$' "$WORKDIR" |
     while read -r path action filename; do
         logger -s -t "$(basename "$0")" "The file '$filename' appeared in directory '$path' via '$action'"
-        logger -s -t "$(basename "$0")" "Starting $DISPATCHER1 $path$filename"
 
-        # Überprüfen, ob die Datei existiert und ausführbar ist
-        if [ -f "$path$filename" ]; then
-            sleep 1  # Kurze Pause, um sicherzustellen, dass die Datei vollständig geschrieben wurde
-            php "$DISPATCHER" "$path$filename"  # Dispatcher ausführen
-        else
-            logger -s -t "$(basename "$0")" "Fehler: Die Datei $path$filename existiert nicht oder ist nicht lesbar."
+        # Lock-Dateien ignorieren
+        if [[ "$filename" == *.lock ]]; then
+            continue
         fi
+
+        # Datei im Hintergrund verarbeiten
+        process_file "$path$filename" &
     done
 done
 

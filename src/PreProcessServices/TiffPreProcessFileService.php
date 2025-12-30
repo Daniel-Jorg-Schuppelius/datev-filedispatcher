@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace App\PreProcessServices;
 
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
+use CommonToolkit\Helper\FileSystem\File;
 use CommonToolkit\Helper\FileSystem\Files;
 use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 
@@ -62,9 +63,39 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             if (!empty($tiffFiles)) {
                 $this->logInfo("Mehrseitige TIFF-Dateien gefunden: {$this->file}");
                 $outputFilePath = dirname($this->file) . DIRECTORY_SEPARATOR . $fileMatches[1] . '.tif';
+                $lockFile = $outputFilePath . '.lock';
 
-                TifFile::merge($tiffFiles, $outputFilePath);
-                TifFile::convertToPdf($outputFilePath);
+                // Exklusives Lock erstellen, um parallele Verarbeitung zu verhindern
+                $lockHandle = fopen($lockFile, 'c');
+                if ($lockHandle === false) {
+                    $this->logWarning("Lock-Datei konnte nicht erstellt werden: {$lockFile}");
+                    return false;
+                }
+
+                if (!flock($lockHandle, LOCK_EX | LOCK_NB)) {
+                    // Ein anderer Prozess verarbeitet bereits diese Dateien
+                    $this->logInfo("Datei wird bereits von einem anderen Prozess verarbeitet: {$this->file}");
+                    fclose($lockHandle);
+                    return false;
+                }
+
+                try {
+                    // Nochmal prüfen, ob die Dateien noch existieren (könnten bereits verarbeitet sein)
+                    $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $fileMatches[1]);
+                    if (empty($tiffFiles)) {
+                        $this->logInfo("TIFF-Dateien wurden bereits von einem anderen Prozess verarbeitet: {$this->file}");
+                        return false;
+                    }
+
+                    TifFile::merge($tiffFiles, $outputFilePath);
+                    TifFile::convertToPdf($outputFilePath);
+                } finally {
+                    flock($lockHandle, LOCK_UN);
+                    fclose($lockHandle);
+                    if (File::exists($lockFile)) {
+                        File::delete($lockFile);
+                    }
+                }
             }
         }
 
