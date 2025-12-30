@@ -11,7 +11,25 @@ The tool uses the DATEV API to automatically sort documents into the appropriate
 ## Requirements
 The following tools are required to successfully run `datev-filedispatcher`:
 
-### 1. TIFF Tools
+### Automatic Installation (Linux)
+On Debian/Ubuntu, you can automatically install all dependencies using the included install script:
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher.git
+
+# Or if already cloned, initialize submodules
+git submodule update --init --recursive
+
+# Run the installation script (requires jq)
+sudo apt install jq
+./installscript/install-dependencies.sh
+```
+
+The script automatically scans the `vendor/` directory and installs all required tools defined in `*executables.json` configuration files.
+
+### Manual Installation
+
+#### 1. TIFF Tools
 Required for processing and handling TIFF files.
 - **Windows**: [GnuWin32 TIFF Tools](https://gnuwin32.sourceforge.net/packages/tiff.htm)
 - **Debian/Ubuntu**: 
@@ -19,7 +37,7 @@ Required for processing and handling TIFF files.
   apt install libtiff-tools
   ```
 
-### 2. Xpdf
+#### 2. Xpdf
 Required for handling PDF files.
 - **Windows**: [Xpdf Download](https://www.xpdfreader.com/download.html)
 - **Debian/Ubuntu**:
@@ -27,7 +45,7 @@ Required for handling PDF files.
   apt install xpdf
   ```
 
-### 3. ImageMagick
+#### 3. ImageMagick
 For converting and processing image files.
 - **Windows**: [ImageMagick Installer](https://imagemagick.org/script/download.php#windows)
 - **Debian/Ubuntu**:
@@ -35,17 +53,45 @@ For converting and processing image files.
   apt install imagemagick-6.q16hdri
   ```
 
-### 4. muPDF Tools
+#### 4. muPDF Tools
 For processing PDF and XPS documents.
 - **Debian/Ubuntu**:
   ```bash
   apt install mupdf-tools
   ```
 
+#### 5. qpdf
+For PDF manipulation and repair.
+- **Windows**: [qpdf Releases](https://github.com/qpdf/qpdf/releases)
+- **Debian/Ubuntu**:
+  ```bash
+  apt install qpdf
+  ```
+
 ## Installation and Usage
 1. Install the **requirements** (see above).
 2. Download and configure `datev-filedispatcher`.
-3. Execution: Once files are placed in the monitored directory, the automatic sorting into the corresponding client folders begins.
+3. Copy `config/config.json.sample` to `config/config.json` and adjust the settings.
+4. Execution: Once files are placed in the monitored directory, the automatic sorting into the corresponding client folders begins.
+
+## Configuration
+
+The configuration is done via `config/config.json`. The following settings are available:
+
+| Section | Key | Description |
+|---------|-----|-------------|
+| `DatevAPI` | `resourceurl` | URL to the DATEV API (default: `https://127.0.0.1:58452`) |
+| `DatevAPI` | `user` | Username for API authentication |
+| `DatevAPI` | `password` | Password for API authentication |
+| `DatevAPI` | `verifySSL` | SSL certificate verification (`true` for production, `false` for self-signed certs) |
+| `Path` | `internalStore` | Path to the internal store with `{tenant}` placeholder for client directories |
+| `Logging` | `log` | Log output target (`Console`, `File`, `Null`) |
+| `Logging` | `level` | Log level (`emergency`, `alert`, `critical`, `error`, `warning`, `notice`, `info`, `debug`) |
+| `Logging` | `path` | Path to log file |
+| `Debugging` | `debug` | Enable debug mode (`true`/`false`) |
+
+### SSL Verification
+For development environments with self-signed certificates, set `verifySSL` to `false`. In production, always set it to `true` to ensure secure communication.
 
 ### Bash Script for Monitoring the Corresponding Directory
 To activate the Bash script as a service on Linux, run the following commands:
@@ -53,6 +99,8 @@ To activate the Bash script as a service on Linux, run the following commands:
 sudo ln -s /path/to/your/project/config/init.d/filedispatcher /etc/init.d/filedispatcher
 sudo update-rc.d filedispatcher defaults
 ```
+
+The monitoring script uses file locking to prevent parallel processing of the same files.
 
 ## License
 This project is licensed under the MIT License. For more information, see the [LICENSE](LICENSE) file. It would be nice if you consider supporting me for any commercial use.
