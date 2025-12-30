@@ -36,6 +36,38 @@ class FileDispatcher extends HelperAbstract {
     protected static ?array $preProcessServices = null;
     protected static array $fileTypesWithoutGenericPreProcessing = ['xlsm', 'txt'];
 
+    /**
+     * Prüft ob die Datei eine temporäre oder ungültige Datei ist
+     * - 0-Byte Dateien
+     * - Windows 8.3 Short Names (z.B. NDH6SA~M)
+     * - Dateien ohne Erweiterung
+     * - Versteckte Dateien (beginnend mit .)
+     */
+    protected static function isTemporaryOrInvalidFile(string $file): bool {
+        $basename = pathinfo($file, PATHINFO_BASENAME);
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+        // 0-Byte Dateien ignorieren
+        if (File::exists($file) && filesize($file) === 0) {
+            self::logInfo("Überspringe 0-Byte Datei: $file");
+            return true;
+        }
+
+        // Dateien ohne Erweiterung ignorieren (außer bekannte Ausnahmen)
+        if (empty($extension)) {
+            self::logInfo("Überspringe Datei ohne Erweiterung: $file");
+            return true;
+        }
+
+        // Versteckte Dateien ignorieren
+        if (strpos($basename, '.') === 0) {
+            self::logInfo("Überspringe versteckte Datei: $file");
+            return true;
+        }
+
+        return false;
+    }
+
     // Allgemeine Methode für das Setzen von Services oder PreProcessServices
     protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
         if (is_null($serviceStorage)) {
@@ -76,6 +108,11 @@ class FileDispatcher extends HelperAbstract {
 
         if (!File::exists($file)) {
             self::logWarning("Datei $file existiert nicht.");
+            return;
+        }
+
+        // Prüfe auf temporäre oder ungültige Dateien
+        if (self::isTemporaryOrInvalidFile($file)) {
             return;
         }
 
