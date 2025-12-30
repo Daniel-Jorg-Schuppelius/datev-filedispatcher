@@ -66,6 +66,10 @@ class Config {
         return $this->configLoader->get("DatevAPI", "password");
     }
 
+    public function getVerifySSL(): bool {
+        return $this->configLoader->get("DatevAPI", "verifySSL", false);
+    }
+
     // Getter für Logging
     public function getLogType(): LogType {
         return LogType::fromString($this->configLoader->get("Logging", "log", LogType::NULL->value));

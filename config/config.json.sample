@@ -20,6 +20,13 @@
 			"type": "text",
 			"description": "Password for the Datev API",
 			"enabled": true
+		},
+		{
+			"key": "verifySSL",
+			"value": false,
+			"type": "bool",
+			"description": "Verify SSL certificate for the Datev API (set to true in production)",
+			"enabled": true
 		}
 	],
 	"Path": [

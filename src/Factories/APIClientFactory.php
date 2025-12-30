@@ -24,7 +24,7 @@ class APIClientFactory {
         if (self::$client === null) {
             $config = Config::getInstance();
             $authentication = new BasicAuthentication($config->getUser(), $config->getPassword());
-            self::$client = new Client($authentication, $config->getResourceUrl() ?? "https://127.0.0.1:58452", LoggerFactory::getLogger());
+            self::$client = new Client($authentication, $config->getResourceUrl() ?? "https://127.0.0.1:58452", LoggerFactory::getLogger(), false, $config->getVerifySSL());
         }
         return self::$client;
     }
