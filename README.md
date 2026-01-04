@@ -207,9 +207,6 @@ vendor/bin/phpunit
 ## 📖 Abhängigkeiten
 
 - [datev-php-sdk](https://github.com/daniel-jorg-schuppelius/datev-php-sdk) (^0.4.1) - DATEV API SDK
-- [php-api-toolkit](https://github.com/daniel-jorg-schuppelius/php-api-toolkit) - Basis-Klassen für API-Integration
-- [GuzzleHttp](https://github.com/guzzle/guzzle) - HTTP Client
-- [PSR-3 Logger](https://www.php-fig.org/psr/psr-3/) - Logging-Interface
 
 ## 📄 Lizenz
 

@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace App\Factories;
 
-use APIToolkit\Contracts\Abstracts\API\Authentication\BasicAuthentication;
+use APIToolkit\API\Authentication\BasicAuthentication;
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use Datev\API\Desktop\Client;
 use App\Config\Config;
