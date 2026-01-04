@@ -2,7 +2,6 @@
 
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-8892BF.svg)](https://php.net/)
 [![License](https://img.shields.io/github/license/Daniel-Jorg-Schuppelius/datev-filedispatcher)](https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher/blob/main/LICENSE)
-[![GitHub](https://img.shields.io/github/stars/Daniel-Jorg-Schuppelius/datev-filedispatcher?style=social)](https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher)
 
 Ein PHP-Tool zur automatischen Organisation und Sortierung von Mandantendateien aus dem DATEV Document Management System (DMS). Die Dateien werden basierend auf ihrer Zuordnung automatisch in die entsprechenden Mandantenverzeichnisse verschoben.
 
