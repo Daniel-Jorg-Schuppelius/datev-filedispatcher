@@ -1,36 +1,60 @@
-# datev-filedispatcher
+# DATEV File Dispatcher
 
-A tool for automatically organizing and sorting client files that are pulled from the DATEV Document Management System (DMS) into a directory. The files are moved into the corresponding client directories based on their assignment.
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-8892BF.svg)](https://php.net/)
+[![License](https://img.shields.io/github/license/Daniel-Jorg-Schuppelius/datev-filedispatcher)](https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher/blob/main/LICENSE)
+[![GitHub](https://img.shields.io/github/stars/Daniel-Jorg-Schuppelius/datev-filedispatcher?style=social)](https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher)
 
-## Functionality
-The tool uses the DATEV API to automatically sort documents into the appropriate client folders. This creates a file structure that enables quick retrieval and structured storage. Various file and image formats are supported.
+Ein PHP-Tool zur automatischen Organisation und Sortierung von Mandantendateien aus dem DATEV Document Management System (DMS). Die Dateien werden basierend auf ihrer Zuordnung automatisch in die entsprechenden Mandantenverzeichnisse verschoben.
 
-### Note on Using with Nextcloud
-`datev-filedispatcher` can be used in conjunction with Nextcloud to share client files easily and securely. Since many law firms or companies still rely on email for client communication, using this tool in combination with Nextcloud provides a structured and modern alternative for document distribution. Clients have direct access to their relevant files and can stay up to date without relying on email communication. The files are directly sorted into the Nextcloud directory.
+## 🚀 Features
 
-## Requirements
-The following tools are required to successfully run `datev-filedispatcher`:
+- **Automatische Dateisortierung**: Dokumente werden automatisch in die passenden Mandantenordner einsortiert
+- **DATEV API Integration**: Direkte Anbindung an die DATEV DMS API
+- **Pattern-basierte Verarbeitung**: Flexible Service-Architektur mit Regex-Pattern-Matching
+- **PreProcessing**: TIFF-Konvertierung, PDF-Verarbeitung, Multi-Page-Handling
+- **Nextcloud-Integration**: Direkte Sortierung in Nextcloud-Verzeichnisse für einfache Mandantenkommunikation
+- **Erweiterbar**: Einfaches Hinzufügen neuer File-Services durch dynamische Service-Discovery
 
-### Automatic Installation (Linux)
-On Debian/Ubuntu, you can automatically install all dependencies using the included install script:
+## 📋 Voraussetzungen
+
+- PHP 8.2, 8.3 oder 8.4
+- DATEV Account mit API-Zugang
+- Composer
+- Externe Tools (siehe Installation)
+
+## 📦 Installation
+
+### Composer
+
 ```bash
-# Clone with submodules
+composer require daniel-jorg-schuppelius/datev-filedispatcher
+```
+
+### Klonen des Repositories
+
+```bash
+# Mit Submodulen klonen
 git clone --recurse-submodules https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher.git
 
-# Or if already cloned, initialize submodules
+# Oder falls bereits geklont, Submodule initialisieren
 git submodule update --init --recursive
+```
 
-# Run the installation script (requires jq)
+### Automatische Installation der Abhängigkeiten (Linux)
+
+Auf Debian/Ubuntu können alle Abhängigkeiten automatisch installiert werden:
+
+```bash
 sudo apt install jq
 ./installscript/install-dependencies.sh
 ```
 
-The script automatically scans the `vendor/` directory and installs all required tools defined in `*executables.json` configuration files.
+Das Skript scannt automatisch das `vendor/`-Verzeichnis und installiert alle erforderlichen Tools, die in `*executables.json` Konfigurationsdateien definiert sind.
 
-### Manual Installation
+### Manuelle Installation der externen Tools
 
 #### 1. TIFF Tools
-Required for processing and handling TIFF files.
+Erforderlich für die Verarbeitung von TIFF-Dateien.
 - **Windows**: [GnuWin32 TIFF Tools](https://gnuwin32.sourceforge.net/packages/tiff.htm)
 - **Debian/Ubuntu**: 
   ```bash
@@ -38,7 +62,7 @@ Required for processing and handling TIFF files.
   ```
 
 #### 2. Xpdf
-Required for handling PDF files.
+Erforderlich für die PDF-Verarbeitung.
 - **Windows**: [Xpdf Download](https://www.xpdfreader.com/download.html)
 - **Debian/Ubuntu**:
   ```bash
@@ -46,7 +70,7 @@ Required for handling PDF files.
   ```
 
 #### 3. ImageMagick
-For converting and processing image files.
+Für die Konvertierung und Verarbeitung von Bilddateien.
 - **Windows**: [ImageMagick Installer](https://imagemagick.org/script/download.php#windows)
 - **Debian/Ubuntu**:
   ```bash
@@ -54,53 +78,154 @@ For converting and processing image files.
   ```
 
 #### 4. muPDF Tools
-For processing PDF and XPS documents.
+Für die Verarbeitung von PDF- und XPS-Dokumenten.
 - **Debian/Ubuntu**:
   ```bash
   apt install mupdf-tools
   ```
 
 #### 5. qpdf
-For PDF manipulation and repair.
+Für PDF-Manipulation und -Reparatur.
 - **Windows**: [qpdf Releases](https://github.com/qpdf/qpdf/releases)
 - **Debian/Ubuntu**:
   ```bash
   apt install qpdf
   ```
 
-## Installation and Usage
-1. Install the **requirements** (see above).
-2. Download and configure `datev-filedispatcher`.
-3. Copy `config/config.json.sample` to `config/config.json` and adjust the settings.
-4. Execution: Once files are placed in the monitored directory, the automatic sorting into the corresponding client folders begins.
+## ⚙️ Konfiguration
 
-## Configuration
+### Konfigurationsdatei erstellen
 
-The configuration is done via `config/config.json`. The following settings are available:
-
-| Section | Key | Description |
-|---------|-----|-------------|
-| `DatevAPI` | `resourceurl` | URL to the DATEV API (default: `https://127.0.0.1:58452`) |
-| `DatevAPI` | `user` | Username for API authentication |
-| `DatevAPI` | `password` | Password for API authentication |
-| `DatevAPI` | `verifySSL` | SSL certificate verification (`true` for production, `false` for self-signed certs) |
-| `Path` | `internalStore` | Path to the internal store with `{tenant}` placeholder for client directories |
-| `Logging` | `log` | Log output target (`Console`, `File`, `Null`) |
-| `Logging` | `level` | Log level (`emergency`, `alert`, `critical`, `error`, `warning`, `notice`, `info`, `debug`) |
-| `Logging` | `path` | Path to log file |
-| `Debugging` | `debug` | Enable debug mode (`true`/`false`) |
-
-### SSL Verification
-For development environments with self-signed certificates, set `verifySSL` to `false`. In production, always set it to `true` to ensure secure communication.
-
-### Bash Script for Monitoring the Corresponding Directory
-To activate the Bash script as a service on Linux, run the following commands:
 ```bash
-sudo ln -s /path/to/your/project/config/init.d/filedispatcher /etc/init.d/filedispatcher
+cp config/config.json.sample config/config.json
+```
+
+### Konfigurationsoptionen
+
+Die Konfiguration erfolgt über `config/config.json`:
+
+| Sektion | Schlüssel | Beschreibung |
+|---------|-----------|--------------|
+| `DatevAPI` | `resourceurl` | URL zur DATEV API (Standard: `https://127.0.0.1:58452`) |
+| `DatevAPI` | `user` | Benutzername für API-Authentifizierung |
+| `DatevAPI` | `password` | Passwort für API-Authentifizierung |
+| `DatevAPI` | `verifySSL` | SSL-Zertifikatsprüfung (`true` für Produktion, `false` für selbstsignierte Zertifikate) |
+| `Path` | `internalStore` | Pfad zum internen Speicher mit `{tenant}` Platzhalter für Mandantenverzeichnisse |
+| `Logging` | `log` | Log-Ausgabeziel (`Console`, `File`, `Null`) |
+| `Logging` | `level` | Log-Level (`emergency`, `alert`, `critical`, `error`, `warning`, `notice`, `info`, `debug`) |
+| `Logging` | `path` | Pfad zur Log-Datei |
+| `Debugging` | `debug` | Debug-Modus aktivieren (`true`/`false`) |
+
+### SSL-Verifizierung
+
+Für Entwicklungsumgebungen mit selbstsignierten Zertifikaten setzen Sie `verifySSL` auf `false`. In der Produktion sollte dies immer auf `true` gesetzt sein.
+
+## 📚 Verwendung
+
+### Einzelne Datei verarbeiten
+
+```bash
+php src/DatevFileDispatcher.php "/pfad/zur/datei.pdf"
+```
+
+### Als Linux-Service einrichten
+
+```bash
+sudo ln -s /pfad/zum/projekt/config/init.d/filedispatcher /etc/init.d/filedispatcher
 sudo update-rc.d filedispatcher defaults
 ```
 
-The monitoring script uses file locking to prevent parallel processing of the same files.
+## 🏗️ Projektstruktur
 
-## License
-This project is licensed under the MIT License. For more information, see the [LICENSE](LICENSE) file. It would be nice if you consider supporting me for any commercial use.
+```
+src/
+├── DatevFileDispatcher.php     # CLI Einstiegspunkt
+├── Config/
+│   └── Config.php              # Konfigurationsmanagement (Singleton)
+├── Contracts/
+│   ├── Abstracts/              # Basis-Klassen
+│   └── Interfaces/             # Interface-Definitionen
+├── Factories/
+│   ├── APIClientFactory.php    # DATEV API Client Factory
+│   ├── LoggerFactory.php       # Logger Factory
+│   └── StorageFactory.php      # Storage Path Factory
+├── Helper/
+│   ├── FileDispatcher.php      # Zentrale Orchestrierung
+│   └── InternalStoreMapper.php # Mandanten-Verzeichnis-Mapping
+├── PreProcessServices/         # Vorverarbeitung (TIFF, PDF, etc.)
+│   ├── DuplicateNumberProcessFileService.php
+│   ├── PDFNameProcessFileService.php
+│   ├── PDFScannerCodeProcessFileService.php
+│   ├── PDFTimeCodeProcessFileService.php
+│   └── TiffPreProcessFileService.php
+├── Services/                   # Datei-Services (Pattern-basiert)
+│   ├── DMSBasicFileService.php
+│   └── Payroll/                # Lohnabrechnungs-Services
+└── Traits/
+    ├── FileServiceTrait.php
+    └── PeriodicFileServiceTrait.php
+```
+
+## 🔌 Service-Architektur
+
+### File Services
+
+Services werden automatisch aus dem `src/Services/` Verzeichnis geladen und verarbeiten Dateien basierend auf Regex-Patterns:
+
+| Service | Pattern-Beispiel | Beschreibung |
+|---------|------------------|--------------|
+| `DMSBasicFileService` | `219628 - Dokument.pdf` | Standard DMS-Dateien |
+| Payroll Services | `Lohn*.pdf` | Lohnabrechnungs-Dokumente |
+
+### PreProcess Services
+
+Vorverarbeitungs-Services aus `src/PreProcessServices/`:
+
+| Service | Beschreibung |
+|---------|--------------|
+| `TiffPreProcessFileService` | TIFF zu PDF Konvertierung |
+| `PDFNameProcessFileService` | PDF-Namensextraktion |
+| `PDFScannerCodeProcessFileService` | Scanner-Code Verarbeitung |
+| `PDFTimeCodeProcessFileService` | Zeitcode-Verarbeitung |
+| `DuplicateNumberProcessFileService` | Duplikat-Erkennung |
+
+## 🧪 Tests
+
+### Test-Konfiguration
+
+```bash
+cp config/testconfig.json.sample config/testconfig.json
+```
+
+### Tests ausführen
+
+```bash
+composer test
+# oder
+vendor/bin/phpunit
+```
+
+## 📖 Abhängigkeiten
+
+- [datev-php-sdk](https://github.com/daniel-jorg-schuppelius/datev-php-sdk) (^0.4.1) - DATEV API SDK
+- [php-api-toolkit](https://github.com/daniel-jorg-schuppelius/php-api-toolkit) - Basis-Klassen für API-Integration
+- [GuzzleHttp](https://github.com/guzzle/guzzle) - HTTP Client
+- [PSR-3 Logger](https://www.php-fig.org/psr/psr-3/) - Logging-Interface
+
+## 📄 Lizenz
+
+Dieses Projekt ist unter der [MIT-Lizenz](https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher/blob/main/LICENSE) lizenziert.
+
+## 💖 Unterstützung
+
+Wenn Ihnen dieses Projekt gefällt und es Ihnen bei Ihrer Arbeit hilft, würde ich mich sehr über eine Spende freuen!
+
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa)](https://github.com/sponsors/Daniel-Jorg-Schuppelius)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue)](https://www.paypal.com/donate/?hosted_button_id=X43UQQVDKL76Y)
+
+## 👤 Autor
+
+**Daniel Jörg Schuppelius**
+
+- Website: [schuppelius.org](https://schuppelius.org/)
+- E-Mail: [info@schuppelius.org](mailto:info@schuppelius.org)
