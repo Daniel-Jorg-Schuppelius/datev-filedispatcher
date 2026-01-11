@@ -67,8 +67,7 @@ trait PeriodicFileServiceTrait {
         try {
             $this->date = new DateTime("$year-$month-$day");
         } catch (Exception) {
-            $this->logError("Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
-            throw new OutOfRangeException("Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
+            self::logErrorAndThrow(OutOfRangeException::class, "Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
         }
     }
 
@@ -76,11 +75,9 @@ trait PeriodicFileServiceTrait {
         parent::validateConfig();
 
         if (is_null($this->config->getPreviousYears4Internal())) {
-            $this->logError("Ungültige Konfiguration für die Anzahl der Vorjahre.");
-            throw new OutOfRangeException("Ungültige Konfiguration für die Anzahl der Vorjahre.");
+            self::logErrorAndThrow(OutOfRangeException::class, "Ungültige Konfiguration für die Anzahl der Vorjahre.");
         } elseif (is_null($this->config->getPreviousYearsFolderName4Internal())) {
-            $this->logError("Ungültige Konfiguration für den Namen des Vorjahresordners.");
-            throw new OutOfRangeException("Ungültige Konfiguration für den Namen des Vorjahresordners.");
+            self::logErrorAndThrow(OutOfRangeException::class, "Ungültige Konfiguration für den Namen des Vorjahresordners.");
         }
     }
 }

@@ -41,7 +41,7 @@ abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInt
         try {
             $this->extractDataFromFile();
         } catch (Exception $e) {
-            $this->logError("Fehler bei der Verarbeitung des Dateinamens: " . $e->getMessage());
+            self::logException($e);
             throw $e;
         }
     }

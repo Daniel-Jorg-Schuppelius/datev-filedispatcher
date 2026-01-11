@@ -129,7 +129,7 @@ class FileDispatcher extends HelperAbstract {
                 self::logWarning("Kein passender Service für Datei: $file gefunden.");
             }
         } catch (Exception $e) {
-            self::logError("Fehler bei der Verarbeitung der Datei $file: " . $e->getMessage());
+            self::logException($e);
             throw $e;
         }
     }
@@ -156,7 +156,7 @@ class FileDispatcher extends HelperAbstract {
             self::logNotice("Kein passender preProcessService für Datei: $file gefunden. Versuche generische Vorverarbeitung.");
             return self::genericPreProcessFile($file, $fileType);
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung der Datei $file: " . $e->getMessage());
+            self::logException($e);
             return false;
         }
     }
@@ -201,7 +201,7 @@ class FileDispatcher extends HelperAbstract {
             }
             self::logInfo("CSV-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung der CSV-Datei $file: " . $e->getMessage());
+            self::logException($e);
         }
     }
 
@@ -212,7 +212,7 @@ class FileDispatcher extends HelperAbstract {
             }
             self::logInfo("PDF-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung der PDF-Datei $file: " . $e->getMessage());
+            self::logException($e);
         }
     }
 
@@ -222,7 +222,7 @@ class FileDispatcher extends HelperAbstract {
             TifFile::convertToPdf($file);
             self::logInfo("TIFF-Datei $file wurde erfolgreich in PDF umgewandelt.");
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung der TIFF-Datei $file: " . $e->getMessage());
+            self::logException($e);
         }
     }
 
@@ -233,7 +233,7 @@ class FileDispatcher extends HelperAbstract {
             }
             self::logInfo("XML-Datei $file erfolgreich validiert.");
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung der XML-Datei $file: " . $e->getMessage());
+            self::logException($e);
         }
     }
 
@@ -245,7 +245,7 @@ class FileDispatcher extends HelperAbstract {
             self::logInfo("ZIP-Archiv $file erfolgreich validiert.");
             ZipFile::extract($file, pathinfo($file, PATHINFO_DIRNAME));
         } catch (Exception $e) {
-            self::logError("Fehler bei der Vorverarbeitung des ZIP-Archivs $file: " . $e->getMessage());
+            self::logException($e);
         }
     }
 }

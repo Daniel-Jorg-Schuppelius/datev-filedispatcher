@@ -40,11 +40,9 @@ class EmployeeFileService extends PayrollFileServiceAbstract {
                 return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
             }
 
-            $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");
-            throw new Exception("Mitarbeiter nicht gefunden: {$employeeNumber}");
+            self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
         }
 
-        $this->logError("Client nicht gefunden: {$matches[1]}");
-        throw new Exception("Client nicht gefunden: {$matches[1]}");
+        self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");
     }
 }

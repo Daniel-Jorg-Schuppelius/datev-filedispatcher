@@ -36,15 +36,12 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
                     return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
                 }
 
-                $this->logError("Mitarbeiter nicht gefunden: {$employeeNumber}");
-                throw new Exception("Mitarbeiter nicht gefunden: {$employeeNumber}");
+                self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
             }
 
-            $this->logError("Keine Mitarbeiter für Client: {$this->payrollClient->getNumber()} gefunden");
-            throw new Exception("Keine Mitarbeiter für Client: {$this->payrollClient->getNumber()} gefunden");
+            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$this->payrollClient->getNumber()} gefunden");
         }
 
-        $this->logError("Client nicht gefunden: {$matches[1]}");
-        throw new Exception("Client nicht gefunden: {$matches[1]}");
+        self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");
     }
 }

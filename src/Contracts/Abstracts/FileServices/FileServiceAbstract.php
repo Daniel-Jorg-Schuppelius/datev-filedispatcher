@@ -46,7 +46,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
         try {
             $this->extractDataFromFile();
         } catch (Exception $e) {
-            $this->logError("Fehler bei der Verarbeitung der Datei: $file (" . $e->getMessage() . ")");
+            self::logException($e);
             throw $e;
         }
     }
@@ -78,8 +78,7 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
     protected function validateConfig(): void {
         if (is_null($this->config->getInternalStorePath())) {
-            $this->logCritical("Ungültige Konfiguration für den internen Speicherpfad.");
-            throw new OutOfRangeException("Ungültige Konfiguration für den internen Speicherpfad.");
+            self::logCriticalAndThrow(OutOfRangeException::class, "Ungültige Konfiguration für den internen Speicherpfad.");
         }
     }
 
