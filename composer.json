@@ -17,7 +17,8 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.2 <8.5",
-    "daniel-jorg-schuppelius/datev-php-sdk": "^0.4.5"
+    "daniel-jorg-schuppelius/datev-php-sdk": "^0.4.5",
+    "dschuppelius/php-config-toolkit": "0.4.4"
   },
 
   "autoload-dev": {
