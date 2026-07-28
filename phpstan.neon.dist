@@ -1,0 +1,24 @@
+parameters:
+    level: 8
+    # Gegen die gesamte unterstützte PHP-Spanne (composer: >=8.2 <8.5) analysieren,
+    # damit versionsabhängige Signaturen unabhängig von der lokal laufenden
+    # PHP-Version erkannt werden.
+    phpVersion:
+        min: 80200
+        max: 80499
+    paths:
+        - src
+    tmpDir: var/phpstan
+    reportUnmatchedIgnoredErrors: true
+    ignoreErrors:
+        # PHPStan hält File::exists() für deterministisch und merkt sich das Ergebnis der
+        # ersten Prüfung. Zwischen beiden Prüfungen läuft aber die Vorverarbeitung, die die
+        # Datei löschen kann: TifFile::convertToPdf() entfernt die Quell-TIFF nach der
+        # Umwandlung. Die zweite Prüfung ist daher zwingend und darf nicht entfallen.
+        # Nachgewiesener False Positive; dank reportUnmatchedIgnoredErrors meldet sich
+        # dieser Eintrag von selbst, sobald PHPStan das korrekt erkennt.
+        -
+            identifier: booleanNot.alwaysFalse
+            message: '#^Negated boolean expression is always false\.$#'
+            path: src/Helper/FileDispatcher.php
+            count: 1

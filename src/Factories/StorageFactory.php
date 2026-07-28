@@ -22,12 +22,15 @@ class StorageFactory {
 
     public static function getInternalStorePath(): string {
         if (self::$internalStorePath === null) {
-            $config = Config::getInstance();
-            self::$internalStorePath = $config->getInternalStorePath();
+            $configuredPath = Config::getInstance()->getInternalStorePath();
 
-            if (!self::isInternalStorePathValid()) {
+            if ($configuredPath === null) {
+                throw new InvalidArgumentException('The InternalStorePath is not configured. Please check your configuration');
+            } elseif (!self::containsTenantPlaceholder($configuredPath)) {
                 throw new InvalidArgumentException('The InternalStorePath must contain the placeholder {tenant}. Please check your configuration');
             }
+
+            self::$internalStorePath = $configuredPath;
         }
         return self::$internalStorePath;
     }
@@ -42,14 +45,18 @@ class StorageFactory {
     }
 
     public static function setInternalStorePath(string $path): void {
-        self::$internalStorePath = $path;
-
-        if (!self::isInternalStorePathValid()) {
+        if (!self::containsTenantPlaceholder($path)) {
             throw new InvalidArgumentException('The path must contain the placeholder {tenant}');
         }
+
+        self::$internalStorePath = $path;
     }
 
     public static function isInternalStorePathValid(): bool {
-        return str_contains(self::$internalStorePath, '{tenant}');
+        return !is_null(self::$internalStorePath) && self::containsTenantPlaceholder(self::$internalStorePath);
+    }
+
+    private static function containsTenantPlaceholder(string $path): bool {
+        return str_contains($path, '{tenant}');
     }
 }

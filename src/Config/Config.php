@@ -107,23 +107,30 @@ class Config {
     }
 
     // Getter für Mappings & Listen
+
+    /** @return array<string, string>|null Kategorie ("Ordner Register") => interner Unterpfad */
     public function getDatevDMSMapping(): ?array {
         return $this->configLoader->get("DatevDMSMapping");
     }
 
+    /** @return list<string>|null */
     public function getExcludedFolders(): ?array {
         return $this->configLoader->get("ExcludedFolders");
     }
 
+    /** @return list<string>|null */
     public function getPerYear(): ?array {
         return $this->configLoader->get("PerYear");
     }
 
+    /** @return list<string>|null */
     public function getPerPeriod(): ?array {
         return $this->configLoader->get("PerPeriod");
     }
 
     // Getter für Tenant-IDs
+
+    /** @return list<string>|null */
     public function getTenantIDs(): ?array {
         return $this->configLoader->get("TenantIDs");
     }

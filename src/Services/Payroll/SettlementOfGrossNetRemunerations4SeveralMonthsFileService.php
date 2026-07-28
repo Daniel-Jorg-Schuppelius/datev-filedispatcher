@@ -27,17 +27,22 @@ class SettlementOfGrossNetRemunerations4SeveralMonthsFileService extends Payroll
 
         $documentType = "Mehrmonatige_Entgeltabrechnung";
 
-        if (!is_null($this->payrollClient)) {
-            $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
+        $payrollClient = $this->payrollClient;
+        if (!is_null($payrollClient)) {
+            $this->logInfo("Client gefunden: {$payrollClient->getNumber()}");
 
-            $employees = $this->payrollClient->getEmployees();
-            $employee = $employees->getFirstValue('id', $employeeNumber);
-            if (!is_null($employee)) {
-                $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+            $employees = $payrollClient->getEmployees();
+            if (!is_null($employees)) {
+                $employee = $employees->getFirstValue('id', $employeeNumber);
+                if (!is_null($employee)) {
+                    $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
+                    return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                }
+
+                self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
             }
 
-            self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
+            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
         }
 
         self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");
@@ -50,7 +55,13 @@ class SettlementOfGrossNetRemunerations4SeveralMonthsFileService extends Payroll
 
         $subFolder = $this->prepareSubFolder($subFolder, false, true);
 
+        $client = $this->client;
+        if (is_null($client)) {
+            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
+            return null;
+        }
+
         $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
-        return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
+        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
     }
 }

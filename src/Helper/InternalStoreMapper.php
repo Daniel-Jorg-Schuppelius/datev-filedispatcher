@@ -21,10 +21,6 @@ use Datev\Entities\DocumentManagement\Documents\Document;
 class InternalStoreMapper extends HelperAbstract {
     public static function getInternalStorePath(Client $client, string $subPath, ?string $parameter = null): ?string {
         $internalStorePath = StorageFactory::getInternalStorePathForClient($client);
-        if ($internalStorePath === null) {
-            self::logCritical("Interner Speicherpfad für den Client konnte nicht gefunden werden.");
-            return null;
-        }
 
         return self::validatePath(
             self::buildInternalStorePath($internalStorePath, $subPath, $parameter)
@@ -34,7 +30,7 @@ class InternalStoreMapper extends HelperAbstract {
     public static function getInternalStorePath4Document(Client $client, Document $document, ?string $parameter = null): ?string {
         $subPath = self::getMapping4InternalStorePath($document);
         if ($subPath === null) {
-            self::logError("Kein Mapping für Dokument: '{$document->getFolder()->getName()} {$document->getRegister()->getName()}' gefunden.");
+            self::logError("Kein Mapping für Dokument: '" . self::getDMSCategory($document) . "' gefunden.");
             return null;
         }
 
@@ -43,8 +39,12 @@ class InternalStoreMapper extends HelperAbstract {
 
     public static function getMapping4InternalStorePath(Document $document): ?string {
         $datevDMSMapping = Config::getInstance()->getDatevDMSMapping();
+        if (is_null($datevDMSMapping)) {
+            self::logError("Keine DMS-Zuordnung (DatevDMSMapping) konfiguriert.");
+            return null;
+        }
 
-        $datevDMSCategory = $document->getFolder()->getName() . " " . $document->getRegister()->getName();
+        $datevDMSCategory = self::getDMSCategory($document);
 
         self::logDebug("Suche Mapping für: '$datevDMSCategory'.");
         if (!array_key_exists($datevDMSCategory, $datevDMSMapping)) {
@@ -55,6 +55,19 @@ class InternalStoreMapper extends HelperAbstract {
         return $datevDMSMapping[$datevDMSCategory];
     }
 
+    /**
+     * Baut die DMS-Kategorie ("Ordner Register") aus dem Dokument.
+     * Ordner und Register sind laut SDK optional, fehlende Teile bleiben leer.
+     */
+    private static function getDMSCategory(Document $document): string {
+        return trim(
+            ($document->getFolder()?->getName() ?? '') . " " . ($document->getRegister()?->getName() ?? '')
+        );
+    }
+
+    /**
+     * @param list<string> $patterns
+     */
     public static function requiresPattern(string $internalPath, array $patterns): bool {
         self::logDebug("Prüfe Pattern für: $internalPath (Pattern: " . implode(", ", $patterns) . ")");
 
@@ -67,13 +80,13 @@ class InternalStoreMapper extends HelperAbstract {
     public static function requiresYear(string $internalPath): bool {
         $config = Config::getInstance();
         self::logDebug("Prüfe Jahr-Pattern");
-        return self::requiresPattern($internalPath, $config->getPerYear());
+        return self::requiresPattern($internalPath, $config->getPerYear() ?? []);
     }
 
     public static function requiresPeriod(string $internalPath): bool {
         $config = Config::getInstance();
         self::logDebug("Prüfe Period-Pattern");
-        return self::requiresPattern($internalPath, $config->getPerPeriod());
+        return self::requiresPattern($internalPath, $config->getPerPeriod() ?? []);
     }
 
     private static function buildInternalStorePath(string $basePath, string $mappedPath, ?string $parameter): string {

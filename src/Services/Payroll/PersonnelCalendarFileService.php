@@ -26,6 +26,12 @@ class PersonnelCalendarFileService extends PayrollFileServiceAbstract {
 
         $subFolder = $this->prepareSubFolder($this->getSubFolder(), false, true);
 
-        return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
+        $client = $this->client;
+        if (is_null($client)) {
+            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
+            return null;
+        }
+
+        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
     }
 }

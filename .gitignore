@@ -407,3 +407,5 @@ phpunit.xml
 # Schuppe
 /config/config.json
 /config/testconfig.json
+# PHPStan
+/var/phpstan

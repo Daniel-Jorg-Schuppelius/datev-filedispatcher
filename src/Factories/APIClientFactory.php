@@ -16,6 +16,7 @@ use APIToolkit\API\Authentication\BasicAuthentication;
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use Datev\API\Desktop\Client;
 use App\Config\Config;
+use RuntimeException;
 
 class APIClientFactory {
     private static ?ApiClientInterface $client = null;
@@ -23,7 +24,14 @@ class APIClientFactory {
     public static function getClient(): ApiClientInterface {
         if (self::$client === null) {
             $config = Config::getInstance();
-            $authentication = new BasicAuthentication($config->getUser(), $config->getPassword());
+
+            $user = $config->getUser();
+            $password = $config->getPassword();
+            if (is_null($user) || is_null($password)) {
+                throw new RuntimeException("Unvollständige DATEV-API-Konfiguration: 'DatevAPI.user' und 'DatevAPI.password' müssen gesetzt sein.");
+            }
+
+            $authentication = new BasicAuthentication($user, $password);
             self::$client = new Client($authentication, $config->getResourceUrl() ?? "https://127.0.0.1:58452", LoggerFactory::getLogger(), false, $config->getVerifySSL());
         }
         return self::$client;

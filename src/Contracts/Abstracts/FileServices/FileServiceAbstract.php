@@ -26,6 +26,7 @@ use ERRORToolkit\Traits\ErrorLog;
 use Exception;
 use OutOfRangeException;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 abstract class FileServiceAbstract implements FileServiceInterface {
     use ErrorLog, FileServiceTrait;
@@ -54,10 +55,13 @@ abstract class FileServiceAbstract implements FileServiceInterface {
     public function getDestinationFolder(): ?string {
         $this->validateConfig();
 
-        if (!is_null($this->client) && !is_null($this->document)) {
-            return InternalStoreMapper::getInternalStorePath4Document($this->client, $this->document);
-        } elseif (!is_null($this->client) && !empty($this->getSubFolder())) {
-            return InternalStoreMapper::getInternalStorePath($this->client, $this->getSubFolder());
+        $client = $this->client;
+        $document = $this->document;
+
+        if (!is_null($client) && !is_null($document)) {
+            return InternalStoreMapper::getInternalStorePath4Document($client, $document);
+        } elseif (!is_null($client) && !empty($this->getSubFolder())) {
+            return InternalStoreMapper::getInternalStorePath($client, $this->getSubFolder());
         }
 
         return null;
@@ -65,7 +69,13 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
     public function process(): void {
         $this->logNotice("Verarbeite Datei: {$this->file} mit FileService: " . static::class . ".");
-        File::move($this->file, $this->getDestinationFolder(), $this->getDestinationFilename());
+
+        $destinationFolder = $this->getDestinationFolder();
+        if (is_null($destinationFolder)) {
+            self::logErrorAndThrow(RuntimeException::class, "Zielordner konnte nicht bestimmt werden für die Datei: {$this->file}");
+        }
+
+        File::move($this->file, $destinationFolder, $this->getDestinationFilename());
     }
 
     protected function getDestinationFilename(): string {

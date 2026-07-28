@@ -26,10 +26,11 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
 
         $documentType = "Entgeltabrechnung";
 
-        if (!is_null($this->payrollClient)) {
-            $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
+        $payrollClient = $this->payrollClient;
+        if (!is_null($payrollClient)) {
+            $this->logInfo("Client gefunden: {$payrollClient->getNumber()}");
 
-            $employees = $this->payrollClient->getEmployees();
+            $employees = $payrollClient->getEmployees();
             if (!is_null($employees)) {
                 $employee = $employees->getFirstValue('id', $employeeNumber);
                 if (!is_null($employee)) {
@@ -39,7 +40,7 @@ class EmployeePayrollFileService extends PayrollFileServiceAbstract {
                 self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
             }
 
-            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$this->payrollClient->getNumber()} gefunden");
+            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
         }
 
         self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");

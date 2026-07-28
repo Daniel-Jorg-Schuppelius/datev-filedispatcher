@@ -24,7 +24,8 @@ class DuplicateNumberProcessFileService extends PreProcessFileServiceAbstract {
 
     protected function extractDataFromFile(): void {
         $this->logInfo("Suche Nummernzusätze im Dateinamen: {$this->file}");
-        $this->newFile = preg_replace(self::PATTERN, '', $this->file);
+        // Bei einem preg_replace-Fehler bleibt der Originalname erhalten (kein Umbenennen).
+        $this->newFile = preg_replace(self::PATTERN, '', $this->file) ?? $this->file;
     }
 
     public function preProcess(): bool {

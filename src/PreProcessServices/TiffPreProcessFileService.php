@@ -16,6 +16,7 @@ use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
 use CommonToolkit\Helper\FileSystem\File;
 use CommonToolkit\Helper\FileSystem\Files;
 use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
+use RuntimeException;
 
 class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     // 000000 - ABC Testdokument - 2022_1.tif(f)
@@ -40,18 +41,30 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
     public function preProcess(): bool {
         $this->logInfo("Preprocessing der TIFF-Datei: {$this->file}");
 
+        // Der Konstruktor bricht ab, wenn kein DMS-Dokument ermittelt werden kann.
+        $document = $this->document;
+        if (is_null($document)) {
+            self::logErrorAndThrow(RuntimeException::class, "Kein DMS-Dokument zur Datei gesetzt: {$this->file}");
+        }
+
+        $extension = $document->getExtension() ?? '';
+
         $matches = [];
-        if (preg_match(self::FILE_EXTENSION_PATTERN, $this->document->getExtension())) {
+        if (preg_match(self::FILE_EXTENSION_PATTERN, $extension)) {
             $this->logInfo("Kein Preprocessing durch diesen PreProccessingService erforderlich für die Datei: {$this->file}");
             return true;
         }
 
-        if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $this->document->getExtension(), $matches)) {
+        if (preg_match(self::DATEV_MORE_THAN_ONE_PAGE_EXTENSION_PATTERN, $extension, $matches)) {
             $this->logInfo("Mehrseitige TIFF-Dateien erkannt für die Datei: {$this->file}");
             $fileMatches = [];
-            preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->file), $fileMatches);
+            if (!preg_match(self::DATEV_MORE_THAN_ONE_PAGE_BASENAME_PATTERN, basename($this->file), $fileMatches)) {
+                $this->logWarning("Basisname der mehrseitigen TIFF-Datei konnte nicht ermittelt werden: {$this->file}");
+                return false;
+            }
+            $baseName = $fileMatches[1];
 
-            $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $fileMatches[1]);
+            $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $baseName);
 
             $istFileCount = count($tiffFiles);
             $sollFileCount = (int)$matches[1];
@@ -62,7 +75,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
 
             if (!empty($tiffFiles)) {
                 $this->logInfo("Mehrseitige TIFF-Dateien gefunden: {$this->file}");
-                $outputFilePath = dirname($this->file) . DIRECTORY_SEPARATOR . $fileMatches[1] . '.tif';
+                $outputFilePath = dirname($this->file) . DIRECTORY_SEPARATOR . $baseName . '.tif';
                 $lockFile = $outputFilePath . '.lock';
 
                 // Exklusives Lock erstellen, um parallele Verarbeitung zu verhindern
@@ -81,7 +94,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
 
                 try {
                     // Nochmal prüfen, ob die Dateien noch existieren (könnten bereits verarbeitet sein)
-                    $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $fileMatches[1]);
+                    $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $baseName);
                     if (empty($tiffFiles)) {
                         $this->logInfo("TIFF-Dateien wurden bereits von einem anderen Prozess verarbeitet: {$this->file}");
                         return false;

@@ -24,17 +24,22 @@ class EmployeeNonCashBenefitsFileService extends PayrollFileServiceAbstract {
         $matches = $this->getMatches();
         $employeeNumber = $matches[5];
 
-        if (!is_null($this->payrollClient)) {
-            $this->logInfo("Client gefunden: {$this->payrollClient->getNumber()}");
+        $payrollClient = $this->payrollClient;
+        if (!is_null($payrollClient)) {
+            $this->logInfo("Client gefunden: {$payrollClient->getNumber()}");
 
-            $employees = $this->payrollClient->getEmployees();
-            $employee = $employees->getFirstValue('id', $employeeNumber);
-            if (!is_null($employee)) {
-                $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                return "{$matches[4]}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+            $employees = $payrollClient->getEmployees();
+            if (!is_null($employees)) {
+                $employee = $employees->getFirstValue('id', $employeeNumber);
+                if (!is_null($employee)) {
+                    $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
+                    return "{$matches[4]}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
+                }
+
+                self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
             }
 
-            self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
+            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
         }
 
         self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");

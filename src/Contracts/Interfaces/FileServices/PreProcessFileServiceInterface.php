@@ -17,7 +17,12 @@ use Datev\Entities\DocumentManagement\Documents\Document;
 
 interface PreProcessFileServiceInterface {
     public static function getPattern(): string;
-    public static function matchesPattern(string $file, ?array &$matches = null): bool;
+
+    /**
+     * @param array<array-key, string> $matches
+     * @param-out array<array-key, string> $matches
+     */
+    public static function matchesPattern(string $file, array &$matches = []): bool;
 
     public function preProcess(): bool;
 

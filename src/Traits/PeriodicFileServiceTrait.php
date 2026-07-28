@@ -26,6 +26,9 @@ trait PeriodicFileServiceTrait {
         return (int)$this->date->format('Y');
     }
 
+    /**
+     * @return array{string, string} Jahr und Monat, jeweils formatiert
+     */
     protected function getFormattedDateParts(bool $leadingZero): array {
         $yearFormatted = $this->date->format('Y');
         $monthValue = $this->getMonth();
@@ -67,7 +70,7 @@ trait PeriodicFileServiceTrait {
         try {
             $this->date = new DateTime("$year-$month-$day");
         } catch (Exception) {
-            self::logErrorAndThrow(OutOfRangeException::class, "Ungültiges Datum: $year-$month im Dateinamen: {$this->filename}");
+            self::logErrorAndThrow(OutOfRangeException::class, "Ungültiges Datum: $year-$month im Dateinamen: {$this->getFilename()}");
         }
     }
 

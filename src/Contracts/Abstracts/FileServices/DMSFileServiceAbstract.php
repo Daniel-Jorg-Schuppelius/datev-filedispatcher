@@ -14,6 +14,7 @@ namespace App\Contracts\Abstracts\FileServices;
 
 use App\Helper\InternalStoreMapper;
 use App\Traits\PeriodicFileServiceTrait;
+use RuntimeException;
 
 abstract class DMSFileServiceAbstract extends FileServiceAbstract {
     use PeriodicFileServiceTrait;
@@ -27,23 +28,43 @@ abstract class DMSFileServiceAbstract extends FileServiceAbstract {
 
         $subFolder = $this->prepareSubFolder($subFolder, $requiresPeriod, $requiresYear);
 
+        if (!$requiresPeriod && !$requiresYear) {
+            return parent::getDestinationFolder();
+        }
+
+        $client = $this->client;
+        if (is_null($client)) {
+            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
+            return null;
+        }
+
         if ($requiresPeriod) {
             $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
-        } elseif ($requiresYear) {
-            $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
-        } else {
-            return parent::getDestinationFolder($leadingZero);
+            return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
         }
+
+        $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
     }
 
     protected function getSubFolder(): string {
-        return InternalStoreMapper::getMapping4InternalStorePath($this->document);
+        $document = $this->document;
+        if (is_null($document)) {
+            $this->logError("Kein Dokument gesetzt, der Unterordner kann nicht bestimmt werden.");
+            return '';
+        }
+
+        return InternalStoreMapper::getMapping4InternalStorePath($document) ?? '';
     }
 
     protected function setPropertiesFromDMS(string $documentNumber, bool $withPayroll = false): void {
         parent::setPropertiesFromDMS($documentNumber, $withPayroll);
-        $this->setDate($this->document->getYear(), $this->document->getMonth());
+
+        $document = $this->document;
+        if (is_null($document)) {
+            self::logErrorAndThrow(RuntimeException::class, "Dokument konnte im DMS nicht gefunden werden: $documentNumber");
+        }
+
+        $this->setDate($document->getYear(), $document->getMonth());
     }
 }

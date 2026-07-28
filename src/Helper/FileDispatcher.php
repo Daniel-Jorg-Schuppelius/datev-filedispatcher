@@ -32,8 +32,14 @@ class FileDispatcher extends HelperAbstract {
     protected static string $preProcessServicesDirectory = __DIR__ . '/../PreProcessServices';
     protected static string $servicesNamespace = 'App\\Services';
     protected static string $preProcessNamespace = 'App\\PreProcessServices';
+
+    /** @var list<class-string<FileServiceInterface>>|null */
     protected static ?array $services = null;
+
+    /** @var list<class-string<PreProcessFileServiceInterface>>|null */
     protected static ?array $preProcessServices = null;
+
+    /** @var list<string> */
     protected static array $fileTypesWithoutGenericPreProcessing = ['xlsm', 'txt'];
 
     /**
@@ -68,7 +74,14 @@ class FileDispatcher extends HelperAbstract {
         return false;
     }
 
-    // Allgemeine Methode für das Setzen von Services oder PreProcessServices
+    /**
+     * Allgemeine Methode für das Setzen von Services oder PreProcessServices
+     *
+     * @template T of object
+     * @param class-string<T> $interface
+     * @param list<class-string<T>>|null $serviceStorage
+     * @param-out list<class-string<T>> $serviceStorage
+     */
     protected static function setServiceClasses(string $directory, string $namespace, string $interface, ?array &$serviceStorage): void {
         if (is_null($serviceStorage)) {
             $classLoader = new ClassLoader($directory, $namespace, $interface, self::$logger);
@@ -84,7 +97,7 @@ class FileDispatcher extends HelperAbstract {
         self::setServiceClasses(self::$preProcessServicesDirectory, self::$preProcessNamespace, PreProcessFileServiceInterface::class, self::$preProcessServices);
     }
 
-    public static function processFile($file): void {
+    public static function processFile(string $file): void {
         LoggerRegistry::setLogger(LoggerFactory::getLogger());
 
         self::setServices();
@@ -117,17 +130,28 @@ class FileDispatcher extends HelperAbstract {
         }
 
         try {
-            if (self::preProcessFile($file) && File::exists($file)) {
-                foreach (self::$services as $serviceClass) {
-                    if ($serviceClass::matchesPattern($file)) {
-                        self::logDebug("Service: " . $serviceClass . " für Datei: $file gefunden.");
-                        $service = new $serviceClass($file);
-                        $service->process();
-                        return;
-                    }
-                }
-                self::logWarning("Kein passender Service für Datei: $file gefunden.");
+            if (!self::preProcessFile($file)) {
+                return;
             }
+
+            // Die Vorverarbeitung löscht die Quelldatei in manchen Fällen (TifFile::convertToPdf
+            // entfernt die TIFF-Datei nach der Umwandlung). Die Umwandlung läuft über externe
+            // Programme, deren Änderungen PHPs stat-Cache nicht automatisch verwerfen.
+            clearstatcache(true, $file);
+            if (!File::exists($file)) {
+                self::logDebug("Datei $file wurde durch die Vorverarbeitung ersetzt oder entfernt.");
+                return;
+            }
+
+            foreach (self::$services ?? [] as $serviceClass) {
+                if ($serviceClass::matchesPattern($file)) {
+                    self::logDebug("Service: " . $serviceClass . " für Datei: $file gefunden.");
+                    $service = new $serviceClass($file);
+                    $service->process();
+                    return;
+                }
+            }
+            self::logWarning("Kein passender Service für Datei: $file gefunden.");
         } catch (Exception $e) {
             self::logException($e);
             throw $e;
@@ -138,7 +162,7 @@ class FileDispatcher extends HelperAbstract {
         $fileType = pathinfo($file, PATHINFO_EXTENSION);
 
         try {
-            foreach (self::$preProcessServices as $preProcessServiceClass) {
+            foreach (self::$preProcessServices ?? [] as $preProcessServiceClass) {
                 if ($preProcessServiceClass::matchesPattern($file)) {
                     self::logDebug("PreProcessService: " . $preProcessServiceClass . " für Datei: $file gefunden.");
                     $preProcessService = new $preProcessServiceClass($file);

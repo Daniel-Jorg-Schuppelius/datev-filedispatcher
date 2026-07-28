@@ -25,9 +25,15 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^11.3@dev"
+    "phpunit/phpunit": "^11.3@dev",
+    "phpstan/phpstan": "^2.1"
   },
   "scripts": {
-    "test": "vendor/bin/phpunit"
+    "test": "vendor/bin/phpunit",
+    "lint": "vendor/bin/phpstan analyse --memory-limit=1G",
+    "qa": [
+      "@lint",
+      "@test"
+    ]
   }
 }

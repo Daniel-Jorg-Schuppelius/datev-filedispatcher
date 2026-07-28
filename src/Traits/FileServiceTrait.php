@@ -54,6 +54,9 @@ trait FileServiceTrait {
         return $this->document;
     }
 
+    /**
+     * @return array<array-key, string>
+     */
     protected function getMatches(): array {
         $matches = [];
         if (!self::matchesPattern($this->file, $matches)) {
@@ -106,14 +109,22 @@ trait FileServiceTrait {
     protected function setPropertiesFromDMS(string $documentNumber, bool $withPayroll = false): void {
         $this->setDocument($documentNumber);
 
-        $this->client = $this->clientsEndpoint->get($this->document->getCorrespondencePartnerGUID());
-        if (is_null($this->client)) {
-            self::logErrorAndThrow(RuntimeException::class, "Client (Client Master Data) konnte nicht gefunden werden: " . $this->document->getCorrespondencePartnerGUID());
+        $document = $this->document;
+        if (is_null($document)) {
+            self::logErrorAndThrow(RuntimeException::class, "Dokument konnte im DMS nicht gefunden werden: $documentNumber");
         }
+
+        $correspondencePartnerGUID = $document->getCorrespondencePartnerGUID();
+
+        $client = $this->clientsEndpoint->get($correspondencePartnerGUID);
+        if (is_null($client)) {
+            self::logErrorAndThrow(RuntimeException::class, "Client (Client Master Data) konnte nicht gefunden werden: " . $correspondencePartnerGUID);
+        }
+        $this->client = $client;
 
         if ($withPayroll) {
             try {
-                $this->setPayrollClient((string)$this->client->getNumber(), true);
+                $this->setPayrollClient((string)$client->getNumber());
             } catch (RuntimeException $e) {
                 $this->logDebug("Exception abgefangen: " . $e->getMessage());
             }
@@ -128,7 +139,14 @@ trait FileServiceTrait {
         return static::PATTERN;
     }
 
-    public static function matchesPattern(string $file, ?array &$matches = null): bool {
+    /**
+     * Die Patterns nutzen benannte Gruppen, daher enthält $matches sowohl
+     * numerische als auch benannte Schlüssel.
+     *
+     * @param array<array-key, string> $matches
+     * @param-out array<array-key, string> $matches
+     */
+    public static function matchesPattern(string $file, array &$matches = []): bool {
         return preg_match(static::getPattern(), basename($file), $matches) === 1;
     }
 }

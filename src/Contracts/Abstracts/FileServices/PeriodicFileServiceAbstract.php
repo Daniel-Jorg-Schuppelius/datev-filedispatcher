@@ -27,15 +27,23 @@ abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
 
         $subFolder = $this->prepareSubFolder($subFolder, $requiresPeriod, $requiresYear);
 
-        if ($requiresPeriod) {
-            $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
-        } elseif ($requiresYear) {
-            $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
-            return InternalStoreMapper::getInternalStorePath($this->client, $subFolder, $yearFormatted);
+        if (!$requiresPeriod && !$requiresYear) {
+            $this->logError("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
+            return null;
         }
 
-        $this->logError("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
-        return null;
+        $client = $this->client;
+        if (is_null($client)) {
+            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
+            return null;
+        }
+
+        if ($requiresPeriod) {
+            $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
+            return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
+        }
+
+        $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
     }
 }
