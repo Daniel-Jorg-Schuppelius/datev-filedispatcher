@@ -34,6 +34,10 @@ class LoggerFactory implements LoggerFactoryInterface {
                 self::$logger = new NullLogger();
             }
         }
-        return static::$logger;
+        return self::$logger;
+    }
+
+    public static function resetLogger(): void {
+        self::$logger = null;
     }
 }
