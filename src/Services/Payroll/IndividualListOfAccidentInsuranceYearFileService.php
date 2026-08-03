@@ -18,7 +18,7 @@ use App\Helper\InternalStoreMapper;
 class IndividualListOfAccidentInsuranceYearFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Einzelaufstellung_Unfallvers_(jährlich)_AA0.pdf
     //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Einzelaufstellung_Unfallvers_(jährlich)_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Einzelaufstellung_Unfallvers_\(jährlich\)_([A-Z0-9]{2,3})\.pdf$/i';
 
     public function getDestinationFolder(bool $leadingZero = true): ?string {
         [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
