@@ -10,7 +10,9 @@
 
 namespace App\Traits;
 
+use APIToolkit\Exceptions\ApiException;
 use App\Config\Config;
+use DateTime;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
@@ -34,23 +36,23 @@ trait FileServiceTrait {
     protected ?Document $document = null;
     protected ?PayrollClient $payrollClient = null;
 
-    public final function getFile(): string {
+    final public function getFile(): string {
         return $this->file;
     }
 
-    public final function getFilename(): string {
+    final public function getFilename(): string {
         return basename($this->file);
     }
 
-    public final function getFolder(): string {
+    final public function getFolder(): string {
         return dirname($this->file);
     }
 
-    public final function getClient(): ?Client {
+    final public function getClient(): ?Client {
         return $this->client;
     }
 
-    public final function getDocument(): ?Document {
+    final public function getDocument(): ?Document {
         return $this->document;
     }
 
@@ -67,9 +69,34 @@ trait FileServiceTrait {
         return $matches;
     }
 
-    protected function setClients(string $clientNumber): void {
-        $this->setClient($clientNumber);
-        $this->setPayrollClient($clientNumber);
+    /**
+     * Setzt Client (Mandantendaten) und Client (Payroll). Ist der Mandant in den
+     * Mandantendaten nicht auffindbar, wird er über den Client (Payroll) ermittelt.
+     *
+     * @param DateTime|null $payrollReferenceDate Stichtag für die Payroll-Abfragen, null = heute
+     */
+    protected function setClients(string $clientNumber, ?DateTime $payrollReferenceDate = null): void {
+        $clientException = null;
+        try {
+            $this->setClient($clientNumber);
+        } catch (RuntimeException $e) {
+            $clientException = $e;
+        }
+
+        $this->setPayrollClient($clientNumber, $payrollReferenceDate);
+
+        $payrollClient = $this->payrollClient;
+        if (!is_null($this->client) || is_null($payrollClient)) {
+            return;
+        }
+
+        $client = $this->clientsEndpoint->get($payrollClient->getID());
+        if (is_null($client)) {
+            self::logErrorAndThrow(RuntimeException::class, "Client konnte nicht aus den Payrolldaten ermittelt werden: $clientNumber", previous: $clientException);
+        }
+
+        $this->client = $client;
+        $this->logNotice("Client wurde aus den Payrolldaten ermittelt: " . $payrollClient->getNumber() . " -> " . $client->getNumber());
     }
 
     protected function setClient(string $clientNumber): void {
@@ -81,20 +108,52 @@ trait FileServiceTrait {
         $this->client = $clients->getFirstValue();
     }
 
-    protected function setPayrollClient(string $clientNumber): void {
-        $payrollClients = $this->payrollClientsEndpoint->search();
-        if (!is_null($payrollClients)) {
-            $payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
-            if (is_null($payrollClient)) {
-                $this->logNotice("Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
-                self::logErrorAndThrow(RuntimeException::class, "Client (Payroll) konnte nicht gefunden werden: $clientNumber");
-            }
+    /**
+     * Lädt den Client (Payroll) zum Stichtag. Liegt der Stichtag in der Vergangenheit
+     * und ist der Client dort nicht ermittelbar (z. B. archiviertes Abrechnungsjahr),
+     * wird auf den aktuellen Stand zurückgegriffen.
+     *
+     * @param DateTime|null $referenceDate Stichtag, null = heute
+     */
+    protected function setPayrollClient(string $clientNumber, ?DateTime $referenceDate = null): void {
+        $today = new DateTime('today');
 
-            $this->payrollClient = $this->payrollClientsEndpoint->get($payrollClient->getID()) ?? $payrollClient;
-        } else {
-            $this->logNotice("Payroll aktiv? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
-            self::logErrorAndThrow(RuntimeException::class, "Es wurden keine Clients (Payroll) gefunden.");
+        if (!is_null($referenceDate) && $referenceDate->format('Y-m-d') !== $today->format('Y-m-d')) {
+            try {
+                $this->payrollClient = $this->fetchPayrollClient($clientNumber, $referenceDate);
+                return;
+            } catch (ApiException|RuntimeException $e) {
+                $this->logNotice("Client (Payroll) $clientNumber zum Stichtag {$referenceDate->format('Y-m-d')} nicht ermittelbar ({$e->getMessage()}), versuche den aktuellen Stand.");
+            }
         }
+
+        try {
+            $this->payrollClient = $this->fetchPayrollClient($clientNumber, $today);
+        } catch (ApiException $e) {
+            $this->logNotice("Payroll-Schnittstelle meldet HTTP {$e->getCode()}. Server in Sicherung oder Wartung? Ursache im DATEVconnect-Protokoll prüfen, die Datei wird beim nächsten Lauf erneut verarbeitet.");
+            throw $e;
+        } catch (RuntimeException $e) {
+            $this->logNotice("Payroll aktiv und Client (Payroll) angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
+            self::logErrorAndThrow(RuntimeException::class, $e->getMessage(), previous: $e);
+        }
+    }
+
+    /**
+     * @throws ApiException bei einem Fehler der Payroll-Schnittstelle
+     * @throws RuntimeException wenn keine Clients (Payroll) oder nicht der gesuchte geliefert werden
+     */
+    private function fetchPayrollClient(string $clientNumber, DateTime $referenceDate): PayrollClient {
+        $payrollClients = $this->payrollClientsEndpoint->search(['reference-date' => $referenceDate->format('Y-m-d')]);
+        if (is_null($payrollClients)) {
+            throw new RuntimeException("Es wurden keine Clients (Payroll) gefunden.");
+        }
+
+        $payrollClient = $payrollClients->getFirstValue("number", $clientNumber);
+        if (is_null($payrollClient)) {
+            throw new RuntimeException("Client (Payroll) konnte nicht gefunden werden: $clientNumber");
+        }
+
+        return $this->payrollClientsEndpoint->get($payrollClient->getID(), referenceDate: $referenceDate) ?? $payrollClient;
     }
 
     protected function setDocument(string $documentNumber): void {
@@ -124,7 +183,7 @@ trait FileServiceTrait {
 
         if ($withPayroll) {
             try {
-                $this->setPayrollClient((string)$client->getNumber());
+                $this->setPayrollClient((string) $client->getNumber());
             } catch (RuntimeException $e) {
                 $this->logDebug("Exception abgefangen: " . $e->getMessage());
             }

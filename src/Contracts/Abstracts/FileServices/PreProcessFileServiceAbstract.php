@@ -21,7 +21,6 @@ use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
 use ERRORToolkit\Traits\ErrorLog;
-use Exception;
 use Psr\Log\LoggerInterface;
 
 abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInterface {
@@ -38,12 +37,8 @@ abstract class PreProcessFileServiceAbstract implements PreProcessFileServiceInt
 
         $this->file = $file;
 
-        try {
-            $this->extractDataFromFile();
-        } catch (Exception $e) {
-            self::logException($e);
-            throw $e;
-        }
+        // Exceptions werden vom FileDispatcher geloggt, hier nicht erneut.
+        $this->extractDataFromFile();
     }
 
     abstract protected function extractDataFromFile(): void;

@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace App\Contracts\Abstracts\FileServices\Periodic;
 
 use App\Contracts\Abstracts\FileServices\PeriodicFileServiceAbstract;
-use RuntimeException;
+use DateTime;
 
 abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
     protected const SUBFOLDER = "02 Entgeltabrechnung";
@@ -21,28 +21,28 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
     protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
 
-        if (array_key_exists("tenant", $matches)) {
-            try {
-                $this->setClients($matches["tenant"]);
-            } catch (RuntimeException $e) {
-                if (is_null($this->payrollClient)) {
-                    $this->setPayrollClient($matches["tenant"]);
-                }
-
-                if (is_null($this->client) && !is_null($this->payrollClient)) {
-                    $this->client = $this->clientsEndpoint->get($this->payrollClient->getID());
-                    if (is_null($this->client)) {
-                        self::logError("Client konnte nicht aus den Payrolldaten ermittelt werden: " . $matches["tenant"]);
-                        throw $e;
-                    }
-
-                    self::logNotice("Client wurde aus den Payrolldaten ermittelt: " . $this->payrollClient->getNumber() . " -> " . $this->client->getNumber());
-                }
-            }
-        }
-
+        // Die Periode zuerst setzen, sie bestimmt den Stichtag der Payroll-Abfragen.
         if (array_key_exists("year", $matches) && array_key_exists("month", $matches)) {
             $this->setDate((int) $matches["year"], (int) $matches["month"]);
         }
+
+        if (array_key_exists("tenant", $matches)) {
+            $this->setClients($matches["tenant"], $this->getPayrollReferenceDate());
+        }
+    }
+
+    /**
+     * Stichtag für die Payroll-Abfragen: das Monatsende der Abrechnungsperiode,
+     * damit Mandant und Mitarbeiter mit dem damals gültigen Stand geladen werden.
+     * Für die laufende oder eine künftige Periode (oder ohne Periode) null = heute.
+     */
+    protected function getPayrollReferenceDate(): ?DateTime {
+        if (!isset($this->date)) {
+            return null;
+        }
+
+        $referenceDate = (clone $this->date)->modify('last day of this month');
+
+        return $referenceDate < new DateTime('today') ? $referenceDate : null;
     }
 }
