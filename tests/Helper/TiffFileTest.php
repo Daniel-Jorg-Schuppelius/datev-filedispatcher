@@ -15,7 +15,6 @@ use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 use PHPUnit\Framework\TestCase;
 
 class TiffFileTest extends TestCase {
-
     private $testFile;
 
     protected function setUp(): void {
@@ -29,12 +28,12 @@ class TiffFileTest extends TestCase {
         }
     }
 
-    public function testMimeType() {
+    public function test_mime_type() {
         $mimeType = File::mimeType($this->testFile);
         $this->assertEquals('image/jpeg', $mimeType);
     }
 
-    public function testConvertToTiff() {
+    public function test_convert_to_tiff() {
         $tiffFile = TifFile::repair($this->testFile);
         $this->assertFileExists($tiffFile);
         $this->assertEquals('image/tiff', File::mimeType($tiffFile));
@@ -44,7 +43,7 @@ class TiffFileTest extends TestCase {
         }
     }
 
-    public function testConvertToPDF() {
+    public function test_convert_to_pdf() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -64,14 +63,14 @@ class TiffFileTest extends TestCase {
         File::delete($pdfFile);
     }
 
-    public function testMerge() {
+    public function test_merge() {
         $tiffFiles = [
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif'),
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif'),
         ];
         $bakTiffFiles = [
             realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_1.tif.bak'),
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak'),
         ];
 
         for ($i = 0; $i < count($tiffFiles); $i++) {
@@ -81,13 +80,11 @@ class TiffFileTest extends TestCase {
             }
         }
 
-
         $mergedFile = __DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081.tif';
         $pdfFile = __DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081.pdf';
 
         File::delete($mergedFile);
         File::delete($pdfFile);
-
 
         TifFile::merge($tiffFiles, $mergedFile);
 

@@ -22,7 +22,7 @@ class EmployeeFileServiceTest extends DocumentTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testPatternMatching() {
+    public function test_pattern_matching() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -33,7 +33,7 @@ class EmployeeFileServiceTest extends DocumentTest {
         $this->assertCount(10, $matches);
     }
 
-    public function testMatchesPattern(): void {
+    public function test_matches_pattern(): void {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -44,7 +44,7 @@ class EmployeeFileServiceTest extends DocumentTest {
         $this->assertFalse(EmployeeFileService::matchesPattern($invalidFilename));
     }
 
-    public function testPayrollFileServiceProcessing() {
+    public function test_payroll_file_service_processing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         } elseif (empty($this->testFile)) {
@@ -57,7 +57,7 @@ class EmployeeFileServiceTest extends DocumentTest {
         $this->assertEquals('20542', $service->getClient()->getNumber());
     }
 
-    public function testFileDispatcherPayrollFileServiceProcessing(): void {
+    public function test_file_dispatcher_payroll_file_service_processing(): void {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         } elseif (empty($this->testFile)) {

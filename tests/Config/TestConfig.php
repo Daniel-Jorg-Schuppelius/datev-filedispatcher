@@ -19,7 +19,7 @@ class TestConfig {
 
     public static function getInstance(): TestConfig {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self;
         }
         return self::$instance;
     }

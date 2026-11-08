@@ -51,5 +51,11 @@ jobs:
     - name: Copy testconfig.json
       run: php -r "file_exists('config/testconfig.json') || copy('config/testconfig.json.sample', 'config/testconfig.json');"
 
+    - name: Check code style (Pint)
+      run: composer run-script format
+
+    - name: Static analysis (PHPStan)
+      run: composer run-script lint
+
     - name: Run test suite
       run: composer run-script test

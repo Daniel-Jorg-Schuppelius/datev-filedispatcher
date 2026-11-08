@@ -11,8 +11,8 @@
 namespace Tests\Services;
 
 use App\Helper\FileDispatcher;
-use CommonToolkit\Helper\FileSystem\File;
 use App\PreProcessServices\TiffPreProcessFileService;
+use CommonToolkit\Helper\FileSystem\File;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class TiffPreProcessFileServiceTest extends DocumentTest {
@@ -24,7 +24,7 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testPatternMatching() {
+    public function test_pattern_matching() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -35,7 +35,7 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         $this->assertCount(3, $matches);
     }
 
-    public function testMatchesPattern(): void {
+    public function test_matches_pattern(): void {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -46,18 +46,18 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         $this->assertFalse(TiffPreProcessFileService::matchesPattern($invalidFilename));
     }
 
-    public function testTiffPreProcessFileServicePreProcessing() {
+    public function test_tiff_pre_process_file_service_pre_processing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         }
 
         $tiffFiles = [
             $this->testFile,
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif'),
         ];
         $bakTiffFiles = [
             $this->testFile . '.bak',
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak'),
         ];
 
         for ($i = 0; $i < count($tiffFiles); $i++) {
@@ -87,18 +87,18 @@ class TiffPreProcessFileServiceTest extends DocumentTest {
         }
     }
 
-    public function testFileDispatcherTiffPreProcessFileServiceProcessing(): void {
+    public function test_file_dispatcher_tiff_pre_process_file_service_processing(): void {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         }
 
         $tiffFiles = [
             $this->testFile,
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif'),
         ];
         $bakTiffFiles = [
             $this->testFile . '.bak',
-            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak')
+            realpath(__DIR__ . '/../../.samples/235310 - BvFA ESt-Bescheid 2023 - S25C-924061909081_2.tif.bak'),
         ];
 
         for ($i = 0; $i < count($tiffFiles); $i++) {

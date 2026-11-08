@@ -14,8 +14,8 @@ namespace App\Factories;
 
 use APIToolkit\API\Authentication\BasicAuthentication;
 use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
-use Datev\API\Desktop\Client;
 use App\Config\Config;
+use Datev\API\Desktop\Client;
 use RuntimeException;
 
 class APIClientFactory {

@@ -22,7 +22,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         $this->testDir = __DIR__ . '/../../.samples/';
     }
 
-    public function testMatchesPattern(): void {
+    public function test_matches_pattern(): void {
         $filename = $this->testDir . 'test (1).txt';
         File::write($filename, 'dummy');
 
@@ -32,7 +32,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         File::delete($filename);
     }
 
-    public function testPreProcessRemovesDuplicateNumber(): void {
+    public function test_pre_process_removes_duplicate_number(): void {
         $filename = $this->testDir . 'example (2).pdf';
         $expected = $this->testDir . 'example.pdf';
 
@@ -50,7 +50,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         File::delete($expected);
     }
 
-    public function testMultipleNumbersRemoved(): void {
+    public function test_multiple_numbers_removed(): void {
         $filename = $this->testDir . 'another (1) (2).docx';
         $expected = $this->testDir . 'another (1).docx'; // nur letzte Zahl entfernt
 
@@ -68,7 +68,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         File::delete($expected);
     }
 
-    public function testNoChangeIfNoPattern(): void {
+    public function test_no_change_if_no_pattern(): void {
         $filename = $this->testDir . 'simplefile.txt';
 
         File::write($filename, 'textdata');
@@ -81,7 +81,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         File::delete($filename);
     }
 
-    public function testCopyPattern(): void {
+    public function test_copy_pattern(): void {
         $filename = $this->testDir . 'dokument - Kopie (2).docx';
         $expected = $this->testDir . 'dokument.docx';
 
@@ -99,7 +99,7 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         File::delete($expected);
     }
 
-    public function testNumberNotAtEndIsNotAffected(): void {
+    public function test_number_not_at_end_is_not_affected(): void {
         $filename = $this->testDir . 'test (1) 2023.txt';
         $expected = $filename; // darf sich nicht ändern
 

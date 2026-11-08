@@ -19,11 +19,11 @@ trait PeriodicFileServiceTrait {
     protected DateTime $date;
 
     public function getMonth(): int {
-        return (int)$this->date->format('n');
+        return (int) $this->date->format('n');
     }
 
     public function getYear(): int {
-        return (int)$this->date->format('Y');
+        return (int) $this->date->format('Y');
     }
 
     /**
@@ -45,7 +45,7 @@ trait PeriodicFileServiceTrait {
     }
 
     protected function adjustForPreviousYears(string $yearFormatted): string {
-        $minYearValue = new DateTime();
+        $minYearValue = new DateTime;
         $minYearValue->modify("-" . $this->config->getPreviousYears4Internal() . " years");
 
         if ($this->date < $minYearValue) {
@@ -57,7 +57,7 @@ trait PeriodicFileServiceTrait {
     }
 
     protected function setDate(?int $year, ?int $month = null, ?int $day = null): void {
-        $year = $year ?? (int) (new DateTime())->format('Y');
+        $year = $year ?? (int) (new DateTime)->format('Y');
         match ($month) {
             41 => $month = 3,
             42 => $month = 6,

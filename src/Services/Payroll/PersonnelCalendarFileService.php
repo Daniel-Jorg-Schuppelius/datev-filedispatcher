@@ -20,7 +20,6 @@ class PersonnelCalendarFileService extends PayrollFileServiceAbstract {
     //                                        1               2              3                                              4
     protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Personalkalender_Div_Mitarbeiter_([A-Z0-9]{2,3})\.pdf$/i';
 
-
     public function getDestinationFolder(bool $leadingZero = true): ?string {
         [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
 

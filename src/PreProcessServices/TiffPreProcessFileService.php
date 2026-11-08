@@ -13,8 +13,7 @@ declare(strict_types=1);
 namespace App\PreProcessServices;
 
 use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
-use CommonToolkit\Helper\FileSystem\File;
-use CommonToolkit\Helper\FileSystem\Files;
+use CommonToolkit\Helper\FileSystem\{File, Files};
 use CommonToolkit\Helper\FileSystem\FileTypes\TifFile;
 use RuntimeException;
 
@@ -67,7 +66,7 @@ class TiffPreProcessFileService extends PreProcessFileServiceAbstract {
             $tiffFiles = Files::get(dirname($this->file), false, ["tif", "tiff"], null, $baseName);
 
             $istFileCount = count($tiffFiles);
-            $sollFileCount = (int)$matches[1];
+            $sollFileCount = (int) $matches[1];
             if ($istFileCount != $sollFileCount) {
                 $this->logWarning("Anzahl der TIFF-Dateien stimmt nicht überein: {$this->file}. Vorverarbeitung abgebrochen, warte auf weitere Dateien.(Ist: $istFileCount, Soll: $sollFileCount)");
                 return false;

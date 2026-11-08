@@ -14,7 +14,6 @@ use CommonToolkit\Helper\FileSystem\File;
 use PHPUnit\Framework\TestCase;
 
 class FileTest extends TestCase {
-
     private $testFile;
 
     protected function setUp(): void {
@@ -28,24 +27,24 @@ class FileTest extends TestCase {
         }
     }
 
-    public function testMimeType() {
+    public function test_mime_type() {
         $mimeType = File::mimeType($this->testFile);
         $this->assertEquals('text/plain', $mimeType);
     }
 
-    public function testMimeTypeFailure() {
+    public function test_mime_type_failure() {
         $invalidFile = '/path/to/nonexistent/file';
         $this->assertEmpty(File::mimeType($invalidFile));
     }
 
-    public function testFileExistsReturnsTrueForExistingFile() {
+    public function test_file_exists_returns_true_for_existing_file() {
         $testFile = tempnam(sys_get_temp_dir(), 'test');
         $this->assertTrue(File::exists($testFile));
 
         unlink($testFile);
     }
 
-    public function testFileExistsReturnsFalseForNonExistingFile() {
+    public function test_file_exists_returns_false_for_non_existing_file() {
         $nonExistingFile = '/path/to/non/existing/file.txt';
         $this->assertFalse(File::exists($nonExistingFile));
     }

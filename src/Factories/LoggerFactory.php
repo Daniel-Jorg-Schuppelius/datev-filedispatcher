@@ -12,13 +12,11 @@ declare(strict_types=1);
 
 namespace App\Factories;
 
-use ERRORToolkit\Contracts\Interfaces\LoggerFactoryInterface;
-use ERRORToolkit\Logger\ConsoleLogger;
-use ERRORToolkit\Logger\FileLogger;
 use App\Config\Config;
+use ERRORToolkit\Contracts\Interfaces\LoggerFactoryInterface;
 use ERRORToolkit\Enums\LogType;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use ERRORToolkit\Logger\{ConsoleLogger, FileLogger};
+use Psr\Log\{LoggerInterface, NullLogger};
 
 class LoggerFactory implements LoggerFactoryInterface {
     public static ?LoggerInterface $logger = null;
@@ -31,7 +29,7 @@ class LoggerFactory implements LoggerFactoryInterface {
             } elseif ($config->getLogType() === LogType::FILE) {
                 self::$logger = new FileLogger($config->getLogPath(), $config->getLogLevel());
             } else {
-                self::$logger = new NullLogger();
+                self::$logger = new NullLogger;
             }
         }
         return self::$logger;

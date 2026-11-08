@@ -14,7 +14,7 @@ namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
-class SKUGFileService  extends PayrollFileServiceAbstract {
+class SKUGFileService extends PayrollFileServiceAbstract {
     // 00000_00_0000_Leistungsantr_Saison_Kug_A01.pdf
     // 00000_00_0000_Anlage_LA_Saison_Kug_A01.pdf
     //                                        1               2              3     4                        5
