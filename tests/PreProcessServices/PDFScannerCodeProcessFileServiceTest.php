@@ -10,7 +10,7 @@
 
 namespace Tests\PreProcessServices;
 
-use App\PreProcessServices\{PDFScannerCodeProcessFileService};
+use App\PreProcessServices\PDFScannerCodeProcessFileService;
 use CommonToolkit\Helper\FileSystem\File;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
