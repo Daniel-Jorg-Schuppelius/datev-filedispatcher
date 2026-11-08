@@ -16,14 +16,14 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class SEPAPayrollFileService extends PayrollFileServiceAbstract {
     // SEPA-00000-2023_05-C01-Lohn_Gehalt.xml
-    //                                             1              2               3                  4
-    protected const PATTERN = '/^SEPA-(?<tenant>\d{5})-(?<year>\d{4})_(?<month>\d{2})-[A-Z0-9]{2,3}-(.+)+\.xml$/i';
+    // Gruppe 4: Verwendungszweck
+    protected const PATTERN = '/^SEPA-(?<tenant>\d{5})-(?<year>\d{4})_(?<month>\d{2})-[A-Z0-9]{2,3}-(.+)\.xml$/i';
+
+    protected const DOCUMENT_TYPE = "SEPA";
 
     protected function getDestinationFilename(): string {
         $matches = $this->getMatches();
 
-        $documentType = "SEPA";
-
-        return "{$documentType}-{$matches[4]}_{$matches[2]}_{$matches[3]}.xml";
+        return static::DOCUMENT_TYPE . "-{$matches[4]}_{$matches['year']}_{$matches['month']}.xml";
     }
 }

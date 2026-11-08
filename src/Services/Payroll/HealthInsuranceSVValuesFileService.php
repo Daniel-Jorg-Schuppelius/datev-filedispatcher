@@ -17,12 +17,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 class HealthInsuranceSVValuesFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_KK_SV_Werte___gesamt_v_AA0.pdf
     // 00000_10_2024_KK_SV_Werte___gesamt_AA0.pdf
-    //                                        1               2              3                                         4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_KK_SV_Werte___gesamt(?:_v)?_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'KK_SV_Werte___gesamt(?:_v)?' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Krankenkasse_SV-Werte_gesamt";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Krankenkasse_SV-Werte_gesamt";
 }

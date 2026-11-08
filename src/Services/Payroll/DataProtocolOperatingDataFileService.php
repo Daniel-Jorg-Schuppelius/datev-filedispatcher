@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class DataProtocolOperatingDataFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_DÜ_Prot_Betriebsdaten_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_DÜ_Prot_Betriebsdaten_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'DÜ_Prot_Betriebsdaten' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "DÜ-Protokoll_Betriebsdaten";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "DÜ-Protokoll_Betriebsdaten";
 }

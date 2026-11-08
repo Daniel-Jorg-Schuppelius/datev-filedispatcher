@@ -8,15 +8,65 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
+use App\Helper\InternalStoreMapper;
 use CommonToolkit\Enums\Month;
 use DateTime;
 use Exception;
 use OutOfRangeException;
 
+/**
+ * Ablage nach Jahr bzw. Monat. Ob ein Unterordner jahres- oder monatsweise abgelegt
+ * wird, steht in der Konfiguration (PerYear / PerPeriod). Mit FORCE_YEARLY_STORAGE
+ * legt ein Service unabhängig davon immer im Jahresordner ab.
+ */
 trait PeriodicFileServiceTrait {
+    /** true = immer Jahresablage, unabhängig von PerYear / PerPeriod */
+    protected const FORCE_YEARLY_STORAGE = false;
+
     protected DateTime $date;
+
+    /**
+     * Zielordner, wenn der Unterordner weder jahres- noch monatsweise abgelegt wird.
+     */
+    abstract protected function getNonPeriodicDestinationFolder(string $subFolder): ?string;
+
+    public function getDestinationFolder(bool $leadingZero = true): ?string {
+        $subFolder = $this->getSubFolder();
+
+        if (static::FORCE_YEARLY_STORAGE) {
+            $requiresPeriod = false;
+            $requiresYear = true;
+        } else {
+            $requiresPeriod = InternalStoreMapper::requiresPeriod($subFolder);
+            $requiresYear = InternalStoreMapper::requiresYear($subFolder);
+        }
+
+        if (!$requiresPeriod && !$requiresYear) {
+            return $this->getNonPeriodicDestinationFolder($subFolder);
+        }
+
+        $subFolder = $this->prepareSubFolder($subFolder, $requiresPeriod, $requiresYear);
+
+        $client = $this->client;
+        if (is_null($client)) {
+            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
+            return null;
+        }
+
+        [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
+
+        if ($requiresPeriod) {
+            $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
+            return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
+        }
+
+        $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
+        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
+    }
 
     public function getMonth(): int {
         return (int) $this->date->format('n');
@@ -58,12 +108,13 @@ trait PeriodicFileServiceTrait {
 
     protected function setDate(?int $year, ?int $month = null, ?int $day = null): void {
         $year = $year ?? (int) (new DateTime)->format('Y');
-        match ($month) {
-            41 => $month = 3,
-            42 => $month = 6,
-            43 => $month = 9,
-            44 => $month = 12,
-            default => $month = $month ?? 1
+        // Quartale (41-44) werden auf den letzten Monat des Quartals abgebildet.
+        $month = match ($month) {
+            41 => 3,
+            42 => 6,
+            43 => 9,
+            44 => 12,
+            default => $month ?? 1
         };
         $day = $day ?? 1;
 

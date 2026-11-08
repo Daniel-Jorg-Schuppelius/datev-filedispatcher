@@ -14,9 +14,30 @@ namespace App\Contracts\Abstracts\FileServices\Periodic;
 
 use App\Contracts\Abstracts\FileServices\PeriodicFileServiceAbstract;
 use DateTime;
+use RuntimeException;
 
+/**
+ * Basis der Lohn-Auswertungen. Für die meisten Services genügen PATTERN und
+ * DOCUMENT_TYPE: Der Zieldateiname lautet dann "<DOCUMENT_TYPE>.<Endung>" bzw. mit
+ * einer Gruppe "employee" im Pattern "<DOCUMENT_TYPE>-<Nr>_<Nachname>_<Vorname>.<Endung>".
+ */
 abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
     protected const SUBFOLDER = "02 Entgeltabrechnung";
+
+    /** Mandant_Monat_Jahr_ am Anfang der meisten Lohn-Dateinamen, z. B. "20542_10_2024_" */
+    protected const PERIOD_PREFIX = '(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_';
+
+    /** Kennung der Auswertung am Ende, z. B. "_AA0" */
+    protected const EVALUATION_SUFFIX = '_([A-Z0-9]{2,3})';
+
+    /** Mitarbeiternummer, wird für den Zieldateinamen über die Payroll-Daten aufgelöst */
+    protected const EMPLOYEE = '(?<employee>\d{5})';
+
+    /** Dokumenttyp im Zieldateinamen, leer = Dateiname bleibt erhalten */
+    protected const DOCUMENT_TYPE = '';
+
+    /** Endung des Zieldateinamens */
+    protected const DESTINATION_EXTENSION = 'pdf';
 
     protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
@@ -29,6 +50,44 @@ abstract class PayrollFileServiceAbstract extends PeriodicFileServiceAbstract {
         if (array_key_exists("tenant", $matches)) {
             $this->setClients($matches["tenant"], $this->getPayrollReferenceDate());
         }
+    }
+
+    protected function getDestinationFilename(): string {
+        if (static::DOCUMENT_TYPE === '') {
+            return parent::getDestinationFilename();
+        }
+
+        $matches = $this->getMatches();
+        if (isset($matches['employee'])) {
+            return static::DOCUMENT_TYPE . '-' . $this->getEmployeeFilenamePart($matches['employee']) . '.' . static::DESTINATION_EXTENSION;
+        }
+
+        return static::DOCUMENT_TYPE . '.' . static::DESTINATION_EXTENSION;
+    }
+
+    /**
+     * Mitarbeiter-Teil des Zieldateinamens: "<Nr>_<Nachname>_<Vorname>".
+     */
+    protected function getEmployeeFilenamePart(string $employeeNumber): string {
+        $payrollClient = $this->payrollClient;
+        if (is_null($payrollClient)) {
+            self::logErrorAndThrow(RuntimeException::class, "Client (Payroll) nicht gefunden für die Datei: {$this->getFilename()}");
+        }
+
+        $employees = $payrollClient->getEmployees();
+        if (is_null($employees)) {
+            self::logErrorAndThrow(RuntimeException::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
+        }
+
+        $employee = $employees->getFirstValue('id', $employeeNumber);
+        if (is_null($employee)) {
+            self::logErrorAndThrow(RuntimeException::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
+        }
+
+        // Personenbezogene Daten nur im Debug-Log.
+        $this->logDebug("Mitarbeiter gefunden: {$employeeNumber} {$employee->getSurname()} {$employee->getFirstName()}");
+
+        return "{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}";
     }
 
     /**

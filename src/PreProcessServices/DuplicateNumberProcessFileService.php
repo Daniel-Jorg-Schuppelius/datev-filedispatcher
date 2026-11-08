@@ -8,36 +8,26 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\PreProcessServices;
 
-use App\Contracts\Abstracts\FileServices\PreProcessFileServiceAbstract;
-use CommonToolkit\Helper\FileSystem\File;
+use App\Contracts\Abstracts\FileServices\RenamePreProcessFileServiceAbstract;
+use App\Enums\PreProcessResult;
 
-class DuplicateNumberProcessFileService extends PreProcessFileServiceAbstract {
+class DuplicateNumberProcessFileService extends RenamePreProcessFileServiceAbstract {
     // Beispiele:
     // test (1).txt -> test.txt
     // abc (23).pdf -> abc.pdf
     // dokument - Kopie (2).docx -> dokument.docx
-    // dokument - Kopie (2) (3).docx -> dokument - Kopie (2).docx
+    // another (1) (2).docx -> another (1).docx (nur die Nummer direkt vor der Endung)
     protected const PATTERN = '/( - (Kopie|Copy)(?: \(\d+\))?)|(\s\(\d+\)(?=\.[^.]+$))/';
-    private string $newFile;
 
-    protected function extractDataFromFile(): void {
-        $this->logInfo("Suche Nummernzusätze im Dateinamen: {$this->file}");
-        // Bei einem preg_replace-Fehler bleibt der Originalname erhalten (kein Umbenennen).
-        $this->newFile = preg_replace(self::PATTERN, '', $this->file) ?? $this->file;
-    }
+    /** Existiert der bereinigte Name schon, geht die Datei unter ihrem bisherigen Namen weiter. */
+    protected const RESULT_IF_TARGET_EXISTS = PreProcessResult::Done;
 
-    public function preProcess(): bool {
-        if ($this->newFile !== $this->file && !File::exists($this->newFile)) {
-            File::rename($this->file, $this->newFile);
-            $this->logInfo("Dateiname bereinigt: {$this->file} -> {$this->newFile}");
-        } elseif (File::exists($this->newFile)) {
-            $this->logWarning("Zieldatei existiert bereits, Datei wird nicht umbenannt: {$this->newFile}");
-        } else {
-            $this->logInfo("Kein Nummernzusatz im Dateinamen gefunden: {$this->file}");
-        }
-
-        return true;
+    protected function buildNewFilename(): ?string {
+        // Bei einem preg_replace-Fehler (null) bleibt der Originalname erhalten.
+        return preg_replace(self::PATTERN, '', $this->getFilename());
     }
 }

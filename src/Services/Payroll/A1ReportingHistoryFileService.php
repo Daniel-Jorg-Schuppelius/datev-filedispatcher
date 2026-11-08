@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class A1ReportingHistoryFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Meldeverlauf_A1_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Meldeverlauf_A1_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Meldeverlauf_A1' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Meldeverlauf - A1-Bescheinigung";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Meldeverlauf - A1-Bescheinigung";
 }

@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class IndividualListOfAccidentInsuranceMonthFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Einzelaufstellung_Unfallvers_(monatlich)_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Einzelaufstellung_Unfallvers_\(monatlich\)_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Einzelaufstellung_Unfallvers_\(monatlich\)' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Einzelaufstellung - Unfallversicherung (monatlich)";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Einzelaufstellung - Unfallversicherung (monatlich)";
 }

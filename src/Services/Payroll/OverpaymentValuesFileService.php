@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class OverpaymentValuesFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Überzahlungen_Werte_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Überzahlungen_Werte_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Überzahlungen_Werte' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Überzahlungen - Werte";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Überzahlungen - Werte";
 }

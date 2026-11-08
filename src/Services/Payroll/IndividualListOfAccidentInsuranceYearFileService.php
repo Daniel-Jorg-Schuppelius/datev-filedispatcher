@@ -13,30 +13,12 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
-use App\Helper\InternalStoreMapper;
 
 class IndividualListOfAccidentInsuranceYearFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Einzelaufstellung_Unfallvers_(jährlich)_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Einzelaufstellung_Unfallvers_\(jährlich\)_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Einzelaufstellung_Unfallvers_\(jährlich\)' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    public function getDestinationFolder(bool $leadingZero = true): ?string {
-        [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
+    protected const DOCUMENT_TYPE = "Einzelaufstellung - Unfallversicherung (jährlich)";
 
-        $subFolder = $this->prepareSubFolder($this->getSubFolder(), false, true);
-
-        $client = $this->client;
-        if (is_null($client)) {
-            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
-            return null;
-        }
-
-        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
-    }
-
-    protected function getDestinationFilename(): string {
-        $documentType = "Einzelaufstellung - Unfallversicherung (jährlich)";
-
-        return "{$documentType}.pdf";
-    }
+    protected const FORCE_YEARLY_STORAGE = true;
 }

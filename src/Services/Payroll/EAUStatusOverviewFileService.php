@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class EAUStatusOverviewFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Dialoginhalt_Sammel_AW_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Dialoginhalt_Sammel_AW_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Dialoginhalt_Sammel_AW' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "eAU-Statusübersicht";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "eAU-Statusübersicht";
 }

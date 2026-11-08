@@ -132,6 +132,18 @@ class InternalStoreMapperTest extends TestCase {
         $this->assertNull($actualPath, "Der Pfad sollte null sein, da das Register und Folder Objekt im Dokument ungültig ist.");
     }
 
+    public function test_percent_in_folder_name_is_not_a_format_specifier(): void {
+        mkdir($this->tempDir . '/04 Sonstiges/Beteiligung 50%/2024', 0777, true);
+
+        $client = $this->createMock(Client::class);
+        $client->method('getNumber')->willReturn(12345);
+
+        $actualPath = InternalStoreMapper::getInternalStorePath($client, '04 Sonstiges/Beteiligung 50%/%s', '2024');
+
+        $this->assertNotNull($actualPath, "Der Pfad sollte nicht null sein.");
+        $this->assertStringEndsWith(str_replace('/', DIRECTORY_SEPARATOR, 'Beteiligung 50%/2024'), $actualPath);
+    }
+
     public function test_requires_year_true() {
         $internalPath = "03 Erklärungen, Abschlüsse, Bescheide";
         $this->assertTrue(InternalStoreMapper::requiresYear($internalPath), "Es wird erwartet, dass das Jahr erforderlich ist.");

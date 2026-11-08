@@ -1,17 +1,22 @@
 <?php
 /*
- * Created on   : Sat Oct 19 2024
+ * Created on   : Sun Nov 08 2026
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : FileServiceTrait.php
+ * Filename     : FileHandlerAbstract.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
 
-namespace App\Traits;
+declare(strict_types=1);
 
+namespace App\Contracts\Abstracts\FileServices;
+
+use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use APIToolkit\Exceptions\ApiException;
 use App\Config\Config;
+use App\Contracts\Interfaces\FileServices\FileHandlerInterface;
+use App\Factories\APIClientFactory;
 use DateTime;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
@@ -19,15 +24,25 @@ use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoin
 use Datev\Entities\ClientMasterData\Clients\Client;
 use Datev\Entities\DocumentManagement\Documents\Document;
 use Datev\Entities\Payroll\Clients\Client as PayrollClient;
+use ERRORToolkit\Traits\ErrorLog;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
-trait FileServiceTrait {
+/**
+ * Gemeinsame Basis von FileServices und PreProcessServices: Pattern-Matching,
+ * Dateiangaben und die Ermittlung von Dokument, Client und Client (Payroll).
+ *
+ * Die DATEV-API wird erst beim ersten Zugriff angesprochen. Services, die nur
+ * Dateinamen umbauen, brauchen dadurch weder API-Zugang noch Zugangsdaten.
+ */
+abstract class FileHandlerAbstract implements FileHandlerInterface {
+    use ErrorLog;
+
     protected const PATTERN = '';
 
-    protected ClientsEndpoint $clientsEndpoint;
-    protected DocumentsEndpoint $documentEndpoint;
-    protected PayrollClientsEndpoint $payrollClientsEndpoint;
+    /** Siehe {@see FileHandlerInterface::getPriority()}. */
+    protected const PRIORITY = 0;
 
     protected Config $config;
 
@@ -35,6 +50,23 @@ trait FileServiceTrait {
     protected ?Client $client = null;
     protected ?Document $document = null;
     protected ?PayrollClient $payrollClient = null;
+
+    private ?ApiClientInterface $apiClient;
+    private ?ClientsEndpoint $clientsEndpoint = null;
+    private ?DocumentsEndpoint $documentsEndpoint = null;
+    private ?PayrollClientsEndpoint $payrollClientsEndpoint = null;
+
+    public function __construct(string $file, ?ApiClientInterface $client = null, ?LoggerInterface $logger = null) {
+        self::setLogger($logger);
+        $this->config = Config::getInstance();
+        $this->apiClient = $client;
+        $this->file = $file;
+
+        // Exceptions werden vom FileDispatcher geloggt, hier nicht erneut.
+        $this->extractDataFromFile();
+    }
+
+    abstract protected function extractDataFromFile(): void;
 
     final public function getFile(): string {
         return $this->file;
@@ -56,6 +88,29 @@ trait FileServiceTrait {
         return $this->document;
     }
 
+    public static function getPattern(): string {
+        if (empty(static::PATTERN)) {
+            self::logErrorAndThrow(RuntimeException::class, "Kein Pattern in " . static::class . " definiert.");
+        }
+
+        return static::PATTERN;
+    }
+
+    public static function getPriority(): int {
+        return static::PRIORITY;
+    }
+
+    /**
+     * Die Patterns nutzen benannte Gruppen, daher enthält $matches sowohl
+     * numerische als auch benannte Schlüssel.
+     *
+     * @param array<array-key, string> $matches
+     * @param-out array<array-key, string> $matches
+     */
+    public static function matchesPattern(string $file, array &$matches = []): bool {
+        return preg_match(static::getPattern(), basename($file), $matches) === 1;
+    }
+
     /**
      * @return array<array-key, string>
      */
@@ -67,6 +122,24 @@ trait FileServiceTrait {
         $this->logDebug("Matches für ServiceKlasse (" . static::class . "):" . implode(", ", $matches));
 
         return $matches;
+    }
+
+    // API-Zugriff (lazy)
+
+    protected function getApiClient(): ApiClientInterface {
+        return $this->apiClient ??= APIClientFactory::getClient();
+    }
+
+    protected function getClientsEndpoint(): ClientsEndpoint {
+        return $this->clientsEndpoint ??= new ClientsEndpoint($this->getApiClient(), self::$logger);
+    }
+
+    protected function getDocumentsEndpoint(): DocumentsEndpoint {
+        return $this->documentsEndpoint ??= new DocumentsEndpoint($this->getApiClient(), self::$logger);
+    }
+
+    protected function getPayrollClientsEndpoint(): PayrollClientsEndpoint {
+        return $this->payrollClientsEndpoint ??= new PayrollClientsEndpoint($this->getApiClient(), self::$logger);
     }
 
     /**
@@ -90,7 +163,7 @@ trait FileServiceTrait {
             return;
         }
 
-        $client = $this->clientsEndpoint->get($payrollClient->getID());
+        $client = $this->getClientsEndpoint()->get($payrollClient->getID());
         if (is_null($client)) {
             self::logErrorAndThrow(RuntimeException::class, "Client konnte nicht aus den Payrolldaten ermittelt werden: $clientNumber", previous: $clientException);
         }
@@ -100,7 +173,9 @@ trait FileServiceTrait {
     }
 
     protected function setClient(string $clientNumber): void {
-        $clients = $this->clientsEndpoint->search(["filter" => "number eq $clientNumber"]);
+        self::assertNumeric($clientNumber, 'Mandantennummer');
+
+        $clients = $this->getClientsEndpoint()->search(["filter" => "number eq $clientNumber"]);
         if (is_null($clients)) {
             $this->logNotice("Client angelegt? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             self::logErrorAndThrow(RuntimeException::class, "Client konnte nicht gefunden werden: $clientNumber");
@@ -143,7 +218,9 @@ trait FileServiceTrait {
      * @throws RuntimeException wenn keine Clients (Payroll) oder nicht der gesuchte geliefert werden
      */
     private function fetchPayrollClient(string $clientNumber, DateTime $referenceDate): PayrollClient {
-        $payrollClients = $this->payrollClientsEndpoint->search(['reference-date' => $referenceDate->format('Y-m-d')]);
+        $endpoint = $this->getPayrollClientsEndpoint();
+
+        $payrollClients = $endpoint->search(['reference-date' => $referenceDate->format('Y-m-d')]);
         if (is_null($payrollClients)) {
             throw new RuntimeException("Es wurden keine Clients (Payroll) gefunden.");
         }
@@ -153,11 +230,13 @@ trait FileServiceTrait {
             throw new RuntimeException("Client (Payroll) konnte nicht gefunden werden: $clientNumber");
         }
 
-        return $this->payrollClientsEndpoint->get($payrollClient->getID(), referenceDate: $referenceDate) ?? $payrollClient;
+        return $endpoint->get($payrollClient->getID(), referenceDate: $referenceDate) ?? $payrollClient;
     }
 
     protected function setDocument(string $documentNumber): void {
-        $documents = $this->documentEndpoint->search(["filter" => "number eq $documentNumber"]);
+        self::assertNumeric($documentNumber, 'Dokumentnummer');
+
+        $documents = $this->getDocumentsEndpoint()->search(["filter" => "number eq $documentNumber"]);
         if (is_null($documents)) {
             $this->logNotice("Dokument im DMS gelöscht? Server nicht erreichbar oder in Sicherung? Bitte prüfen und ggf. aus dem Ordner löschen.");
             self::logErrorAndThrow(RuntimeException::class, "Dokument konnte im DMS nicht gefunden werden: $documentNumber");
@@ -175,7 +254,7 @@ trait FileServiceTrait {
 
         $correspondencePartnerGUID = $document->getCorrespondencePartnerGUID();
 
-        $client = $this->clientsEndpoint->get($correspondencePartnerGUID);
+        $client = $this->getClientsEndpoint()->get($correspondencePartnerGUID);
         if (is_null($client)) {
             self::logErrorAndThrow(RuntimeException::class, "Client (Client Master Data) konnte nicht gefunden werden: " . $correspondencePartnerGUID);
         }
@@ -190,22 +269,13 @@ trait FileServiceTrait {
         }
     }
 
-    public static function getPattern(): string {
-        if (empty(static::PATTERN)) {
-            self::logErrorAndThrow(RuntimeException::class, "Kein Pattern in " . static::class . " definiert.");
-        }
-
-        return static::PATTERN;
-    }
-
     /**
-     * Die Patterns nutzen benannte Gruppen, daher enthält $matches sowohl
-     * numerische als auch benannte Schlüssel.
-     *
-     * @param array<array-key, string> $matches
-     * @param-out array<array-key, string> $matches
+     * Die Nummern landen in OData-Filtern. Die Patterns lassen ohnehin nur Ziffern zu,
+     * die Prüfung schützt zusätzlich vor künftigen Patterns mit weiteren Zeichen.
      */
-    public static function matchesPattern(string $file, array &$matches = []): bool {
-        return preg_match(static::getPattern(), basename($file), $matches) === 1;
+    private static function assertNumeric(string $value, string $label): void {
+        if (!ctype_digit($value)) {
+            self::logErrorAndThrow(InvalidArgumentException::class, "Ungültige $label: '$value'");
+        }
     }
 }

@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class BookingReceiptAccountingsFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Buchungsbeleg_Kontennachweis_pro_Mitarbeiter_Div_Mitarbeiter_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Buchungsbeleg_Kontennachweis_pro_Mitarbeiter_Div_Mitarbeiter_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Buchungsbeleg_Kontennachweis_pro_Mitarbeiter_Div_Mitarbeiter' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Buchungsbeleg - Kontennachweis pro Mitarbeiter (Div Mitarbeiter)";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Buchungsbeleg - Kontennachweis pro Mitarbeiter (Div Mitarbeiter)";
 }

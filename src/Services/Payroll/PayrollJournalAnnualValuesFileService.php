@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class PayrollJournalAnnualValuesFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Lohnjournal_Jahresw_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Lohnjournal_Jahresw_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Lohnjournal_Jahresw' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Jahreswerte_Lohnjournal";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Jahreswerte_Lohnjournal";
 }

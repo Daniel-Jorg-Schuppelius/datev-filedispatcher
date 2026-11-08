@@ -3,7 +3,7 @@
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : PayrollFileServiceTest.php
+ * Filename     : EmployeePayrollFileServiceTest.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
@@ -30,7 +30,9 @@ class EmployeePayrollFileServiceTest extends DocumentTest {
         $matches = [];
         $this->assertTrue(EmployeePayrollFileService::matchesPattern($this->testFile, $matches));
         $this->assertIsArray($matches);
-        $this->assertCount(10, $matches);
+        // 6 numerische + 4 benannte Gruppen (tenant, employee, month, year) + Gesamttreffer
+        $this->assertCount(11, $matches);
+        $this->assertSame('00001', $matches['employee']);
     }
 
     public function test_matches_pattern(): void {

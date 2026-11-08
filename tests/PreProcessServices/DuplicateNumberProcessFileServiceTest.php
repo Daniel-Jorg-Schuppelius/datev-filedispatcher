@@ -10,6 +10,7 @@
 
 namespace Tests\Services;
 
+use App\Enums\PreProcessResult;
 use App\PreProcessServices\DuplicateNumberProcessFileService;
 use CommonToolkit\Helper\FileSystem\File;
 use PHPUnit\Framework\TestCase;
@@ -97,6 +98,48 @@ class DuplicateNumberProcessFileServiceTest extends TestCase {
         $this->assertFalse(File::exists($filename));
 
         File::delete($expected);
+    }
+
+    public function test_only_the_filename_is_renamed_not_the_folder(): void {
+        $folder = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'Projekt - Kopie ' . bin2hex(random_bytes(4));
+        mkdir($folder);
+        $filename = $folder . DIRECTORY_SEPARATOR . 'abc (1).pdf';
+        $expected = $folder . DIRECTORY_SEPARATOR . 'abc.pdf';
+        File::write($filename, 'pdfdata');
+
+        try {
+            $result = (new DuplicateNumberProcessFileService($filename))->preProcess();
+
+            $this->assertSame(PreProcessResult::Done, $result);
+            $this->assertTrue(File::exists($expected));
+            $this->assertFalse(File::exists($filename));
+        } finally {
+            foreach ([$filename, $expected] as $file) {
+                if (File::exists($file)) {
+                    File::delete($file);
+                }
+            }
+            rmdir($folder);
+        }
+    }
+
+    public function test_existing_target_keeps_original_name(): void {
+        $filename = $this->testDir . 'vorhanden (1).pdf';
+        $existing = $this->testDir . 'vorhanden.pdf';
+        File::write($filename, 'neu');
+        File::write($existing, 'alt');
+
+        try {
+            $result = (new DuplicateNumberProcessFileService($filename))->preProcess();
+
+            // Weiterverarbeitung unter dem bisherigen Namen, die vorhandene Datei bleibt unangetastet.
+            $this->assertSame(PreProcessResult::Done, $result);
+            $this->assertTrue(File::exists($filename));
+            $this->assertSame('alt', file_get_contents($existing));
+        } finally {
+            File::delete($filename);
+            File::delete($existing);
+        }
     }
 
     public function test_number_not_at_end_is_not_affected(): void {

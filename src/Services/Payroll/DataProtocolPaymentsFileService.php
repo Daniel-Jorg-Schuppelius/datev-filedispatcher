@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class DataProtocolPaymentsFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_DÜ_Protok_Überweisungen_AA0.pdf
-    //                                        1               2              3                                     4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_DÜ_Protok_Überweisungen_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'DÜ_Protok_Überweisungen' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "DÜ-Protokoll_SEPA-Abstimmliste";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "DÜ-Protokoll_SEPA-Abstimmliste";
 }

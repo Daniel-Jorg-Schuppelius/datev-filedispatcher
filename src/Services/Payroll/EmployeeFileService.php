@@ -8,46 +8,32 @@
  * License Uri  : https://opensource.org/license/mit
  */
 
+declare(strict_types=1);
+
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
-use Exception;
 
 class EmployeeFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Brutto_Netto_01000_AA0.pdf
     // 00000_10_2024_SV_Nachweis_(DEÜV)_00004_AA1.pdf
-    //                                           1                  2                 3     4         5             6
-    protected const PATTERN = '/^(?<tenant>[0-9]{5})_(?<month>[0-9]{2})_(?<year>[0-9]{4})_(.+)_([0-9]{5})_([A-Z0-9]{2,3})\.pdf$/i';
+    // Gruppe 4: Dokumentart, Gruppe 5: Mitarbeiter
+    // Generischer Fallback für Mitarbeiter-Auswertungen, daher die niedrigste Priorität:
+    // Spezifische Services mit demselben Aufbau werden vorher geprüft.
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . '(.+)_(\d{5})' . self::EVALUATION_SUFFIX . '\.pdf$/i';
+
+    protected const PRIORITY = -100;
 
     protected function getDestinationFilename(): string {
         $matches = $this->getMatches();
-        $employeeNumber = $matches[5];
 
-        match ($matches[4]) {
-            'Brutto_Netto' => $documentType = "Entgeltabrechnung",
-            'SV_Nachweis_(DEÜV)' => $documentType = "Sozialversicherungsmeldung",
-            'DÜ_Prot_LSt_Bescheinig' => $documentType = "Lohnsteuerbescheinigung",
-            default => $documentType = $matches[4],
+        $documentType = match ($matches[4]) {
+            'Brutto_Netto' => "Entgeltabrechnung",
+            'SV_Nachweis_(DEÜV)' => "Sozialversicherungsmeldung",
+            'DÜ_Prot_LSt_Bescheinig' => "Lohnsteuerbescheinigung",
+            default => $matches[4],
         };
 
-        $payrollClient = $this->payrollClient;
-        if (!is_null($payrollClient)) {
-            $this->logInfo("Client gefunden: {$payrollClient->getNumber()}");
-
-            $employees = $payrollClient->getEmployees();
-            if (!is_null($employees)) {
-                $employee = $employees->getFirstValue('id', $employeeNumber);
-                if (!is_null($employee)) {
-                    $this->logInfo('Mitarbeiter gefunden: ' . $employee->getSurname() . ' ' . $employee->getFirstName());
-                    return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
-                }
-
-                self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
-            }
-
-            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
-        }
-
-        self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");
+        return "{$documentType}-" . $this->getEmployeeFilenamePart($matches[5]) . '.pdf';
     }
 }

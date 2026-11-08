@@ -3,7 +3,7 @@
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : FileServiceAbstract.php
+ * Filename     : PeriodicFileServiceAbstract.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
@@ -12,38 +12,16 @@ declare(strict_types=1);
 
 namespace App\Contracts\Abstracts\FileServices;
 
-use App\Helper\InternalStoreMapper;
 use App\Traits\PeriodicFileServiceTrait;
 
 abstract class PeriodicFileServiceAbstract extends FileServiceAbstract {
     use PeriodicFileServiceTrait;
 
-    public function getDestinationFolder(bool $leadingZero = true): ?string {
-        $subFolder = $this->getSubFolder();
-        $requiresPeriod = InternalStoreMapper::requiresPeriod($subFolder);
-        $requiresYear = InternalStoreMapper::requiresYear($subFolder);
-
-        [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
-
-        $subFolder = $this->prepareSubFolder($subFolder, $requiresPeriod, $requiresYear);
-
-        if (!$requiresPeriod && !$requiresYear) {
-            $this->logError("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
-            return null;
-        }
-
-        $client = $this->client;
-        if (is_null($client)) {
-            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
-            return null;
-        }
-
-        if ($requiresPeriod) {
-            $this->logInfo("Nutze Monatsablage für den Ordner '" . $subFolder . "'.");
-            return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted . DIRECTORY_SEPARATOR . $monthFormatted);
-        }
-
-        $this->logInfo("Nutze Jahresablage für den Ordner '" . $subFolder . "'.");
-        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
+    /**
+     * Periodische Services brauchen eine Jahres- oder Monatsablage in der Konfiguration.
+     */
+    protected function getNonPeriodicDestinationFolder(string $subFolder): ?string {
+        $this->logError("Keine Konfiguration für eine periodische Ablage in den Ordner '" . $subFolder . "' gefunden.");
+        return null;
     }
 }

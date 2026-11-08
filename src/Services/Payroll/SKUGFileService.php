@@ -17,14 +17,12 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 class SKUGFileService extends PayrollFileServiceAbstract {
     // 00000_00_0000_Leistungsantr_Saison_Kug_A01.pdf
     // 00000_00_0000_Anlage_LA_Saison_Kug_A01.pdf
-    //                                        1               2              3     4                        5
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_(\w+)_Saison_Kug_([A-Z0-9]{2,3})\.pdf$/i';
+    // Gruppe 4: Art des Antrags
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . '(\w+)_Saison_Kug' . self::EVALUATION_SUFFIX . '\.pdf$/i';
+
+    protected const DOCUMENT_TYPE = "SKUG-Antrag";
 
     protected function getDestinationFilename(): string {
-        $matches = $this->getMatches();
-
-        $documentType = "SKUG-Antrag";
-
-        return "{$documentType}-{$matches[4]}.pdf";
+        return static::DOCUMENT_TYPE . "-{$this->getMatches()[4]}.pdf";
     }
 }

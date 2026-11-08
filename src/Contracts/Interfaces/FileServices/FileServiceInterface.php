@@ -12,21 +12,6 @@ declare(strict_types=1);
 
 namespace App\Contracts\Interfaces\FileServices;
 
-use Datev\Entities\ClientMasterData\Clients\Client;
-
-interface FileServiceInterface {
-    public static function getPattern(): string;
-
-    /**
-     * @param array<array-key, string> $matches
-     * @param-out array<array-key, string> $matches
-     */
-    public static function matchesPattern(string $file, array &$matches = []): bool;
-
+interface FileServiceInterface extends FileHandlerInterface {
     public function process(): void;
-
-    public function getFile(): string;
-    public function getFilename(): string;
-
-    public function getClient(): ?Client;
 }

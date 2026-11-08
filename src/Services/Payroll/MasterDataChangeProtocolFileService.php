@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class MasterDataChangeProtocolFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Stammdatenänd_Prot_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Stammdatenänd_Prot_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Stammdatenänd_Prot' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Stammdatenänderungsprotokoll";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Stammdatenänderungsprotokoll";
 }

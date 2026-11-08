@@ -3,7 +3,7 @@
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : DmsMapper.php
+ * Filename     : InternalStoreMapper.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */
@@ -89,12 +89,17 @@ class InternalStoreMapper extends HelperAbstract {
         return self::requiresPattern($internalPath, $config->getPerPeriod() ?? []);
     }
 
+    /**
+     * Setzt den Parameter (Jahr bzw. Jahr/Monat) für den Platzhalter %s im Unterpfad ein.
+     * Bewusst kein sprintf: Ein "%" in Mandanten- oder Ordnernamen (z. B. "Beteiligung 50%")
+     * würde sonst als Formatangabe gelesen und einen ValueError auslösen.
+     */
     private static function buildInternalStorePath(string $basePath, string $mappedPath, ?string $parameter): string {
-        $path = $basePath . '/' . $mappedPath;
-
-        if ($parameter !== null && strpos($path, '%s') !== false) {
-            $path = sprintf($path, $parameter);
+        if ($parameter !== null) {
+            $mappedPath = str_replace('%s', $parameter, $mappedPath);
         }
+
+        $path = $basePath . '/' . $mappedPath;
 
         self::logDebug("Interner Speicherpfad (ermittelt): '$path'.");
 

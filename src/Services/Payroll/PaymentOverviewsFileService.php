@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class PaymentOverviewsFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Übersicht_Zahlungen_AA0.pdf
-    //                                        1               2              3                                 4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Übersicht_Zahlungen_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Übersicht_Zahlungen' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Übersicht_Zahlungen";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Übersicht_Zahlungen";
 }

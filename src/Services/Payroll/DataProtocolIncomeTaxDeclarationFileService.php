@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class DataProtocolIncomeTaxDeclarationFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_DÜ_Protok_LSt_Anm_AA0.pdf
-    //                                        1               2              3                           4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_DÜ_Protok_LSt_Anm_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'DÜ_Protok_LSt_Anm' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "DÜ-Protokoll_Lohnsteuer-Anmeldung";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "DÜ-Protokoll_Lohnsteuer-Anmeldung";
 }

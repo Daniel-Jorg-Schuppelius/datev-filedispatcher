@@ -13,24 +13,10 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
-use App\Helper\InternalStoreMapper;
 
 class PersonnelCalendarFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Personalkalender_Div_Mitarbeiter_AA0.pdf
-    //                                        1               2              3                                              4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Personalkalender_Div_Mitarbeiter_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Personalkalender_Div_Mitarbeiter' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    public function getDestinationFolder(bool $leadingZero = true): ?string {
-        [$yearFormatted, $monthFormatted] = $this->getFormattedDateParts($leadingZero);
-
-        $subFolder = $this->prepareSubFolder($this->getSubFolder(), false, true);
-
-        $client = $this->client;
-        if (is_null($client)) {
-            $this->logError("Kein Client gesetzt, der Zielordner für '" . $subFolder . "' kann nicht bestimmt werden.");
-            return null;
-        }
-
-        return InternalStoreMapper::getInternalStorePath($client, $subFolder, $yearFormatted);
-    }
+    protected const FORCE_YEARLY_STORAGE = true;
 }

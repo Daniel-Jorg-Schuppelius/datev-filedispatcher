@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class DataProtocolPaymentsContributionInvoiceUVFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_DÜ_Prot_Lohnnachweis_Unfallversicherung_AA0.pdf
-    //                                        1               2              3                                                     4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_DÜ_Prot_Lohnnachweis_Unfallversicherung_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'DÜ_Prot_Lohnnachweis_Unfallversicherung' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "DÜ-Protokoll_Lohnnachweis_Unfallversicherung";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "DÜ-Protokoll_Lohnnachweis_Unfallversicherung";
 }

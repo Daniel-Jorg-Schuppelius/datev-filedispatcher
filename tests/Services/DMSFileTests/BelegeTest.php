@@ -3,7 +3,7 @@
  * Created on   : Tue Oct 08 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : DMSBasicFileServiceTest.php
+ * Filename     : BelegeTest.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */

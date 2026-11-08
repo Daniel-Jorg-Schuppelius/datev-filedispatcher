@@ -16,14 +16,12 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class EmployeesWageTypesFileService extends PayrollFileServiceAbstract {
     // 000000_00000_ABC GbR_03_2024.xlsm
-    //                               1                  2    3               4              5
+    // Gruppe 3: Name des Mandanten
     protected const PATTERN = '/^(\d{6,7})_(?<tenant>\d{5})_(.+)_(?<month>\d{2})_(?<year>\d{4})\.xlsm$/i';
 
+    protected const DOCUMENT_TYPE = "Lohnarten";
+
     protected function getDestinationFilename(): string {
-        $matches = $this->getMatches();
-
-        $documentType = "Lohnarten";
-
-        return "{$documentType}-{$matches[3]}.xlsm";
+        return static::DOCUMENT_TYPE . "-{$this->getMatches()[3]}.xlsm";
     }
 }

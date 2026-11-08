@@ -17,13 +17,16 @@ use CommonToolkit\Helper\FileSystem\File;
 
 class EmployeeInvitationFileService extends FileServiceAbstract {
     // Arbeitnehmer online - Einladungsstatus - 000000 - 00000 - Regina Wegner.csv
-    //                                                                        1           2      3
+    // Gruppe 1: Beraternummer, Gruppe 2: Mandant, Gruppe 3: Name
     protected const PATTERN = '/^Arbeitnehmer online - Einladungsstatus - (\d{6,7}) - (\d{5}) - (.+)\.csv$/i';
 
     protected const SUBFOLDER = "02 Entgeltabrechnung";
 
-    protected const DOCUMENT_EMPLOYEE = "Arbeitnehmer online.docx";
-    protected const DOCUMENT_EMPLOYER = "AG Arbeitnehmer online.docx";
+    /** Anleitungen im Eingangsordner, die zusammen mit dem Einladungsstatus abgelegt werden */
+    protected const GUIDES = [
+        "Arbeitnehmer online.docx" => "Arbeitnehmer",
+        "AG Arbeitnehmer online.docx" => "Arbeitgeber",
+    ];
 
     protected function extractDataFromFile(): void {
         $matches = $this->getMatches();
@@ -42,17 +45,14 @@ class EmployeeInvitationFileService extends FileServiceAbstract {
     public function process(): void {
         parent::process();
 
-        $employeeFilename = $this->getFolder() . DIRECTORY_SEPARATOR . self::DOCUMENT_EMPLOYEE;
-        $employerFilename = $this->getFolder() . DIRECTORY_SEPARATOR . self::DOCUMENT_EMPLOYER;
+        $destinationFolder = $this->requireDestinationFolder();
 
-        if (File::exists($employeeFilename)) {
-            $this->logInfo("Kopiere Anleitung für Arbeitnehmer : $employeeFilename");
-            File::copy($employeeFilename, $this->getDestinationFolder() . DIRECTORY_SEPARATOR . self::DOCUMENT_EMPLOYEE);
-        }
-
-        if (File::exists($employerFilename)) {
-            $this->logInfo("Kopiere Anleitung für Arbeitgeber : $employerFilename");
-            File::copy($employerFilename, $this->getDestinationFolder() . DIRECTORY_SEPARATOR . self::DOCUMENT_EMPLOYER);
+        foreach (self::GUIDES as $guide => $audience) {
+            $source = $this->getFolder() . DIRECTORY_SEPARATOR . $guide;
+            if (File::exists($source)) {
+                $this->logInfo("Kopiere Anleitung für $audience: $source");
+                File::copy($source, $destinationFolder . DIRECTORY_SEPARATOR . $guide);
+            }
         }
     }
 }

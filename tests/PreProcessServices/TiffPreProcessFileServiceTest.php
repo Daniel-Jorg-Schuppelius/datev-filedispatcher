@@ -3,7 +3,7 @@
  * Created on   : Sat Oct 19 2024
  * Author       : Daniel Jörg Schuppelius
  * Author Uri   : https://schuppelius.org
- * Filename     : TiffPreProcessFileService.php
+ * Filename     : TiffPreProcessFileServiceTest.php
  * License      : MIT License
  * License Uri  : https://opensource.org/license/mit
  */

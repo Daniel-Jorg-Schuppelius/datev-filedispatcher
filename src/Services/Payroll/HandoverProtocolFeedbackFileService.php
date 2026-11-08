@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class HandoverProtocolFeedbackFileService extends PayrollFileServiceAbstract {
     // 00000_11_2024_Übern_Prot_Rückm_Verf_AA0.pdf
-    //                                        1               2              3                                   4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Übern_Prot_Rückm_Verf_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Übern_Prot_Rückm_Verf' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Übernahmeprotokoll_Rückmeldeverfahren";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Übernahmeprotokoll_Rückmeldeverfahren";
 }

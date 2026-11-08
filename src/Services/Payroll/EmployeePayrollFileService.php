@@ -13,36 +13,11 @@ declare(strict_types=1);
 namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
-use Exception;
 
 class EmployeePayrollFileService extends PayrollFileServiceAbstract {
     // 00000_00000_Client_Client_00_0000_Brutto_Netto_AA0.pdf
-    //                                        1       2            3                        4              5                          6
-    protected const PATTERN = '/^(?<tenant>\d{5})_(\d{5})_([A-Za-z]+_[A-Za-z]+)_(?<month>\d{2})_(?<year>\d{4})_Brutto_Netto_([A-Z0-9]{2,3})\.pdf$/i';
+    // Mandant_Mitarbeiter_Name_Monat_Jahr_Brutto_Netto_Kennung
+    protected const PATTERN = '/^(?<tenant>\d{5})_' . self::EMPLOYEE . '_([A-Za-z]+_[A-Za-z]+)_(?<month>\d{2})_(?<year>\d{4})_Brutto_Netto' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $matches = $this->getMatches();
-        $employeeNumber = $matches[2];
-
-        $documentType = "Entgeltabrechnung";
-
-        $payrollClient = $this->payrollClient;
-        if (!is_null($payrollClient)) {
-            $this->logInfo("Client gefunden: {$payrollClient->getNumber()}");
-
-            $employees = $payrollClient->getEmployees();
-            if (!is_null($employees)) {
-                $employee = $employees->getFirstValue('id', $employeeNumber);
-                if (!is_null($employee)) {
-                    return "{$documentType}-{$employeeNumber}_{$employee->getSurname()}_{$employee->getFirstName()}.pdf";
-                }
-
-                self::logErrorAndThrow(Exception::class, "Mitarbeiter nicht gefunden: {$employeeNumber}");
-            }
-
-            self::logErrorAndThrow(Exception::class, "Keine Mitarbeiter für Client: {$payrollClient->getNumber()} gefunden");
-        }
-
-        self::logErrorAndThrow(Exception::class, "Client nicht gefunden: {$matches[1]}");
-    }
+    protected const DOCUMENT_TYPE = "Entgeltabrechnung";
 }

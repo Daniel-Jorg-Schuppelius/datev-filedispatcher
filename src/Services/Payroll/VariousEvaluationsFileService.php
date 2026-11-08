@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class VariousEvaluationsFileService extends PayrollFileServiceAbstract {
     // 00000_08_2026_Div_Auswertungen_L02.pdf
-    //                                        1               2              3                       4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Div_Auswertungen_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Div_Auswertungen' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Diverse-Auswertungen";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Diverse-Auswertungen";
 }

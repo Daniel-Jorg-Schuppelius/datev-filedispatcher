@@ -16,12 +16,7 @@ use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
 class PaymentTransferProtocolFileService extends PayrollFileServiceAbstract {
     // 00000_10_2024_Überweisungsprotokoll_AA0.pdf
-    //                                        1               2              3                                   4
-    protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Überweisungsprotokoll_([A-Z0-9]{2,3})\.pdf$/i';
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Überweisungsprotokoll' . self::EVALUATION_SUFFIX . '\.pdf$/i';
 
-    protected function getDestinationFilename(): string {
-        $documentType = "Überweisungsprotokoll";
-
-        return "{$documentType}.pdf";
-    }
+    protected const DOCUMENT_TYPE = "Überweisungsprotokoll";
 }
