@@ -15,8 +15,7 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 
 class ShellTest extends TestCase {
-
-    public function testExecuteShellCommandSuccess() {
+    public function test_execute_shell_command_success() {
         $unixCommand = 'echo "Hello World"';
         $windowsCommand = 'echo Hello World';
 
@@ -29,7 +28,7 @@ class ShellTest extends TestCase {
         $this->assertNotEmpty($output, "The output should not be empty.");
     }
 
-    public function testExecuteShellCommandFailure() {
+    public function test_execute_shell_command_failure() {
         $command = "invalidcommand 2>&1";
 
         $output = [];

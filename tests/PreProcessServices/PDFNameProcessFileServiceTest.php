@@ -10,8 +10,8 @@
 
 namespace Tests\PreProcessServices;
 
-use CommonToolkit\Helper\FileSystem\File;
 use App\PreProcessServices\PDFNameProcessFileService;
+use CommonToolkit\Helper\FileSystem\File;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class PDFNameProcessFileServiceTest extends DocumentTest {
@@ -22,7 +22,7 @@ class PDFNameProcessFileServiceTest extends DocumentTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testPatternMatching() {
+    public function test_pattern_matching() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -33,7 +33,7 @@ class PDFNameProcessFileServiceTest extends DocumentTest {
         $this->assertCount(2, $matches);
     }
 
-    public function testMatchesPattern(): void {
+    public function test_matches_pattern(): void {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -44,7 +44,7 @@ class PDFNameProcessFileServiceTest extends DocumentTest {
         $this->assertFalse(PDFNameProcessFileService::matchesPattern($invalidFilename));
     }
 
-    public function testPayrollFileServiceProcessing() {
+    public function test_payroll_file_service_processing() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }

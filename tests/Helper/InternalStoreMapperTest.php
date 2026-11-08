@@ -11,20 +11,19 @@
 namespace Tests\Helper;
 
 use App\Config\Config;
-use PHPUnit\Framework\TestCase;
+use App\Factories\StorageFactory;
 use App\Helper\InternalStoreMapper;
 use Datev\Entities\ClientMasterData\Clients\Client;
-use App\Factories\StorageFactory;
 use Datev\Entities\DocumentManagement\Documents\Document;
 use Datev\Entities\DocumentManagement\Documents\Folders\DocumentFolder;
 use Datev\Entities\DocumentManagement\Registers\Register;
 use FilesystemIterator;
+use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Tests\Config\TestConfig;
 
 class InternalStoreMapperTest extends TestCase {
-
     private string $tempDir;
     private string $internalStorePath;
 
@@ -51,7 +50,7 @@ class InternalStoreMapperTest extends TestCase {
         $categories = [
             "04 Sonstiges/Einkommensbescheinigungen",
             "02 Entgeltabrechnung/2023",
-            "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc"
+            "01 Finanzbuchhaltung/2024/FA Mahnungen, Umbuchung etc",
         ];
 
         foreach ($categories as $category) {
@@ -72,7 +71,7 @@ class InternalStoreMapperTest extends TestCase {
         parent::tearDown();
     }
 
-    public function testGetInternalStorePathWithoutParameter() {
+    public function test_get_internal_store_path_without_parameter() {
         $client = $this->createMock(Client::class);
         $document = $this->createMock(Document::class);
         $register = $this->createMock(Register::class);
@@ -93,7 +92,7 @@ class InternalStoreMapperTest extends TestCase {
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
     }
 
-    public function testGetInternalStorePathWithParameter() {
+    public function test_get_internal_store_path_with_parameter() {
         $client = $this->createMock(Client::class);
         $document = $this->createMock(Document::class);
         $register = $this->createMock(Register::class);
@@ -115,7 +114,7 @@ class InternalStoreMapperTest extends TestCase {
         $this->assertStringContainsString($expectedPath, $actualPath, "Der erwartete Pfad ist nicht korrekt.");
     }
 
-    public function testGetInternalStorePathInvalidCategory() {
+    public function test_get_internal_store_path_invalid_category() {
         $client = $this->createMock(Client::class);
         $document = $this->createMock(Document::class);
         $register = $this->createMock(Register::class);
@@ -133,22 +132,22 @@ class InternalStoreMapperTest extends TestCase {
         $this->assertNull($actualPath, "Der Pfad sollte null sein, da das Register und Folder Objekt im Dokument ungültig ist.");
     }
 
-    public function testRequiresYearTrue() {
+    public function test_requires_year_true() {
         $internalPath = "03 Erklärungen, Abschlüsse, Bescheide";
         $this->assertTrue(InternalStoreMapper::requiresYear($internalPath), "Es wird erwartet, dass das Jahr erforderlich ist.");
     }
 
-    public function testRequiresYearFalse() {
+    public function test_requires_year_false() {
         $internalPath = "01 Finanzbuchhaltung";
         $this->assertFalse(InternalStoreMapper::requiresYear($internalPath), "Es wird erwartet, dass das Jahr nicht erforderlich ist.");
     }
 
-    public function testRequiresPeriodTrue() {
+    public function test_requires_period_true() {
         $internalPath = "01 Finanzbuchhaltung";
         $this->assertTrue(InternalStoreMapper::requiresPeriod($internalPath), "Es wird erwartet, dass der Zeitraum erforderlich ist.");
     }
 
-    public function testRequiresPeriodFalse() {
+    public function test_requires_period_false() {
         $internalPath = "03 Erklärungen, Abschlüsse, Bescheide";
         $this->assertFalse(InternalStoreMapper::requiresPeriod($internalPath), "Es wird erwartet, dass der Zeitraum nicht erforderlich ist.");
     }

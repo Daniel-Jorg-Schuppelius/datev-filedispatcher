@@ -26,8 +26,12 @@ if ($argc < 2) {
     $filename = $argv[1];
 }
 
-if (strpos($filename, "log.txt")) die(0);
-if (strpos($filename, "Arbeitnehmer online.docx")) die(0);
+if (strpos($filename, "log.txt")) {
+    exit(0);
+}
+if (strpos($filename, "Arbeitnehmer online.docx")) {
+    exit(0);
+}
 
 echo "[" . date('Y-m-d H:i:s') . "] info: $self -> Verarbeitung der Datei $filename begonnen...\n";
 

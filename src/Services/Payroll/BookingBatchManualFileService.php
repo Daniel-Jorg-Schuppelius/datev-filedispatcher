@@ -14,7 +14,7 @@ namespace App\Services\Payroll;
 
 use App\Contracts\Abstracts\FileServices\Periodic\PayrollFileServiceAbstract;
 
-class BookingBatchManualFileService  extends PayrollFileServiceAbstract {
+class BookingBatchManualFileService extends PayrollFileServiceAbstract {
     // LUG_Buchungsbelege_000000_00000_202312.CSV
     // LUG_Buchungsbelege_000000_00000_202401.txt
     //                                                  1                  2              3              4       5

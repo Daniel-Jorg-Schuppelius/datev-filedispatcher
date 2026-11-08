@@ -19,7 +19,6 @@ class SettlementOfGrossNetEarningsEmployeesFileService extends PayrollFileServic
     //                                        1               2              3                                                4
     protected const PATTERN = '/^(?<tenant>\d{5})_(?<month>\d{2})_(?<year>\d{4})_Brutto_Netto_Probe_Div_Mitarbeiter_([A-Z0-9]{2,3})\.pdf$/i';
 
-
     protected function getDestinationFilename(): string {
         $documentType = "Probeabrechnung_Mitarbeiter";
 

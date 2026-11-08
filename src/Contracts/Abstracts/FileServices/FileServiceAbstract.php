@@ -16,14 +16,13 @@ use APIToolkit\Contracts\Interfaces\API\ApiClientInterface;
 use App\Config\Config;
 use App\Contracts\Interfaces\FileServices\FileServiceInterface;
 use App\Factories\APIClientFactory;
-use CommonToolkit\Helper\FileSystem\File;
 use App\Helper\InternalStoreMapper;
 use App\Traits\FileServiceTrait;
+use CommonToolkit\Helper\FileSystem\File;
 use Datev\API\Desktop\Endpoints\ClientMasterData\ClientsEndpoint;
 use Datev\API\Desktop\Endpoints\DocumentManagement\DocumentsEndpoint;
 use Datev\API\Desktop\Endpoints\Payroll\ClientsEndpoint as PayrollClientsEndpoint;
 use ERRORToolkit\Traits\ErrorLog;
-use Exception;
 use OutOfRangeException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
@@ -44,12 +43,8 @@ abstract class FileServiceAbstract implements FileServiceInterface {
 
         $this->file = $file;
 
-        try {
-            $this->extractDataFromFile();
-        } catch (Exception $e) {
-            self::logException($e);
-            throw $e;
-        }
+        // Exceptions werden vom FileDispatcher geloggt, hier nicht erneut.
+        $this->extractDataFromFile();
     }
 
     public function getDestinationFolder(): ?string {

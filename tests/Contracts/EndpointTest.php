@@ -54,7 +54,7 @@ abstract class EndpointTest extends TestCase {
 
     final protected function setUp(): void {
         foreach ($this->tenantIds as $tenantId) {
-            $tempDir = str_replace("{tenant}", (string)$tenantId, $this->testConfig->getInternalStorePath());
+            $tempDir = str_replace("{tenant}", (string) $tenantId, $this->testConfig->getInternalStorePath());
 
             if (!is_dir(dirname($tempDir))) {
                 mkdir(dirname($tempDir));
@@ -69,7 +69,7 @@ abstract class EndpointTest extends TestCase {
                 "02 Entgeltabrechnung/Vorjahre/2022/01 Januar",
                 "02 Entgeltabrechnung/2023/09 September",
                 "02 Entgeltabrechnung/2024/10 Oktober",
-                "01 Finanzbuchhaltung/2023/FA Mahnungen, Umbuchung etc"
+                "01 Finanzbuchhaltung/2023/FA Mahnungen, Umbuchung etc",
             ];
 
             foreach ($categories as $category) {
@@ -94,7 +94,7 @@ abstract class EndpointTest extends TestCase {
 
     protected function tearDown(): void {
         foreach ($this->tenantIds as $tenantId) {
-            $tempDir = str_replace("{tenant}", (string)$tenantId, $this->testConfig->getInternalStorePath());
+            $tempDir = str_replace("{tenant}", (string) $tenantId, $this->testConfig->getInternalStorePath());
             if (is_dir($tempDir)) {
                 foreach (
                     new RecursiveIteratorIterator(

@@ -37,7 +37,7 @@ class DocumentTest extends EndpointTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testGetClient() {
+    public function test_get_client() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         }
@@ -48,7 +48,7 @@ class DocumentTest extends EndpointTest {
         $this->assertInstanceOf(Client::class, $client);
     }
 
-    public function testGetClientFromPayroll() {
+    public function test_get_client_from_payroll() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         }

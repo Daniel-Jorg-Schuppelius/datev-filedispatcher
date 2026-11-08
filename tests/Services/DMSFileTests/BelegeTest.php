@@ -21,7 +21,7 @@ class BelegeTest extends DMSBasicFileServiceTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testPatternMatching() {
+    public function test_pattern_matching() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -32,7 +32,7 @@ class BelegeTest extends DMSBasicFileServiceTest {
         $this->assertCount(3, $matches);
     }
 
-    public function testDMSBasicFileServiceProcessing() {
+    public function test_dms_basic_file_service_processing() {
         if ($this->apiDisabled) {
             $this->markTestSkipped('API is disabled');
         } elseif (empty($this->testFile)) {

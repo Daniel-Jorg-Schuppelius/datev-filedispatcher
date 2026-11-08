@@ -14,8 +14,8 @@ namespace App\Config;
 
 use ConfigToolkit\ConfigLoader;
 use ERRORToolkit\Enums\LogType;
-use Psr\Log\LogLevel;
 use Exception;
+use Psr\Log\LogLevel;
 
 class Config {
     private static ?Config $instance = null;
@@ -29,7 +29,7 @@ class Config {
 
     public static function getInstance(): Config {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new self;
         }
         return self::$instance;
     }

@@ -10,10 +10,8 @@
 
 namespace Tests\PreProcessServices;
 
-use App\Helper\FileDispatcher;
+use App\PreProcessServices\{PDFScannerCodeProcessFileService};
 use CommonToolkit\Helper\FileSystem\File;
-use App\PreProcessServices\PDFFileNameProcessFileService;
-use App\PreProcessServices\PDFScannerCodeProcessFileService;
 use Tests\Endpoints\DocumentManagement\DocumentTest;
 
 class PDFScannerCodeProcessFileServiceTest extends DocumentTest {
@@ -24,7 +22,7 @@ class PDFScannerCodeProcessFileServiceTest extends DocumentTest {
         $this->apiDisabled = true; // API is disabled
     }
 
-    public function testPatternMatching() {
+    public function test_pattern_matching() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -35,7 +33,7 @@ class PDFScannerCodeProcessFileServiceTest extends DocumentTest {
         $this->assertCount(2, $matches);
     }
 
-    public function testMatchesPattern(): void {
+    public function test_matches_pattern(): void {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
@@ -46,7 +44,7 @@ class PDFScannerCodeProcessFileServiceTest extends DocumentTest {
         $this->assertFalse(PDFScannerCodeProcessFileService::matchesPattern($invalidFilename));
     }
 
-    public function testPayrollFileServiceProcessing() {
+    public function test_payroll_file_service_processing() {
         if (empty($this->testFile)) {
             $this->markTestSkipped('Test file not found');
         }
