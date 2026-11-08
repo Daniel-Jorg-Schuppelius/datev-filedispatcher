@@ -14,10 +14,28 @@ namespace App\Config;
 
 use ConfigToolkit\ConfigLoader;
 use ERRORToolkit\Enums\LogType;
-use Exception;
 use Psr\Log\LogLevel;
+use RuntimeException;
+use Throwable;
 
+/**
+ * Konfiguration aus config/config.json (Pfad per FILEDISPATCHER_CONFIG änderbar).
+ * Zugangsdaten der DATEV-API lassen sich per Umgebungsvariable setzen, damit sie
+ * nicht im Klartext in der Konfigurationsdatei stehen müssen.
+ */
 class Config {
+    public const ENV_CONFIG_FILE = 'FILEDISPATCHER_CONFIG';
+    public const ENV_API_URL = 'DATEV_API_URL';
+    public const ENV_API_USER = 'DATEV_API_USER';
+    public const ENV_API_PASSWORD = 'DATEV_API_PASSWORD';
+    public const ENV_API_CA_FILE = 'DATEV_API_CA_FILE';
+
+    private const DEFAULT_CONFIG_FILE = __DIR__ . '/../../config/config.json';
+
+    private const DEFAULT_ZIP_MAX_ENTRIES = 1000;
+    private const DEFAULT_ZIP_MAX_BYTES = 500 * 1024 * 1024;
+    private const DEFAULT_ZIP_MAX_RATIO = 100.0;
+
     private static ?Config $instance = null;
     private ConfigLoader $configLoader;
     private ?bool $debugOverride = null; // Ermöglicht das Überschreiben in Tests
@@ -27,6 +45,9 @@ class Config {
         $this->loadConfig();
     }
 
+    /**
+     * @throws RuntimeException wenn die Konfigurationsdatei fehlt oder nicht geladen werden kann
+     */
     public static function getInstance(): Config {
         if (self::$instance === null) {
             self::$instance = new self;
@@ -34,40 +55,46 @@ class Config {
         return self::$instance;
     }
 
-    public function isConfigured(): bool {
-        return $this->getResourceUrl() !== null
-            && $this->getUser() !== null
-            && $this->getPassword() !== null;
-    }
-
     private function loadConfig(): void {
-        try {
-            $configPath = realpath(__DIR__ . '/../../config/config.json');
-            if (!$configPath) {
-                throw new Exception("Config file not found.");
-            }
+        $configFile = self::env(self::ENV_CONFIG_FILE) ?? self::DEFAULT_CONFIG_FILE;
 
+        $configPath = realpath($configFile);
+        if ($configPath === false || !is_readable($configPath)) {
+            throw new RuntimeException("Konfigurationsdatei nicht gefunden oder nicht lesbar: $configFile (Vorlage: config/config.json.sample)");
+        }
+
+        try {
             $this->configLoader->loadConfigFile($configPath);
-        } catch (Exception $e) {
-            error_log("Config-Fehler: " . $e->getMessage());
+        } catch (Throwable $e) {
+            throw new RuntimeException("Konfigurationsdatei konnte nicht geladen werden: $configPath ({$e->getMessage()})", 0, $e);
         }
     }
 
-    // Getter für API-Konfiguration
+    // Getter für API-Konfiguration (Umgebungsvariablen haben Vorrang)
     public function getResourceUrl(): ?string {
-        return $this->configLoader->get("DatevAPI", "resourceurl");
+        return self::env(self::ENV_API_URL) ?? $this->configLoader->get("DatevAPI", "resourceurl");
     }
 
     public function getUser(): ?string {
-        return $this->configLoader->get("DatevAPI", "user");
+        return self::env(self::ENV_API_USER) ?? $this->configLoader->get("DatevAPI", "user");
     }
 
     public function getPassword(): ?string {
-        return $this->configLoader->get("DatevAPI", "password");
+        return self::env(self::ENV_API_PASSWORD) ?? $this->configLoader->get("DatevAPI", "password");
     }
 
     public function getVerifySSL(): bool {
-        return $this->configLoader->get("DatevAPI", "verifySSL", false);
+        return (bool) $this->configLoader->get("DatevAPI", "verifySSL", true);
+    }
+
+    /**
+     * CA-Datei (PEM), der zusätzlich zum Zertifikatsspeicher vertraut wird, z. B. für ein
+     * selbstsigniertes DATEVconnect-Zertifikat. null = Zertifikatsspeicher des Systems.
+     */
+    public function getCaFile(): ?string {
+        $caFile = self::env(self::ENV_API_CA_FILE) ?? $this->configLoader->get("DatevAPI", "caFile");
+
+        return ($caFile === null || $caFile === '') ? null : (string) $caFile;
     }
 
     // Getter für Logging
@@ -76,7 +103,7 @@ class Config {
     }
 
     public function getLogLevel(): string {
-        return $this->configLoader->get("Logging", "level", LogLevel::DEBUG);
+        return $this->configLoader->get("Logging", "level", LogLevel::INFO);
     }
 
     public function getLogPath(): ?string {
@@ -106,6 +133,19 @@ class Config {
         return $this->configLoader->get("maxYears", "previousYearsFolderName4Internal");
     }
 
+    // Grenzen für ZIP-Archive (Schutz vor ZIP-Bomben)
+    public function getZipMaxEntries(): int {
+        return (int) $this->configLoader->get("Zip", "maxEntries", self::DEFAULT_ZIP_MAX_ENTRIES);
+    }
+
+    public function getZipMaxBytes(): int {
+        return (int) $this->configLoader->get("Zip", "maxBytes", self::DEFAULT_ZIP_MAX_BYTES);
+    }
+
+    public function getZipMaxRatio(): float {
+        return (float) $this->configLoader->get("Zip", "maxRatio", self::DEFAULT_ZIP_MAX_RATIO);
+    }
+
     // Getter für Mappings & Listen
 
     /** @return array<string, string>|null Kategorie ("Ordner Register") => interner Unterpfad */
@@ -128,10 +168,9 @@ class Config {
         return $this->configLoader->get("PerPeriod");
     }
 
-    // Getter für Tenant-IDs
+    private static function env(string $name): ?string {
+        $value = getenv($name);
 
-    /** @return list<string>|null */
-    public function getTenantIDs(): ?array {
-        return $this->configLoader->get("TenantIDs");
+        return ($value === false || $value === '') ? null : $value;
     }
 }

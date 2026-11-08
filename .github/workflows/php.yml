@@ -46,7 +46,8 @@ jobs:
       run: php -r "file_exists('phpunit.xml') || copy('phpunit.xml.dist', 'phpunit.xml');"
 
     - name: Copy config.json
-      run: php -r "file_exists('config/config.json') || copy('config/config.json.sample', 'config/config.json');"
+      # Die Vorlage loggt nach /var/log/filedispatcher, das ist auf dem Runner nicht beschreibbar.
+      run: php -r "file_exists('config/config.json') || file_put_contents('config/config.json', str_replace('/var/log/filedispatcher/filedispatcher.log', '/tmp/filedispatcher.log', file_get_contents('config/config.json.sample')));"
 
     - name: Copy testconfig.json
       run: php -r "file_exists('config/testconfig.json') || copy('config/testconfig.json.sample', 'config/testconfig.json');"

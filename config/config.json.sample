@@ -11,30 +11,37 @@
 			"key": "user",
 			"value": "user",
 			"type": "text",
-			"description": "Username for the Datev API",
+			"description": "Username for the Datev API (environment variable DATEV_API_USER takes precedence)",
 			"enabled": true
 		},
 		{
 			"key": "password",
 			"value": "password",
 			"type": "text",
-			"description": "Password for the Datev API",
+			"description": "Password for the Datev API (environment variable DATEV_API_PASSWORD takes precedence; keep this file chmod 600)",
 			"enabled": true
 		},
 		{
 			"key": "verifySSL",
-			"value": false,
+			"value": true,
 			"type": "bool",
-			"description": "Verify SSL certificate for the Datev API (set to true in production)",
+			"description": "Verify the TLS certificate of the Datev API (default true). For a self-signed DATEVconnect certificate use caFile or the system trust store instead of disabling the check",
 			"enabled": true
+		},
+		{
+			"key": "caFile",
+			"value": "/etc/filedispatcher/datevconnect-ca.pem",
+			"type": "text",
+			"description": "PEM file with the CA or self-signed certificate of DATEVconnect (environment variable DATEV_API_CA_FILE takes precedence). Enable to use it instead of the system trust store",
+			"enabled": false
 		}
 	],
 	"Path": [
 		{
 			"key": "internalStore",
-			"value": "/tmp",
+			"value": "/srv/mandanten/{tenant}",
 			"type": "text",
-			"description": "Path to the internal store where the tenant files are stored",
+			"description": "Path to the internal store where the tenant files are stored, must contain {tenant}",
 			"enabled": true
 		}
 	],
@@ -59,9 +66,9 @@
 		},
 		{
 			"key": "path",
-			"value": "/tmp/log.txt",
+			"value": "/var/log/filedispatcher/filedispatcher.log",
 			"type": "text",
-			"description": "path to log file",
+			"description": "path to log file (contains client and employee names: use a directory only the service user and its group can read)",
 			"enabled": true
 		}
 	],
@@ -87,6 +94,29 @@
 			"value": "Vorjahre",
 			"type": "text",
 			"description": "foldername for maximal years before put in previous years",
+			"enabled": true
+		}
+	],
+	"Zip": [
+		{
+			"key": "maxEntries",
+			"value": 1000,
+			"type": "number",
+			"description": "maximum number of entries in a ZIP archive (protection against ZIP bombs)",
+			"enabled": true
+		},
+		{
+			"key": "maxBytes",
+			"value": 524288000,
+			"type": "number",
+			"description": "maximum total uncompressed size of a ZIP archive in bytes",
+			"enabled": true
+		},
+		{
+			"key": "maxRatio",
+			"value": 100,
+			"type": "number",
+			"description": "maximum compression ratio (uncompressed / compressed) per entry",
 			"enabled": true
 		}
 	],

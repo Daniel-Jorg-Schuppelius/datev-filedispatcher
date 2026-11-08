@@ -32,8 +32,27 @@ class APIClientFactory {
             }
 
             $authentication = new BasicAuthentication($user, $password);
-            self::$client = new Client($authentication, $config->getResourceUrl() ?? "https://127.0.0.1:58452", LoggerFactory::getLogger(), false, $config->getVerifySSL());
+            $client = new Client($authentication, $config->getResourceUrl() ?? "https://127.0.0.1:58452", LoggerFactory::getLogger(), false, $config->getVerifySSL());
+
+            $caFile = $config->getCaFile();
+            if (!is_null($caFile)) {
+                self::applyCaFile($client, $caFile);
+            }
+
+            self::$client = $client;
         }
         return self::$client;
+    }
+
+    /**
+     * Vertraut der CA-Datei, z. B. dem selbstsignierten Zertifikat von DATEVconnect, statt die
+     * Zertifikatsprüfung abzuschalten. Setzt php-api-toolkit mit ClientAbstract::setCaBundle() voraus.
+     */
+    private static function applyCaFile(ApiClientInterface $client, string $caFile): void {
+        if (!method_exists($client, 'setCaBundle')) {
+            throw new RuntimeException("Die Option 'DatevAPI.caFile' benötigt eine Version von daniel-jorg-schuppelius/php-api-toolkit mit ClientAbstract::setCaBundle(). Bitte die Abhängigkeiten aktualisieren (composer update).");
+        }
+
+        $client->setCaBundle($caFile);
     }
 }

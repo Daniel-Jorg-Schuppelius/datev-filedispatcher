@@ -52,10 +52,6 @@ class StorageFactory {
         self::$internalStorePath = $path;
     }
 
-    public static function isInternalStorePathValid(): bool {
-        return !is_null(self::$internalStorePath) && self::containsTenantPlaceholder(self::$internalStorePath);
-    }
-
     private static function containsTenantPlaceholder(string $path): bool {
         return str_contains($path, '{tenant}');
     }
