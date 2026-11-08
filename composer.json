@@ -1,7 +1,7 @@
 {
   "name": "daniel-jorg-schuppelius/datev-filedispatcher",
-  "description": "Project description.",
-  "type": "app",
+  "description": "Sortiert Dokumente aus dem DATEV DMS und der Lohnabrechnung automatisch in die Mandantenverzeichnisse.",
+  "type": "project",
   "license": "MIT",
   "authors": [
     {

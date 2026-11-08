@@ -9,9 +9,10 @@ Ein PHP-Tool zur automatischen Organisation und Sortierung von Mandantendateien 
 
 - **Automatische Dateisortierung**: Dokumente werden automatisch in die passenden Mandantenordner einsortiert
 - **DATEV API Integration**: Direkte Anbindung an die DATEV DMS API
-- **Pattern-basierte Verarbeitung**: Flexible Service-Architektur mit Regex-Pattern-Matching
+- **Pattern-basierte Verarbeitung**: Flexible Service-Architektur mit Regex-Pattern-Matching und fester Prüfreihenfolge
 - **PreProcessing**: TIFF-Konvertierung, PDF-Verarbeitung, Multi-Page-Handling
 - **Nextcloud-Integration**: Direkte Sortierung in Nextcloud-Verzeichnisse für einfache Mandantenkommunikation
+- **Robuster Betrieb**: Wiederholung liegengebliebener Dateien, begrenzte Parallelität, gehärtete systemd-Unit
 - **Erweiterbar**: Einfaches Hinzufügen neuer File-Services durch dynamische Service-Discovery
 
 ## 📋 Voraussetzungen
@@ -23,17 +24,13 @@ Ein PHP-Tool zur automatischen Organisation und Sortierung von Mandantendateien 
 
 ## 📦 Installation
 
-### Composer
-
-```bash
-composer require daniel-jorg-schuppelius/datev-filedispatcher
-```
-
 ### Klonen des Repositories
 
 ```bash
 # Mit Submodulen klonen
 git clone --recurse-submodules https://github.com/Daniel-Jorg-Schuppelius/datev-filedispatcher.git
+cd datev-filedispatcher
+composer install --no-dev
 
 # Oder falls bereits geklont, Submodule initialisieren
 git submodule update --init --recursive
@@ -48,14 +45,14 @@ sudo apt install jq
 ./installscript/install-dependencies.sh
 ```
 
-Das Skript scannt automatisch das `vendor/`-Verzeichnis und installiert alle erforderlichen Tools, die in `*executables.json` Konfigurationsdateien definiert sind.
+Das Skript scannt automatisch das `vendor/`-Verzeichnis und installiert alle erforderlichen Tools, die in `*executables.json` Konfigurationsdateien definiert sind. Für den Dienst wird zusätzlich `inotify-tools` benötigt.
 
 ### Manuelle Installation der externen Tools
 
 #### 1. TIFF Tools
 Erforderlich für die Verarbeitung von TIFF-Dateien.
 - **Windows**: [GnuWin32 TIFF Tools](https://gnuwin32.sourceforge.net/packages/tiff.htm)
-- **Debian/Ubuntu**: 
+- **Debian/Ubuntu**:
   ```bash
   apt install libtiff-tools
   ```
@@ -91,13 +88,22 @@ Für PDF-Manipulation und -Reparatur.
   apt install qpdf
   ```
 
+#### 6. inotify-tools (nur Dienst unter Linux)
+- **Debian/Ubuntu**:
+  ```bash
+  apt install inotify-tools
+  ```
+
 ## ⚙️ Konfiguration
 
 ### Konfigurationsdatei erstellen
 
 ```bash
 cp config/config.json.sample config/config.json
+chmod 600 config/config.json
 ```
+
+Ein anderer Ablageort (z. B. `/etc/filedispatcher/config.json`) wird über die Umgebungsvariable `FILEDISPATCHER_CONFIG` gesetzt. Fehlt die Konfiguration, bricht der Dispatcher mit einer klaren Meldung ab.
 
 ### Konfigurationsoptionen
 
@@ -108,16 +114,31 @@ Die Konfiguration erfolgt über `config/config.json`:
 | `DatevAPI` | `resourceurl` | URL zur DATEV API (Standard: `https://127.0.0.1:58452`) |
 | `DatevAPI` | `user` | Benutzername für API-Authentifizierung |
 | `DatevAPI` | `password` | Passwort für API-Authentifizierung |
-| `DatevAPI` | `verifySSL` | SSL-Zertifikatsprüfung (`true` für Produktion, `false` für selbstsignierte Zertifikate) |
+| `DatevAPI` | `verifySSL` | TLS-Zertifikatsprüfung, Standard `true` |
+| `DatevAPI` | `caFile` | Optional: PEM-Datei mit dem (selbstsignierten) Zertifikat von DATEVconnect |
 | `Path` | `internalStore` | Pfad zum internen Speicher mit `{tenant}` Platzhalter für Mandantenverzeichnisse |
 | `Logging` | `log` | Log-Ausgabeziel (`Console`, `File`, `Null`) |
-| `Logging` | `level` | Log-Level (`emergency`, `alert`, `critical`, `error`, `warning`, `notice`, `info`, `debug`) |
+| `Logging` | `level` | Log-Level (`emergency`, `alert`, `critical`, `error`, `warning`, `notice`, `info`, `debug`), Standard `info` |
 | `Logging` | `path` | Pfad zur Log-Datei |
 | `Debugging` | `debug` | Debug-Modus aktivieren (`true`/`false`) |
+| `Zip` | `maxEntries`, `maxBytes`, `maxRatio` | Grenzen beim Entpacken von ZIP-Archiven (Standard: 1000 Einträge, 500 MB, Verhältnis 100) |
 
-### SSL-Verifizierung
+### Zugangsdaten per Umgebungsvariable
 
-Für Entwicklungsumgebungen mit selbstsignierten Zertifikaten setzen Sie `verifySSL` auf `false`. In der Produktion sollte dies immer auf `true` gesetzt sein.
+`DATEV_API_URL`, `DATEV_API_USER`, `DATEV_API_PASSWORD` und `DATEV_API_CA_FILE` haben Vorrang vor der `config.json`. So muss das Passwort nicht im Klartext im Projektverzeichnis liegen, z. B. in `/etc/default/filedispatcher` mit `chmod 600`.
+
+### TLS-Verifizierung
+
+Die Zertifikatsprüfung ist standardmäßig aktiv. Für ein selbstsigniertes DATEVconnect-Zertifikat gibt es zwei Wege, ohne `verifySSL` auf `false` zu setzen:
+
+- **`caFile`**: Das Zertifikat als PEM-Datei ablegen (z. B. `/etc/filedispatcher/datevconnect-ca.pem`) und den Pfad in `DatevAPI.caFile` oder `DATEV_API_CA_FILE` eintragen. Es gilt dann nur für den Dispatcher. Setzt eine Version von `php-api-toolkit` mit `setCaBundle()` voraus; ist sie nicht installiert, bricht der Dispatcher mit einer Meldung ab.
+- **Zertifikatsspeicher des Systems**: Debian/Ubuntu: nach `/usr/local/share/ca-certificates/` kopieren und `update-ca-certificates` ausführen. Das Zertifikat gilt dann für alle Programme.
+
+Ohne Prüfung gehen die Zugangsdaten ungeschützt gegen Mitlesen über das Netz.
+
+### Datenschutz im Log
+
+Mitarbeiternamen erscheinen nur auf dem Log-Level `debug`. Dateinamen und Pfade enthalten trotzdem personenbezogene Daten, die Log-Datei gehört daher in ein Verzeichnis, das nur der Dienstbenutzer und seine Gruppe lesen können.
 
 ## 📚 Verwendung
 
@@ -127,11 +148,58 @@ Für Entwicklungsumgebungen mit selbstsignierten Zertifikaten setzen Sie `verify
 php src/DatevFileDispatcher.php "/pfad/zur/datei.pdf"
 ```
 
-### Als Linux-Service einrichten
+### Unverarbeitete Dateien auflisten
 
 ```bash
+php src/DatevFileDispatcher.php --list "/pfad/zum/eingang" [mindestalter_in_sekunden]
+```
+
+Gibt die Dateien NUL-getrennt aus. Ignorierte Dateien (`log.txt`, Lockfiles, Anleitungen zu Arbeitnehmer online), versteckte und leere Dateien sowie `ExcludedFolders` fehlen in der Liste.
+
+## 🛠️ Betrieb als Dienst (Linux)
+
+`scripts/filedispatcher.sh` überwacht das Eingangsverzeichnis mit `inotifywait` und übergibt neue Dateien an den Dispatcher. Zusätzlich gilt:
+
+- **Wiederholung**: Beim Start und danach alle `FILEDISPATCHER_RESCAN_INTERVAL` Sekunden werden liegengebliebene Dateien erneut verarbeitet, z. B. nach einer Sicherung des DATEV-Servers.
+- **Parallelität**: Höchstens `FILEDISPATCHER_MAX_JOBS` Dateien gleichzeitig je Quelle, damit große Lohnläufe DATEVconnect nicht überlasten.
+- **Rechte**: Neu erzeugte Dateien bekommen die umask `FILEDISPATCHER_UMASK` (Standard `0027`: Dienstbenutzer schreibt, Gruppe liest, alle anderen nichts).
+- **Locks**: Lockfiles liegen in einem Verzeichnis, das nur dem Dienstbenutzer gehört (Standard `/run/filedispatcher`).
+
+Alle Einstellungen stehen mit Beschreibung in [config/default/filedispatcher.sample](config/default/filedispatcher.sample).
+
+### systemd (empfohlen)
+
+```bash
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin filedispatcher
+sudo cp config/systemd/filedispatcher.service /etc/systemd/system/
+sudo cp config/default/filedispatcher.sample /etc/default/filedispatcher
+sudo chmod 600 /etc/default/filedispatcher
+# ExecStart und ReadWritePaths in der Unit an die eigenen Pfade anpassen
+sudo systemctl daemon-reload
+sudo systemctl enable --now filedispatcher
+```
+
+Die Unit läuft als eigener Benutzer und ist gehärtet (`ProtectSystem=strict`, `PrivateTmp`, `NoNewPrivileges` u. a.). Beschreibbar sind nur Eingang und Mandantenablage (`ReadWritePaths`) sowie das Logverzeichnis `/var/log/filedispatcher`, das systemd selbst anlegt (`LogsDirectory`). Die Vorlage der `config.json` loggt bereits dorthin. Ein Log unter `/tmp` wäre wegen `PrivateTmp` nur im privaten Temp-Verzeichnis des Dienstes sichtbar.
+
+**Nextcloud**: Neu erzeugte Dateien sind für die Gruppe nur lesbar (umask `0027`). Damit Nextcloud sie lesen kann, den Webserver in die Gruppe des Dienstes aufnehmen (z. B. `usermod -aG filedispatcher www-data`) und die Mandantenablage dieser Gruppe zuordnen (`chgrp -R filedispatcher` und `chmod g+s` auf die Verzeichnisse). Sollen Nutzer die Dateien in Nextcloud auch ändern oder löschen können, `FILEDISPATCHER_UMASK=0007` setzen.
+
+### init.d (ohne systemd)
+
+```bash
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin filedispatcher
 sudo ln -s /pfad/zum/projekt/config/init.d/filedispatcher /etc/init.d/filedispatcher
 sudo update-rc.d filedispatcher defaults
+```
+
+Das Skript startet den Dienst als `DAEMON_USER` (Standard `filedispatcher`, änderbar in `/etc/default/filedispatcher`). Existiert der Benutzer nicht, startet der Dienst nicht.
+
+### ImageMagick absichern
+
+Der Dienst verarbeitet Dateien aus dem Eingang mit externen Programmen. In `/etc/ImageMagick-6/policy.xml` sollten nur die benötigten Formate erlaubt sein, z. B.:
+
+```xml
+<policy domain="coder" rights="none" pattern="*" />
+<policy domain="coder" rights="read|write" pattern="{TIFF,TIF,PDF,JPEG,PNG}" />
 ```
 
 ## 🏗️ Projektstruktur
@@ -142,14 +210,17 @@ src/
 ├── Config/
 │   └── Config.php              # Konfigurationsmanagement (Singleton)
 ├── Contracts/
-│   ├── Abstracts/              # Basis-Klassen
+│   ├── Abstracts/              # Basis-Klassen (FileHandlerAbstract, FileService-, PreProcess-Basen)
 │   └── Interfaces/             # Interface-Definitionen
+├── Enums/
+│   └── PreProcessResult.php    # Ergebnis der Vorverarbeitung (Done, Skipped, Abort)
 ├── Factories/
 │   ├── APIClientFactory.php    # DATEV API Client Factory
 │   ├── LoggerFactory.php       # Logger Factory
 │   └── StorageFactory.php      # Storage Path Factory
 ├── Helper/
 │   ├── FileDispatcher.php      # Zentrale Orchestrierung
+│   ├── FilenameSanitizer.php   # Bereinigung der Zieldateinamen
 │   └── InternalStoreMapper.php # Mandanten-Verzeichnis-Mapping
 ├── PreProcessServices/         # Vorverarbeitung (TIFF, PDF, etc.)
 │   ├── DuplicateNumberProcessFileService.php
@@ -161,8 +232,12 @@ src/
 │   ├── DMSBasicFileService.php
 │   └── Payroll/                # Lohnabrechnungs-Services
 └── Traits/
-    ├── FileServiceTrait.php
     └── PeriodicFileServiceTrait.php
+config/
+├── config.json.sample          # Vorlage der Konfiguration
+├── default/                    # Vorlage für /etc/default/filedispatcher
+├── init.d/                     # init.d-Skript
+└── systemd/                    # systemd-Unit
 ```
 
 ## 🔌 Service-Architektur
@@ -174,19 +249,44 @@ Services werden automatisch aus dem `src/Services/` Verzeichnis geladen und vera
 | Service | Pattern-Beispiel | Beschreibung |
 |---------|------------------|--------------|
 | `DMSBasicFileService` | `219628 - Dokument.pdf` | Standard DMS-Dateien |
-| Payroll Services | `Lohn*.pdf` | Lohnabrechnungs-Dokumente |
+| Payroll Services | `20542_10_2024_Lohnjournal_AA0.pdf` | Lohnabrechnungs-Dokumente |
+
+Passen mehrere Patterns, gewinnt der Service mit der höchsten `PRIORITY` (Standard `0`), bei Gleichstand der alphabetisch erste. Generische Fallbacks wie der `EmployeeFileService` haben eine negative Priorität. Der `ServiceRoutingTest` prüft für jeden Service, dass seine Beispieldateien bei ihm landen. Ein neuer Service braucht dort einen Testfall.
+
+Ein typischer Lohn-Service besteht nur aus Konstanten:
+
+```php
+class PayrollJournalFileService extends PayrollFileServiceAbstract {
+    // 00000_10_2024_Lohnjournal_AA0.pdf
+    protected const PATTERN = '/^' . self::PERIOD_PREFIX . 'Lohnjournal' . self::EVALUATION_SUFFIX . '\.pdf$/i';
+
+    protected const DOCUMENT_TYPE = "Lohnjournal";
+}
+```
+
+- `DOCUMENT_TYPE`: Zieldateiname `<DOCUMENT_TYPE>.pdf`. Enthält das Pattern die Gruppe `employee` (`self::EMPLOYEE`), lautet er `<DOCUMENT_TYPE>-<Nr>_<Nachname>_<Vorname>.pdf`.
+- `DESTINATION_EXTENSION`: andere Endung als `pdf`.
+- `FORCE_YEARLY_STORAGE`: immer im Jahresordner ablegen, unabhängig von `PerYear`/`PerPeriod`.
 
 ### PreProcess Services
 
-Vorverarbeitungs-Services aus `src/PreProcessServices/`:
+Vorverarbeitungs-Services aus `src/PreProcessServices/`. `preProcess()` liefert ein `PreProcessResult`:
+
+| Ergebnis | Bedeutung |
+|----------|-----------|
+| `Done` | Vorverarbeitung erledigt, weiter mit den File Services |
+| `Skipped` | Nicht zuständig, nächster PreProcess Service bzw. generische Vorverarbeitung |
+| `Abort` | Datei bleibt liegen, z. B. solange Seiten eines mehrseitigen TIFFs fehlen |
 
 | Service | Beschreibung |
 |---------|--------------|
-| `TiffPreProcessFileService` | TIFF zu PDF Konvertierung |
-| `PDFNameProcessFileService` | PDF-Namensextraktion |
-| `PDFScannerCodeProcessFileService` | Scanner-Code Verarbeitung |
-| `PDFTimeCodeProcessFileService` | Zeitcode-Verarbeitung |
-| `DuplicateNumberProcessFileService` | Duplikat-Erkennung |
+| `TiffPreProcessFileService` | Mehrseitige TIFFs zusammenführen und in PDF umwandeln |
+| `PDFNameProcessFileService` | DMS-Kürzel (BvFA, BaFA, ...) aus dem Dateinamen entfernen |
+| `PDFScannerCodeProcessFileService` | Scanner-Code aus dem Dateinamen entfernen |
+| `PDFTimeCodeProcessFileService` | Zeitstempel aus dem Dateinamen entfernen |
+| `DuplicateNumberProcessFileService` | Zusätze wie ` (1)` oder ` - Kopie` entfernen |
+
+Die Umbenennungs-Services ändern nur den Dateinamen, nie das Verzeichnis.
 
 ## 🧪 Tests
 
@@ -200,13 +300,13 @@ cp config/testconfig.json.sample config/testconfig.json
 
 ```bash
 composer test
-# oder
-vendor/bin/phpunit
+# Formatierung, statische Analyse und Tests
+composer qa
 ```
 
 ## 📖 Abhängigkeiten
 
-- [datev-php-sdk](https://github.com/daniel-jorg-schuppelius/datev-php-sdk) (^0.4.1) - DATEV API SDK
+- [datev-php-sdk](https://github.com/daniel-jorg-schuppelius/datev-php-sdk) (^1.0) - DATEV API SDK
 
 ## 📄 Lizenz
 
