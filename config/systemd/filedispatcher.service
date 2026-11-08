@@ -1,0 +1,63 @@
+# systemd-Unit für den DATEV File Dispatcher
+#
+# Installation (Pfade anpassen):
+#   useradd --system --no-create-home --shell /usr/sbin/nologin filedispatcher
+#   cp config/systemd/filedispatcher.service /etc/systemd/system/
+#   cp config/default/filedispatcher.sample /etc/default/filedispatcher && chmod 600 /etc/default/filedispatcher
+#   systemctl daemon-reload && systemctl enable --now filedispatcher
+#
+# Eingangsverzeichnis und Mandantenablage müssen für den Benutzer beschreibbar sein und unten
+# in ReadWritePaths stehen. Das Logverzeichnis /var/log/filedispatcher legt systemd selbst an.
+
+[Unit]
+Description=DATEV File Dispatcher (sortiert DMS-Exporte in die Mandantenablage)
+After=network-online.target remote-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=filedispatcher
+Group=filedispatcher
+# Neu erzeugte Dateien: Gruppe (z. B. gemeinsam mit Nextcloud) darf lesen, alle anderen nichts.
+# Das Skript setzt die umask zusätzlich selbst (FILEDISPATCHER_UMASK).
+UMask=0027
+EnvironmentFile=-/etc/default/filedispatcher
+ExecStart=/opt/datev-filedispatcher/scripts/filedispatcher.sh
+Restart=on-failure
+RestartSec=10s
+
+# Lockfiles in /run/filedispatcher, nur für den Dienst zugänglich (FILEDISPATCHER_LOCKDIR)
+RuntimeDirectory=filedispatcher
+RuntimeDirectoryMode=0700
+
+# Logverzeichnis /var/log/filedispatcher (Logging.path), beschreibbar trotz ProtectSystem=strict
+LogsDirectory=filedispatcher
+LogsDirectoryMode=0750
+
+# Härtung: Der Dienst verarbeitet Dateien aus dem Eingang mit ImageMagick, xpdf, mupdf und libtiff.
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=yes
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+
+# Beschreibbare Pfade: Eingang und Mandantenablage (Path.internalStore).
+# "-" = Pfad darf fehlen; ohne Eintrag hier sind alle Pfade außerhalb von /run, /var/log/filedispatcher
+# und PrivateTmp schreibgeschützt.
+ReadWritePaths=-/opt/internal_dispatcher -/srv/mandanten
+
+[Install]
+WantedBy=multi-user.target

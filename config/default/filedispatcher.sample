@@ -1,0 +1,30 @@
+# Einstellungen für den DATEV File Dispatcher, Ziel: /etc/default/filedispatcher (chmod 600)
+# Wird von der systemd-Unit (EnvironmentFile) und vom init.d-Skript gelesen.
+
+# Überwachtes Eingangsverzeichnis
+FILEDISPATCHER_WORKDIR=/opt/internal_dispatcher/
+
+# Parallele Verarbeitungen je Quelle (Dateiereignisse, Rescan); schont DATEVconnect bei großen Lohnläufen
+FILEDISPATCHER_MAX_JOBS=4
+
+# Sekunden zwischen zwei Durchläufen für liegengebliebene Dateien, 0 = aus
+FILEDISPATCHER_RESCAN_INTERVAL=1800
+
+# umask für neu erzeugte Dateien (0027 = Benutzer schreibt, Gruppe liest, alle anderen nichts)
+FILEDISPATCHER_UMASK=0027
+
+# Pfad zur config.json, falls nicht im Projektverzeichnis
+#FILEDISPATCHER_CONFIG=/etc/filedispatcher/config.json
+
+# Zugangsdaten der DATEV-API; haben Vorrang vor der config.json, die dann keine Passwörter enthalten muss
+#DATEV_API_URL=https://127.0.0.1:58452
+#DATEV_API_USER=
+#DATEV_API_PASSWORD=
+# Eigene CA-Datei (PEM) für ein selbstsigniertes DATEVconnect-Zertifikat, Vorrang vor DatevAPI.caFile
+#DATEV_API_CA_FILE=/etc/filedispatcher/datevconnect-ca.pem
+
+# Nur init.d: Benutzer und Gruppe des Dienstes (systemd: User=/Group= in der Unit)
+#DAEMON_USER=filedispatcher
+#DAEMON_GROUP=filedispatcher
+# Nur init.d: Logverzeichnis, wird beim Start angelegt (systemd: LogsDirectory= in der Unit)
+#FILEDISPATCHER_LOGDIR=/var/log/filedispatcher

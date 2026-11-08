@@ -1,8 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          Internal Dispatcher
-# Required-Start:    $remote_fs
-# Required-Stop:     $remote_fs
+# Provides:          filedispatcher
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start the internal dispatcher Script
@@ -12,13 +12,15 @@
 
 # Authors: Daniel Jörg Schuppelius <daniel.schuppelius@gmail.com>
 #          Georg Klimm <gklimm@gmail.com>
+#
+# Für systemd-Systeme wird config/systemd/filedispatcher.service empfohlen.
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Internal Dispatcher"
 NAME="filedispatcher.sh"
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$SCRIPT_DIR/../../"  
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/../.."
 SCRIPT="$PROJECT_ROOT/scripts/$NAME"
 
 DAEMON="$SCRIPT"
@@ -26,11 +28,21 @@ DAEMON_ARGS=""
 PIDFILE="/var/run/$NAME.pid"
 SCRIPTNAME="/etc/init.d/filedispatcher"
 
+# Der Dienst läuft nicht als root: Er verarbeitet Dateien aus dem Eingang mit externen Programmen.
+DAEMON_USER="filedispatcher"
+DAEMON_GROUP=""
+FILEDISPATCHER_LOCKDIR="/run/filedispatcher"
+FILEDISPATCHER_LOGDIR="/var/log/filedispatcher"
+FILEDISPATCHER_UMASK="0027"
+
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
 
-# Read configuration variable file if it is present
+# Konfiguration lesen und an den Dienst weitergeben (früherer Name: /etc/default/filedispatcher.sh)
+set -a
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r /etc/default/filedispatcher ] && . /etc/default/filedispatcher
+set +a
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -45,8 +57,19 @@ do_start() {
     #   0, wenn der Daemon gestartet wurde
     #   1, wenn der Daemon bereits läuft
     #   2, wenn der Daemon nicht gestartet werden konnte
-    start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON --test > /dev/null || return 1
-    start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_ARGS || return 2
+    if ! id "$DAEMON_USER" > /dev/null 2>&1; then
+        log_failure_msg "Benutzer $DAEMON_USER existiert nicht. Anlegen mit 'useradd --system --no-create-home --shell /usr/sbin/nologin $DAEMON_USER' oder DAEMON_USER in /etc/default/filedispatcher setzen."
+        return 2
+    fi
+
+    # Lock-Verzeichnis nur für den Dienstbenutzer, Logverzeichnis (Logging.path) zusätzlich für dessen Gruppe lesbar
+    install -d -m 0700 -o "$DAEMON_USER" "$FILEDISPATCHER_LOCKDIR" || return 2
+    install -d -m 0750 -o "$DAEMON_USER" "$FILEDISPATCHER_LOGDIR" || return 2
+
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --startas $DAEMON --test > /dev/null || return 1
+    start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE \
+        --chuid "$DAEMON_USER${DAEMON_GROUP:+:$DAEMON_GROUP}" --umask "$FILEDISPATCHER_UMASK" \
+        --startas $DAEMON -- $DAEMON_ARGS || return 2
 }
 
 # Funktion, die den Daemon/Dienst stoppt
@@ -55,24 +78,9 @@ do_stop() {
     #   0, wenn der Daemon gestoppt wurde
     #   1, wenn der Daemon bereits gestoppt war
     #   2, wenn der Daemon nicht gestoppt werden konnte
-    start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
-    RETVAL="$?"
-    [ "$RETVAL" = 2 ] && return 2
-
-    # Warten, bis alle Kindprozesse beendet sind
-    start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
-    [ "$?" = 2 ] && return 2
-
-    # Lösche die PID-Datei
-    rm -f $PIDFILE
-    return "$RETVAL"
-}
-
-# Funktion zum Neustarten des Daemons
-do_reload() {
-    # SIGHUP senden, wenn der Daemon seine Konfiguration neu laden kann
-    start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
-    return 0
+    # Das Skript beendet bei TERM seine Kindprozesse (inotifywait, Rescan, laufende Verarbeitungen).
+    start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --remove-pidfile
+    return "$?"
 }
 
 # Hauptsteuerung des Dienstes
